@@ -121,18 +121,6 @@ const authService = {
     }
   },
 
-  /**
-   * Logout user
-   */
-  logout: async () => {
-    try {
-      await SessionManager.clear();
-      return true;
-    } catch (error) {
-      console.error('Logout error:', error);
-      throw error;
-    }
-  },
 
   /**
    * Request password reset
