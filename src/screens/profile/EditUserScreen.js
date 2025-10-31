@@ -52,34 +52,30 @@ const EditUserScreen = ({ navigation }) => {
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) {
-      Alert.alert('Error', 'El nombre es requerido');
+    // Solo validar campos que tengan contenido
+    if (formData.name && formData.name.trim() && formData.name.trim().length < 2) {
+      Alert.alert('Error', 'El nombre debe tener al menos 2 caracteres');
       return false;
     }
 
-    if (!formData.email.trim()) {
-      Alert.alert('Error', 'El correo electrónico es requerido');
-      return false;
+    if (formData.age && formData.age.toString().trim()) {
+      const age = parseInt(formData.age, 10);
+      if (isNaN(age) || age < 18 || age > 120) {
+        Alert.alert('Error', 'Debes tener al menos 18 años');
+        return false;
+      }
     }
 
-    if (!formData.age.trim()) {
-      Alert.alert('Error', 'La edad es requerida');
-      return false;
-    }
-
-    if (!validateAge(formData.age)) {
-      Alert.alert('Error', 'Debés tener al menos 18 años');
-      return false;
-    }
-
-    if (formData.password && formData.password !== formData.confirmPassword) {
-      Alert.alert('Error', 'Las contraseñas no coinciden');
-      return false;
-    }
-
-    if (formData.password && formData.password.length < 6) {
-      Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
-      return false;
+    if (formData.password && formData.password.length > 0) {
+      if (formData.password.length < 6) {
+        Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
+        return false;
+      }
+      
+      if (formData.password !== formData.confirmPassword) {
+        Alert.alert('Error', 'Las contraseñas no coinciden');
+        return false;
+      }
     }
 
     return true;
@@ -90,26 +86,47 @@ const EditUserScreen = ({ navigation }) => {
       return;
     }
 
+    if (!user || !user.id) {
+      Alert.alert('Error', 'No se pudo identificar al usuario');
+      return;
+    }
+
     setLoading(true);
     try {
-      const updateData = {
-        name: formData.name.trim(),
-        age: parseInt(formData.age, 10),
-        gender: formData.gender,
-      };
+      // Solo enviar campos que hayan cambiado o que tengan valor
+      const updateData = {};
 
-      if (formData.password) {
+      if (formData.name && formData.name.trim() && formData.name !== user.name) {
+        updateData.name = formData.name.trim();
+      }
+
+      if (formData.age && formData.age.toString().trim() && parseInt(formData.age, 10) !== user.age) {
+        updateData.age = parseInt(formData.age, 10);
+      }
+
+      if (formData.gender && formData.gender !== user.gender) {
+        updateData.gender = formData.gender;
+      }
+
+      if (formData.password && formData.password.trim()) {
         updateData.password = formData.password;
+      }
+
+      // Si no hay nada que actualizar
+      if (Object.keys(updateData).length === 0) {
+        Alert.alert('Info', 'No hay cambios para guardar');
+        setLoading(false);
+        return;
       }
 
       const updatedUser = await userService.updateUser(user.id, updateData);
       await updateUser(updatedUser);
 
-      Alert.alert('Éxito', 'Perfil actualizado correctamente', [
-        { text: 'OK', onPress: () => navigation.goBack() },
-      ]);
+      // Navegar de vuelta al perfil sin alert
+      navigation.goBack();
     } catch (error) {
-      Alert.alert('Error', 'No se pudo actualizar el perfil');
+      console.error('Update error:', error);
+      Alert.alert('Error', error.response?.data?.message || 'No se pudo actualizar el perfil');
     } finally {
       setLoading(false);
     }
@@ -146,19 +163,19 @@ const EditUserScreen = ({ navigation }) => {
             style={styles.input}
             value={formData.name}
             onChangeText={(value) => handleChange('name', value)}
-            placeholder="Nombre completo"
+            placeholder={user?.name || "Nombre completo"}
             placeholderTextColor={COLORS.GRAY}
           />
 
-          {/* Email Input */}
+          {/* Email Input - Solo lectura */}
           <TextInput
-            style={styles.input}
+            style={[styles.input, styles.inputDisabled]}
             value={formData.email}
-            onChangeText={(value) => handleChange('email', value)}
-            placeholder="Correo electrónico"
+            placeholder={user?.email || "Correo electrónico"}
             placeholderTextColor={COLORS.GRAY}
             keyboardType="email-address"
             autoCapitalize="none"
+            editable={false}
           />
 
           {/* Password Input */}
@@ -166,7 +183,7 @@ const EditUserScreen = ({ navigation }) => {
             style={styles.input}
             value={formData.password}
             onChangeText={(value) => handleChange('password', value)}
-            placeholder="Contraseña (opcional)"
+            placeholder="Nueva contraseña (opcional)"
             placeholderTextColor={COLORS.GRAY}
             secureTextEntry
           />
@@ -176,7 +193,7 @@ const EditUserScreen = ({ navigation }) => {
             style={styles.input}
             value={formData.confirmPassword}
             onChangeText={(value) => handleChange('confirmPassword', value)}
-            placeholder="Repetir contraseña"
+            placeholder="Repetir nueva contraseña"
             placeholderTextColor={COLORS.GRAY}
             secureTextEntry
           />
@@ -186,7 +203,7 @@ const EditUserScreen = ({ navigation }) => {
             style={styles.input}
             value={formData.age}
             onChangeText={(value) => handleChange('age', value)}
-            placeholder="Edad"
+            placeholder={user?.age?.toString() || "Edad"}
             placeholderTextColor={COLORS.GRAY}
             keyboardType="numeric"
           />
@@ -277,6 +294,10 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.WHITE,
     marginBottom: 10,
   },
+  inputDisabled: {
+    backgroundColor: '#f0f0f0',
+    color: '#888',
+  },
   pickerContainer: {
     height: 48,
     borderWidth: 1,
@@ -303,16 +324,17 @@ const styles = StyleSheet.create({
     color: COLORS.WHITE,
   },
   cancelButton: {
-    backgroundColor: COLORS.GRAY,
+    backgroundColor: '#2c3e50',
     borderRadius: 8,
-    paddingVertical: 12,
+    paddingVertical: 14,
     alignItems: 'center',
     marginTop: 12,
+    marginBottom: 24,
   },
   cancelButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.DARK,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.WHITE,
   },
 });
 

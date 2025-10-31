@@ -63,8 +63,16 @@ export const validatePassword = (password) => {
  */
 export const extractUserIdFromToken = (token) => {
   try {
-    if (!token) return null;
-    const base64Url = token.split('.')[1];
+    if (!token) {
+      return null;
+    }
+    
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      return null;
+    }
+    
+    const base64Url = parts[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(
       atob(base64)
@@ -73,7 +81,10 @@ export const extractUserIdFromToken = (token) => {
         .join('')
     );
     const payload = JSON.parse(jsonPayload);
-    return payload.userId || payload.sub || null;
+    
+    const userId = payload.userId || payload.sub || payload.id || null;
+    
+    return userId;
   } catch (error) {
     console.error('Error extracting user ID from token:', error);
     return null;

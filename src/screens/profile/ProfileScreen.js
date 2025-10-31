@@ -18,7 +18,14 @@ const ProfileScreen = ({ navigation }) => {
 
   useEffect(() => {
     loadUserData();
-  }, []);
+    
+    // Recargar datos cuando vuelvas de la pantalla de edición
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadUserData();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   const loadUserData = async () => {
     setLoading(true);
@@ -39,21 +46,13 @@ const ProfileScreen = ({ navigation }) => {
     Alert.alert('Cambiar Foto', 'Funcionalidad de cambio de foto próximamente');
   };
 
-  const handleLogout = () => {
-    Alert.alert('Cerrar Sesión', '¿Estás seguro de que quieres cerrar sesión?', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Cerrar Sesión',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await logout();
-          } catch (error) {
-            Alert.alert('Error', 'No se pudo cerrar sesión');
-          }
-        },
-      },
-    ]);
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Error en logout:', error);
+      Alert.alert('Error', 'No se pudo cerrar sesión');
+    }
   };
 
   const getGenderLabel = (gender) => {

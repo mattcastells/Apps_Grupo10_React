@@ -33,7 +33,7 @@ export const COLORS = {
 
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: 'http://10.0.2.2:8080/api/v1',
+  BASE_URL: 'http://localhost:8080/api/v1', // Changed from 10.0.2.2 (Android emulator) to localhost for React Native
   TIMEOUT: 30000,
   USE_MOCK: false, // Set to false to use real backend
 };

@@ -49,10 +49,26 @@ export const AuthProvider = ({ children }) => {
   const loadUserData = async (token) => {
     try {
       const userId = extractUserIdFromToken(token);
+      
+      if (!userId) {
+        // Si no hay userId, limpiar sesión
+        await SessionManager.clear();
+        setIsAuthenticated(false);
+        setToken(null);
+        setUser(null);
+        return;
+      }
+      
       const user = await userService.getUser(userId);
       setUser(user);
+      setToken(token);
     } catch (error) {
       console.error('Load user data error:', error);
+      // Si falla la carga del usuario, limpiar sesión
+      await SessionManager.clear();
+      setIsAuthenticated(false);
+      setToken(null);
+      setUser(null);
     }
   };
 
@@ -60,8 +76,15 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await authService.login(email, password);
-      setIsAuthenticated(true);
-      setToken(response.data.token);
+      
+      if (response.data.token) {
+        await SessionManager.setToken(response.data.token);
+        setToken(response.data.token);
+        setIsAuthenticated(true);
+        
+        // Load user data from token
+        await loadUserData(response.data.token);
+      }
 
       return response;
     } catch (error) {
@@ -85,11 +108,14 @@ export const AuthProvider = ({ children }) => {
   const verifyEmail = async (email, otp) => {
     try {
       const response = await authService.verifyEmail(email, otp);
-      setIsAuthenticated(true);
-
-      // Load user data
-      if (response.userId) {
-        await loadUserData(response.userId);
+      
+      if (response.token) {
+        await SessionManager.setToken(response.token);
+        setToken(response.token);
+        setIsAuthenticated(true);
+        
+        // Load user data from token
+        await loadUserData(response.token);
       }
 
       return response;
@@ -105,6 +131,7 @@ export const AuthProvider = ({ children }) => {
       await SessionManager.clear();
       setIsAuthenticated(false);
       setToken(null);
+      setUser(null);
     } catch (error) {
       console.error('Logout error:', error);
       throw error;

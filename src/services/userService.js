@@ -71,66 +71,11 @@ const userService = {
       }
 
       const response = await apiClientAuth.put(`/users/${id}/photo`, {
-        photoUrl,
+        profilePicture: photoUrl,
       });
       return response.data;
     } catch (error) {
       console.error('Update photo error:', error.response?.data || error.message);
-      throw error;
-    }
-  },
-
-  /**
-   * Upload profile photo (FormData)
-   * @param {number} id - User ID
-   * @param {FormData} formData - Form data with photo file
-   * @returns {Promise} Updated user data
-   */
-  uploadPhoto: async (id, formData) => {
-    try {
-      const response = await apiClientAuth.post(`/users/${id}/upload-photo`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Upload photo error:', error.response?.data || error.message);
-      throw error;
-    }
-  },
-
-  /**
-   * Delete user account
-   * @param {number} id - User ID
-   * @returns {Promise} Deletion response
-   */
-  deleteUser: async (id) => {
-    try {
-      const response = await apiClientAuth.delete(`/users/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error('Delete user error:', error.response?.data || error.message);
-      throw error;
-    }
-  },
-
-  /**
-   * Change user password
-   * @param {number} id - User ID
-   * @param {string} currentPassword - Current password
-   * @param {string} newPassword - New password
-   * @returns {Promise} Password change response
-   */
-  changePassword: async (id, currentPassword, newPassword) => {
-    try {
-      const response = await apiClientAuth.put(`/users/${id}/change-password`, {
-        currentPassword,
-        newPassword,
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Change password error:', error.response?.data || error.message);
       throw error;
     }
   },

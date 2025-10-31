@@ -91,12 +91,9 @@ const CreateUserScreen = ({ navigation }) => {
 
       await register(userRequest);
 
-      Alert.alert('Éxito', 'Cuenta creada. Verifica tu email con el código OTP.', [
-        {
-          text: 'OK',
-          onPress: () => navigation.navigate('Otp', { email: formData.email.trim() }),
-        },
-      ]);
+      // Navegar directamente a la pantalla OTP
+      navigation.navigate('Otp', { email: formData.email.trim() });
+      
     } catch (error) {
       Alert.alert(
         'Error',

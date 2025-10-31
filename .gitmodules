@@ -1,0 +1,6 @@
+[submodule "Apps_Grupo10_Android"]
+	path = Apps_Grupo10_Android
+	url = https://github.com/mattcastells/Apps_Grupo10_Android
+[submodule "Apps_Grupo10_Backend"]
+	path = Apps_Grupo10_Backend
+	url = https://github.com/mattcastells/Apps_Grupo10_Backend

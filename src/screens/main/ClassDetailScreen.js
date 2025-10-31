@@ -34,9 +34,11 @@ const ClassDetailScreen = ({ route, navigation }) => {
   };
 
   const handleBookClass = async () => {
+    if (loading) return;
+
     Alert.alert(
       'Confirmar Reserva',
-      '¿Estás seguro de que querés reservar esta clase?',
+      `¿Estás seguro de que querés reservar esta clase?\n\n${classDetail.name}\n${formattedDate} a las ${formattedTime}`,
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -44,12 +46,30 @@ const ClassDetailScreen = ({ route, navigation }) => {
           onPress: async () => {
             setLoading(true);
             try {
-              await bookingService.createBooking(classId);
-              Alert.alert('Éxito', 'Clase reservada correctamente', [
-                { text: 'OK', onPress: () => navigation.goBack() },
-              ]);
+              console.log('📅 Reservando clase:', classId);
+              const result = await bookingService.createBooking(classId);
+              console.log('✅ Reserva exitosa:', result);
+              
+              Alert.alert(
+                '¡Reserva Confirmada!', 
+                'La clase ha sido reservada correctamente. Podés verla en "Mis Reservas".',
+                [
+                  { 
+                    text: 'Ver Reservas', 
+                    onPress: () => navigation.navigate('Reservations')
+                  },
+                  { 
+                    text: 'OK',
+                    onPress: () => navigation.goBack()
+                  },
+                ]
+              );
             } catch (error) {
-              Alert.alert('Error', 'No se pudo reservar la clase');
+              console.error('❌ Error al reservar:', error);
+              const errorMessage = error.response?.data?.message || 
+                                  error.message || 
+                                  'No se pudo reservar la clase. Intentá nuevamente.';
+              Alert.alert('Error', errorMessage);
             } finally {
               setLoading(false);
             }

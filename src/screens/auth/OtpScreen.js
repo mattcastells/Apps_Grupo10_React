@@ -39,6 +39,7 @@ const OtpScreen = ({ navigation, route }) => {
       await verifyEmail(email, otp.trim());
       setVerified(true);
       setErrorMessage('');
+      
     } catch (error) {
       setErrorMessage(
         error.response?.data?.message || 'Código OTP inválido. Intenta nuevamente.'

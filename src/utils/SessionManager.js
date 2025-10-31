@@ -1,4 +1,4 @@
-import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TOKEN_KEY = 'authToken';
 
@@ -6,7 +6,7 @@ class SessionManager {
 
   async getToken(){
     try {
-      return await SecureStore.getItemAsync(TOKEN_KEY);
+      return await AsyncStorage.getItem(TOKEN_KEY);
     } catch (error) {
       console.error('Error getting token', error);
       return null;
@@ -15,7 +15,7 @@ class SessionManager {
 
   async setToken(token) {
     try {
-      await SecureStore.setItemAsync(TOKEN_KEY, token);
+      await AsyncStorage.setItem(TOKEN_KEY, token);
     } catch (error) {
       console.error('Error saving token', error);
     }
@@ -23,7 +23,7 @@ class SessionManager {
 
   async deleteToken() {
     try {
-      await SecureStore.deleteItemAsync(TOKEN_KEY);
+      await AsyncStorage.removeItem(TOKEN_KEY);
     } catch (error) {
       console.error('Error removing token', error);
     }

@@ -21,8 +21,9 @@ const authService = {
       });
 
       // Save token
-      if (response.data.token)
+      if (response.data.token) {
         await SessionManager.setToken(response.data.token);
+      }
 
       return response;
     } catch (error) {
