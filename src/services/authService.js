@@ -1,7 +1,7 @@
-import { apiClient } from './apiClient';
 import SessionManager from '../utils/SessionManager';
 import { API_CONFIG } from '../utils/constants';
-import { MOCK_TOKEN, MOCK_CREDENTIALS, MOCK_OTP } from './mockData';
+import { MOCK_TOKEN, MOCK_OTP } from './mockData';
+import { apiClient } from "./apiClient";
 
 /**
  * Authentication Service
@@ -15,35 +15,16 @@ const authService = {
    */
   login: async (email, password) => {
     try {
-      // Mock mode
-      if (API_CONFIG.USE_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        if (email === MOCK_CREDENTIALS.email && password === MOCK_CREDENTIALS.password) {
-          const mockResponse = {
-            token: MOCK_TOKEN,
-            userId: '1',
-            email: email,
-          };
-
-          await SessionManager.saveAuth(mockResponse.token, email, mockResponse.userId);
-          return mockResponse;
-        } else {
-          throw new Error('Credenciales inválidas');
-        }
-      }
-
       const response = await apiClient.post('/auth/login', {
         email,
         password,
       });
 
-      // Save auth data
-      if (response.data.token) {
-        await SessionManager.saveAuth(response.data.token, email, response.data.userId);
-      }
+      // Save token
+      if (response.data.token)
+        await SessionManager.setToken(response.data.token);
 
-      return response.data;
+      return response;
     } catch (error) {
       console.error('Login error:', error.response?.data || error.message);
       throw error;
@@ -97,7 +78,7 @@ const authService = {
             message: 'Email verificado exitosamente',
           };
 
-          await SessionManager.saveAuth(mockResponse.token, email, mockResponse.userId);
+          await SessionManager.setToken(mockResponse.token);
           return mockResponse;
         } else {
           throw new Error('Código OTP inválido');
@@ -111,7 +92,7 @@ const authService = {
 
       // Save auth data after successful verification
       if (response.data.token) {
-        await SessionManager.saveAuth(response.data.token, email, response.data.userId);
+        await SessionManager.setToken(response.data.token, email, response.data.userId);
       }
 
       return response.data;

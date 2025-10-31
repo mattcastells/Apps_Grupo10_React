@@ -37,7 +37,7 @@ const LoginScreen = ({ navigation }) => {
     setLoading(true);
     try {
       await login(email.trim(), password);
-      // Navigation handled by AppNavigator based on auth state
+      // Navigation to home handled by AppNavigator based on auth state
     } catch (error) {
       setErrorMessage(
         error.response?.data?.message || 'Error al iniciar sesión. Verifica tus credenciales.'

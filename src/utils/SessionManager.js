@@ -1,17 +1,8 @@
 import * as SecureStore from 'expo-secure-store';
 
 const TOKEN_KEY = 'authToken';
-const USER_KEY = 'userData';
 
 class SessionManager {
-
-  async saveToken(token) {
-    try {
-      await SecureStore.setItemAsync(TOKEN_KEY, token);
-    } catch (error) {
-      console.error('Error saving token', error);
-    }
-  };
 
   async getToken(){
     try {
@@ -22,7 +13,15 @@ class SessionManager {
     }
   };
 
-  async removeToken() {
+  async setToken(token) {
+    try {
+      await SecureStore.setItemAsync(TOKEN_KEY, token);
+    } catch (error) {
+      console.error('Error saving token', error);
+    }
+  };
+
+  async deleteToken() {
     try {
       await SecureStore.deleteItemAsync(TOKEN_KEY);
     } catch (error) {
@@ -40,25 +39,12 @@ class SessionManager {
     }
   }
 
-
-  // TODO Validar
-  async getUserData() {
+  async clear() {
     try {
-      const userData = await SecureStore.getItemAsync(USER_KEY);
-      return userData ? JSON.parse(userData) : null;
-    } catch (error) {
-      console.error('Error getting user data:', error);
-      return null;
-    }
-  }
-
-  // TODO Validar
-  async saveUserData(userData) {
-    try {
-      await SecureStore.setItemAsync(JSON.stringify(userData), USER_KEY);
+      await this.deleteToken();
       return true;
     } catch (error) {
-      console.error('Error saving user data:', error);
+      console.error('Error clearing session:', error);
       return false;
     }
   }

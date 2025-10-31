@@ -46,13 +46,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // TODO Get User from token
   const loadUserData = async (token) => {
     try {
       const userId = extractUserIdFromToken(token);
-      const userData = await userService.getUser(userId);
-      setUser(userData);
-      await SessionManager.saveUserData(userData);
+      const user = await userService.getUser(userId);
+      setUser(user);
     } catch (error) {
       console.error('Load user data error:', error);
     }
@@ -63,11 +61,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authService.login(email, password);
       setIsAuthenticated(true);
-
-      // Load user data
-      if (response.userId) {
-        await loadUserData(response.userId);
-      }
+      setToken(response.data.token);
 
       return response;
     } catch (error) {
@@ -130,9 +124,9 @@ export const AuthProvider = ({ children }) => {
   // TODO: Update user data in context
   const refreshUser = async () => {
     try {
-      const userId = await SessionManager.getUserId();
-      if (userId) {
-        await loadUserData(userId);
+      const token = await SessionManager.getToken();
+      if (token) {
+        await loadUserData(token);
       }
     } catch (error) {
       console.error('Refresh user error:', error);
