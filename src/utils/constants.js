@@ -35,7 +35,7 @@ export const COLORS = {
 export const API_CONFIG = {
   BASE_URL: 'http://10.0.2.2:8080/api/v1',
   TIMEOUT: 30000,
-  USE_MOCK: true, // Set to false to use real backend
+  USE_MOCK: false, // Set to false to use real backend
 };
 
 // Storage Keys

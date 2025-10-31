@@ -1,100 +1,34 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { STORAGE_KEYS } from './constants';
-import { extractUserIdFromToken } from './helpers';
+import * as SecureStore from 'expo-secure-store';
 
-/**
- * SessionManager - Handles authentication data storage
- */
+const TOKEN_KEY = 'authToken';
+
 class SessionManager {
-  /**
-   * Save authentication data
-   */
-  async saveAuth(token, email, userId = null) {
+
+  async getToken(){
     try {
-      await AsyncStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
-      await AsyncStorage.setItem(STORAGE_KEYS.USER_EMAIL, email);
-
-      // Extract userId from token if not provided
-      const id = userId || extractUserIdFromToken(token);
-      if (id) {
-        await AsyncStorage.setItem(STORAGE_KEYS.USER_ID, id.toString());
-      }
-
-      return true;
+      return await SecureStore.getItemAsync(TOKEN_KEY);
     } catch (error) {
-      console.error('Error saving auth data:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Get stored token
-   */
-  async getToken() {
-    try {
-      const token = await AsyncStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-      return token;
-    } catch (error) {
-      console.error('Error getting token:', error);
+      console.error('Error getting token', error);
       return null;
     }
-  }
+  };
 
-  /**
-   * Get stored user ID
-   */
-  async getUserId() {
+  async setToken(token) {
     try {
-      const userId = await AsyncStorage.getItem(STORAGE_KEYS.USER_ID);
-      return userId;
+      await SecureStore.setItemAsync(TOKEN_KEY, token);
     } catch (error) {
-      console.error('Error getting user ID:', error);
-      return null;
+      console.error('Error saving token', error);
     }
-  }
+  };
 
-  /**
-   * Get stored email
-   */
-  async getEmail() {
+  async deleteToken() {
     try {
-      const email = await AsyncStorage.getItem(STORAGE_KEYS.USER_EMAIL);
-      return email;
+      await SecureStore.deleteItemAsync(TOKEN_KEY);
     } catch (error) {
-      console.error('Error getting email:', error);
-      return null;
+      console.error('Error removing token', error);
     }
-  }
+  };
 
-  /**
-   * Get stored user data
-   */
-  async getUserData() {
-    try {
-      const userData = await AsyncStorage.getItem(STORAGE_KEYS.USER_DATA);
-      return userData ? JSON.parse(userData) : null;
-    } catch (error) {
-      console.error('Error getting user data:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Save user data
-   */
-  async saveUserData(userData) {
-    try {
-      await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(userData));
-      return true;
-    } catch (error) {
-      console.error('Error saving user data:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Check if user is authenticated
-   */
   async isAuthenticated() {
     try {
       const token = await this.getToken();
@@ -105,23 +39,16 @@ class SessionManager {
     }
   }
 
-  /**
-   * Clear all authentication data
-   */
   async clear() {
     try {
-      await AsyncStorage.multiRemove([
-        STORAGE_KEYS.AUTH_TOKEN,
-        STORAGE_KEYS.USER_ID,
-        STORAGE_KEYS.USER_EMAIL,
-        STORAGE_KEYS.USER_DATA,
-      ]);
+      await this.deleteToken();
       return true;
     } catch (error) {
       console.error('Error clearing session:', error);
       return false;
     }
   }
+
 }
 
 export default new SessionManager();

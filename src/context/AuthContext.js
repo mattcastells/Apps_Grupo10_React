@@ -1,9 +1,10 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import authService from '../services/authService';
-import userService from '../services/userService';
-import SessionManager from '../utils/SessionManager';
+import SessionManager, { saveToken, removeToken, getToken } from '../utils/SessionManager';
+import authService, { requestOtp, validateOtp } from '../services/authService';
+import userService from "../services/userService";
+import { extractUserIdFromToken } from "../utils/helpers";
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -15,66 +16,52 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  /**
-   * Check authentication status on mount
-   */
   useEffect(() => {
     checkAuth();
   }, []);
 
-  /**
-   * Check if user is authenticated
-   */
   const checkAuth = async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       const authenticated = await SessionManager.isAuthenticated();
       setIsAuthenticated(authenticated);
 
       if (authenticated) {
         // Load user data
-        const userId = await SessionManager.getUserId();
-        if (userId) {
-          await loadUserData(userId);
+        const token = await SessionManager.getToken();
+        if (token) {
+          await loadUserData(token);
         }
       }
     } catch (error) {
       console.error('Auth check error:', error);
       setIsAuthenticated(false);
-      setUser(null);
+      setToken(null);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  /**
-   * Load user data from API
-   */
-  const loadUserData = async (userId) => {
+  const loadUserData = async (token) => {
     try {
-      const userData = await userService.getUser(userId);
-      setUser(userData);
-      await SessionManager.saveUserData(userData);
+      const userId = extractUserIdFromToken(token);
+      const user = await userService.getUser(userId);
+      setUser(user);
     } catch (error) {
       console.error('Load user data error:', error);
     }
   };
 
-  /**
-   * Login user
-   */
+  // Login User
   const login = async (email, password) => {
     try {
       const response = await authService.login(email, password);
       setIsAuthenticated(true);
-
-      // Load user data
-      if (response.userId) {
-        await loadUserData(response.userId);
-      }
+      setToken(response.data.token);
 
       return response;
     } catch (error) {
@@ -83,9 +70,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  /**
-   * Register new user
-   */
+  // Register new user
   const register = async (userRequest) => {
     try {
       const response = await authService.register(userRequest);
@@ -96,9 +81,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  /**
-   * Verify email with OTP
-   */
+  // Verify email with OTP
   const verifyEmail = async (email, otp) => {
     try {
       const response = await authService.verifyEmail(email, otp);
@@ -116,23 +99,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  /**
-   * Logout user
-   */
+  // TODO: Update user data in context
   const logout = async () => {
     try {
-      await authService.logout();
+      await SessionManager.clear();
       setIsAuthenticated(false);
-      setUser(null);
+      setToken(null);
     } catch (error) {
       console.error('Logout error:', error);
       throw error;
     }
   };
 
-  /**
-   * Update user data in context
-   */
+  // TODO: Update user data in context
   const updateUser = async (userData) => {
     try {
       setUser(userData);
@@ -142,14 +121,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  /**
-   * Refresh user data
-   */
+  // TODO: Update user data in context
   const refreshUser = async () => {
     try {
-      const userId = await SessionManager.getUserId();
-      if (userId) {
-        await loadUserData(userId);
+      const token = await SessionManager.getToken();
+      if (token) {
+        await loadUserData(token);
       }
     } catch (error) {
       console.error('Refresh user error:', error);
@@ -159,7 +136,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     isAuthenticated,
     user,
-    loading,
+    isLoading,
     login,
     register,
     verifyEmail,
@@ -170,5 +147,3 @@ export const AuthProvider = ({ children }) => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-
-export default AuthContext;

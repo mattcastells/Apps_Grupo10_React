@@ -1,6 +1,6 @@
-import { apiClientAuth } from './apiClient';
 import { API_CONFIG } from '../utils/constants';
 import { MOCK_USER } from './mockData';
+import { apiClientAuth } from "./apiClient";
 
 /**
  * User Service
