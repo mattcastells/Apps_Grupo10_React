@@ -12,12 +12,16 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
+import BiometricPrompt from '../../components/BiometricPrompt';
 import { COLORS, DISCIPLINES, LOCATIONS } from '../../utils/constants';
 import scheduleService from '../../services/scheduleService';
 import { MOCK_CLASSES } from '../../services/mockData';
 import { formatDate, formatTime } from '../../utils/helpers';
+import { useAuth } from '../../context/AuthContext';
 
 const HomeScreen = ({ navigation }) => {
+  const { needsBiometricAuth, logout } = useAuth();
+
   const [classes, setClasses] = useState(MOCK_CLASSES);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -25,8 +29,18 @@ const HomeScreen = ({ navigation }) => {
   const [selectedLocation, setSelectedLocation] = useState('Todas');
   const [selectedDate, setSelectedDate] = useState('Todas');
 
+  // 🔐 Estado para controlar si debe mostrar el prompt biométrico
+  const [showBiometricPrompt, setShowBiometricPrompt] = useState(false);
+
   useEffect(() => {
-    loadClasses();
+    // 🔐 Verificar si necesita autenticación biométrica al entrar al Home
+    if (needsBiometricAuth()) {
+      // Necesita autenticarse, mostrar el prompt
+      setShowBiometricPrompt(true);
+    } else {
+      // Ya se autenticó en esta sesión, cargar clases normalmente
+      loadClasses();
+    }
   }, []);
 
   const loadClasses = async () => {
@@ -59,6 +73,70 @@ const HomeScreen = ({ navigation }) => {
 
   const handleMyProfile = () => {
     navigation.navigate('Profile');
+  };
+
+  // ============================================================================
+  // 🐛 WORKAROUND PARA BUG DE isEnrolledAsync - INSTRUCCIONES
+  // ============================================================================
+  //
+  // El método BiometricPrompt llama internamente a biometricManager.authenticateBiometric()
+  // que utiliza isEnrolledAsync(), el cual tiene un bug conocido.
+  //
+  // PARA ACTIVAR EL WORKAROUND (versión que muestra alert y deja pasar):
+  //
+  // 1. Ir a: src/utils/BiometricManager.js
+  // 2. En el método authenticateBiometric() (línea ~230 aprox)
+  // 3. Encontrar la línea que dice:
+  //    const result = await biometricManager.authenticateBiometric();
+  // 4. PERO ESPERA, en realidad el workaround ya está implementado dentro de
+  //    BiometricManager.js como un método alternativo llamado:
+  //    authenticateWithWorkaround()
+  //
+  // PARA USAR EL WORKAROUND, MODIFICAR BiometricPrompt.js:
+  // - Archivo: src/components/BiometricPrompt.js
+  // - Línea ~48 (aproximadamente, dentro de startAuthentication())
+  // - CAMBIAR:
+  //   const result = await biometricManager.authenticateBiometric();
+  // - POR:
+  //   const result = await biometricManager.authenticateWithWorkaround();
+  //
+  // Eso mostrará un alert con el valor de isEnrolledAsync y dejará pasar al usuario.
+  //
+  // ============================================================================
+
+  // 🔐 Callbacks para BiometricPrompt
+
+  const handleBiometricSuccess = () => {
+    // Autenticación exitosa, cargar las clases y continuar con el flujo
+    console.log('[HomeScreen] Autenticación biométrica exitosa');
+    loadClasses();
+  };
+
+  const handleBiometricFailure = async (reason) => {
+    // Autenticación fallida o sin enrolamiento, desloguear y redirigir a login
+    console.log('[HomeScreen] Autenticación biométrica fallida. Razón:', reason);
+
+    Alert.alert(
+      'Autenticación requerida',
+      'No se pudo completar la autenticación. Serás redirigido al login.',
+      [
+        {
+          text: 'OK',
+          onPress: async () => {
+            await logout();
+            // La navegación al login se hace automáticamente por el AppNavigator
+          },
+        },
+      ]
+    );
+  };
+
+  const handleBiometricCancel = async () => {
+    // Usuario canceló la autenticación, desloguear y redirigir a login
+    console.log('[HomeScreen] Autenticación biométrica cancelada');
+
+    await logout();
+    // La navegación al login se hace automáticamente por el AppNavigator
   };
 
   const getFilteredClasses = () => {
@@ -99,6 +177,16 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* 🔐 BiometricPrompt - Se muestra solo si showBiometricPrompt es true */}
+      {showBiometricPrompt && (
+        <BiometricPrompt
+          onSuccess={handleBiometricSuccess}
+          onFailure={handleBiometricFailure}
+          onCancel={handleBiometricCancel}
+          maxAttempts={2}
+        />
+      )}
+
       <FlatList
         data={filteredClasses}
         renderItem={renderClassItem}

@@ -20,6 +20,11 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
 
+  // 🔐 Estado en memoria para tracking de autenticación biométrica
+  // Este estado se pierde cuando la app se cierra completamente (mata)
+  // pero persiste mientras la app está en background
+  const [hasBiometricAuthenticated, setHasBiometricAuthenticated] = useState(false);
+
   useEffect(() => {
     checkAuth();
   }, []);
@@ -63,6 +68,10 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       setToken(response.data.token);
 
+      // 🔐 Cuando el usuario se loguea manualmente, marcarlo como autenticado biométricamente
+      // para que NO le pida biometría al entrar al home (requisito #3)
+      setHasBiometricAuthenticated(true);
+
       return response;
     } catch (error) {
       console.error('Login error:', error);
@@ -87,6 +96,10 @@ export const AuthProvider = ({ children }) => {
       const response = await authService.verifyEmail(email, otp);
       setIsAuthenticated(true);
 
+      // 🔐 Al verificar email en registro, también marcarlo como autenticado biométricamente
+      // para que NO le pida biometría al entrar al home por primera vez
+      setHasBiometricAuthenticated(true);
+
       // Load user data
       if (response.userId) {
         await loadUserData(response.userId);
@@ -105,10 +118,21 @@ export const AuthProvider = ({ children }) => {
       await SessionManager.clear();
       setIsAuthenticated(false);
       setToken(null);
+      setHasBiometricAuthenticated(false); // 🔐 Resetear autenticación biométrica al cerrar sesión
     } catch (error) {
       console.error('Logout error:', error);
       throw error;
     }
+  };
+
+  // 🔐 Marcar que el usuario se autenticó exitosamente con biometría en esta sesión
+  const markBiometricAuthenticated = () => {
+    setHasBiometricAuthenticated(true);
+  };
+
+  // 🔐 Verificar si ya se autenticó con biometría en esta sesión
+  const needsBiometricAuth = () => {
+    return !hasBiometricAuthenticated;
   };
 
   // TODO: Update user data in context
@@ -143,6 +167,9 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateUser,
     refreshUser,
+    // 🔐 Funciones para manejo de autenticación biométrica
+    markBiometricAuthenticated,
+    needsBiometricAuth,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
