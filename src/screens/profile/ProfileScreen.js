@@ -7,14 +7,18 @@ import {
   ScrollView,
   Image,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/Button';
 import { COLORS } from '../../utils/constants';
+import cloudinaryService from '../../services/cloudinaryService';
 
 const ProfileScreen = ({ navigation }) => {
   const { user, logout, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   useEffect(() => {
     loadUserData();
@@ -36,7 +40,114 @@ const ProfileScreen = ({ navigation }) => {
   };
 
   const handleChangePhoto = () => {
-    Alert.alert('Cambiar Foto', 'Funcionalidad de cambio de foto próximamente');
+    Alert.alert(
+      'Cambiar Foto de Perfil',
+      'Selecciona una opción',
+      [
+        {
+          text: 'Tomar Foto',
+          onPress: () => selectPhotoFromCamera(),
+        },
+        {
+          text: 'Elegir de Galería',
+          onPress: () => selectPhotoFromLibrary(),
+        },
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const selectPhotoFromLibrary = async () => {
+    // Solicitar permisos para acceder a la galería
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== 'granted') {
+      Alert.alert(
+        'Permiso denegado',
+        'Necesitamos permisos para acceder a tu galería de fotos'
+      );
+      return;
+    }
+
+    // Abrir selector de galería
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const selectedImage = result.assets[0];
+      await uploadPhotoToCloudinary(selectedImage);
+    }
+  };
+
+  const selectPhotoFromCamera = async () => {
+    // Solicitar permisos para usar la cámara
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (status !== 'granted') {
+      Alert.alert(
+        'Permiso denegado',
+        'Necesitamos permisos para usar tu cámara'
+      );
+      return;
+    }
+
+    // Abrir cámara
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const selectedImage = result.assets[0];
+      await uploadPhotoToCloudinary(selectedImage);
+    }
+  };
+
+  const uploadPhotoToCloudinary = async (imageData) => {
+    if (!user?.id) {
+      Alert.alert('Error', 'No se pudo obtener el ID del usuario');
+      return;
+    }
+
+    setUploadingPhoto(true);
+
+    try {
+      // Preparar datos de la imagen (Expo format)
+      const imagePayload = {
+        uri: imageData.uri,
+        type: imageData.mimeType || 'image/jpeg',
+        fileName: imageData.fileName || `profile_${user.id}_${Date.now()}.jpg`,
+      };
+
+      // Subir a Cloudinary y guardar en backend
+      const result = await cloudinaryService.uploadAndSaveProfilePhoto(
+        user.id,
+        imagePayload
+      );
+
+      if (result.success) {
+        Alert.alert('Éxito', 'Foto de perfil actualizada correctamente');
+        // Refrescar datos del usuario para ver la nueva foto
+        await refreshUser();
+      }
+    } catch (error) {
+      console.error('Error al subir foto:', error);
+      Alert.alert(
+        'Error',
+        error.message || 'No se pudo actualizar la foto de perfil'
+      );
+    } finally {
+      setUploadingPhoto(false);
+    }
   };
 
   const handleLogout = () => {
@@ -95,11 +206,19 @@ const ProfileScreen = ({ navigation }) => {
 
         {/* Change Photo Button */}
         <Button
-          title="Cambiar foto"
+          title={uploadingPhoto ? 'Subiendo foto...' : 'Cambiar foto'}
           onPress={handleChangePhoto}
           style={styles.changePhotoButton}
           textStyle={styles.changePhotoText}
+          disabled={uploadingPhoto}
         />
+
+        {uploadingPhoto && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color={COLORS.ORANGE} />
+            <Text style={styles.loadingText}>Subiendo imagen a la nube...</Text>
+          </View>
+        )}
 
         {/* Information Fields */}
         <View style={styles.infoSection}>
@@ -207,6 +326,19 @@ const styles = StyleSheet.create({
   changePhotoText: {
     fontSize: 17,
     color: COLORS.WHITE,
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+    padding: 12,
+  },
+  loadingText: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: COLORS.DARK,
+    fontStyle: 'italic',
   },
   infoSection: {
     marginTop: 24,
