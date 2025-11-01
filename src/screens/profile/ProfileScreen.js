@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,25 +11,37 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/Button';
 import { COLORS } from '../../utils/constants';
+import { useFocusEffect } from '@react-navigation/native';
 
 const ProfileScreen = ({ navigation }) => {
   const { user, logout, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    loadUserData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      // Definimos la función de carga aquí
+      const loadData = async () => {
+        if (loading) return; // Evitar cargas duplicadas si ya está en curso
 
-  const loadUserData = async () => {
-    setLoading(true);
-    try {
-      await refreshUser();
-    } catch (error) {
-      console.error('Error loading user data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        console.log('ProfileScreen enfocado. Recargando datos...');
+        setLoading(true);
+        try {
+          await refreshUser(); // Usamos la función del contexto
+        } catch (error) {
+          console.error('Error loading user data:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      // Ejecutamos la carga
+      loadData();
+
+      // La dependencia de este 'useCallback' es 'refreshUser'.
+      // Si 'refreshUser' cambiara (no debería, pero es la regla),
+      // se recrearía esta función.
+    }, [refreshUser]) // <--- Dependencia correcta
+  );
 
   const handleEditProfile = () => {
     navigation.navigate('EditUser');

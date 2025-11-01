@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import SessionManager, { saveToken, removeToken, getToken } from '../utils/SessionManager';
+import SessionManager, { setToken, deleteToken, getToken } from '../utils/SessionManager';
 import authService, { requestOtp, validateOtp } from '../services/authService';
 import userService from "../services/userService";
 import { extractUserIdFromToken } from "../utils/helpers";
@@ -60,8 +60,15 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await authService.login(email, password);
+      const { token } = response.data; // Obtenemos el token de la respuesta
+
+      // Persistir token en SecureStore y cargar user Data
+      await setToken(token);
+      await loadUserData(token);
+
+      // Actualizar Auth Context
       setIsAuthenticated(true);
-      setToken(response.data.token);
+      setToken(token);
 
       return response;
     } catch (error) {
@@ -105,17 +112,16 @@ export const AuthProvider = ({ children }) => {
       await SessionManager.clear();
       setIsAuthenticated(false);
       setToken(null);
+      setUser(null)
     } catch (error) {
       console.error('Logout error:', error);
       throw error;
     }
   };
 
-  // TODO: Update user data in context
   const updateUser = async (userData) => {
     try {
       setUser(userData);
-      await SessionManager.saveUserData(userData);
     } catch (error) {
       console.error('Update user context error:', error);
     }
