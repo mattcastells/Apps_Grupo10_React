@@ -14,7 +14,7 @@ import Input from '../../components/Input';
 import { COLORS } from '../../utils/constants';
 
 const OtpScreen = ({ navigation, route }) => {
-  const { verifyEmail, login } = useAuth();
+  const { verifyEmail } = useAuth();
   const email = route.params?.email || '';
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
