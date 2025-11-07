@@ -21,7 +21,7 @@ const bookingService = {
         return mockBookingsArray;
       }
 
-      const response = await apiClientAuth.get('/bookings/my-bookings');
+      const response = await apiClientAuth.get('/booking/my-bookings');
       return response.data;
     } catch (error) {
       console.error('Get bookings error:', error.response?.data || error.message);
@@ -47,7 +47,7 @@ const bookingService = {
         }
       }
 
-      const response = await apiClientAuth.get(`/bookings/${bookingId}`);
+      const response = await apiClientAuth.get(`/booking/${bookingId}`);
       return response.data;
     } catch (error) {
       console.error('Get booking error:', error.response?.data || error.message);
@@ -84,7 +84,7 @@ const bookingService = {
         };
       }
 
-      const response = await apiClientAuth.post('/bookings', {
+      const response = await apiClientAuth.post('/booking', {
         scheduledClassId,
       });
       return response.data;
@@ -117,7 +117,7 @@ const bookingService = {
         }
       }
 
-      const response = await apiClientAuth.delete(`/bookings/${bookingId}`);
+      const response = await apiClientAuth.delete(`/booking/${bookingId}`);
       return response.data;
     } catch (error) {
       console.error('Cancel booking error:', error.response?.data || error.message);
@@ -131,7 +131,7 @@ const bookingService = {
    */
   getUpcomingBookings: async () => {
     try {
-      const response = await apiClientAuth.get('/bookings/my-bookings', {
+      const response = await apiClientAuth.get('/booking/my-bookings', {
         params: {
           upcoming: true,
         },
@@ -149,7 +149,7 @@ const bookingService = {
    */
   getPastBookings: async () => {
     try {
-      const response = await apiClientAuth.get('/bookings/my-bookings', {
+      const response = await apiClientAuth.get('/booking/my-bookings', {
         params: {
           past: true,
         },
@@ -168,7 +168,7 @@ const bookingService = {
    */
   checkAvailability: async (scheduledClassId) => {
     try {
-      const response = await apiClientAuth.get(`/bookings/check-availability/${scheduledClassId}`);
+      const response = await apiClientAuth.get(`/booking/check-availability/${scheduledClassId}`);
       return response.data;
     } catch (error) {
       console.error('Check availability error:', error.response?.data || error.message);
