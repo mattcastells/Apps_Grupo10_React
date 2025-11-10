@@ -89,15 +89,21 @@ const CreateUserScreen = ({ navigation }) => {
         password: formData.password,
       };
 
-      await register(userRequest);
+      console.log('📝 Calling register...');
+      const response = await register(userRequest);
+      console.log('✅ Register response:', response);
 
       Alert.alert('Éxito', 'Cuenta creada. Verifica tu email con el código OTP.', [
         {
           text: 'OK',
-          onPress: () => navigation.navigate('Otp', { email: formData.email.trim() }),
+          onPress: () => {
+            console.log('🔄 Navigating to OTP screen');
+            navigation.navigate('Otp', { email: formData.email.trim() });
+          },
         },
       ]);
     } catch (error) {
+      console.error('❌ Register error:', error);
       Alert.alert(
         'Error',
         error.response?.data?.message || 'Error al crear la cuenta. Intenta nuevamente.'

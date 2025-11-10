@@ -56,40 +56,61 @@ const ScanQRScreen = ({ navigation }) => {
           Usá el escáner para ingresar a tu clase registrando tu asistencia
         </Text>
 
+        {/* QR Icon Placeholder */}
+        <View style={styles.qrIconContainer}>
+          <View style={styles.qrIcon}>
+            <Text style={styles.qrIconText}>📱</Text>
+          </View>
+        </View>
+
         <TouchableOpacity
           style={styles.scanButton}
           onPress={handleScanQR}
           disabled={scanning}
         >
           <Text style={styles.scanButtonText}>
-            {scanning ? 'Escaneando...' : 'Iniciar escaneo'}
+            {scanning ? '🔍 Escaneando...' : '📷 Iniciar escaneo'}
           </Text>
         </TouchableOpacity>
 
         {checkInData && (
           <View style={styles.checkInCard}>
-            <Text style={styles.checkInTitle}>Datos del turno</Text>
-            <Text style={styles.checkInText}>Clase: {checkInData.className}</Text>
-            <Text style={styles.checkInText}>Horario: {checkInData.schedule}</Text>
-            <Text style={styles.checkInText}>Sede: {checkInData.location}</Text>
+            <Text style={styles.checkInTitle}>✅ Datos del turno</Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Clase:</Text>
+              <Text style={styles.infoValue}>{checkInData.className}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Horario:</Text>
+              <Text style={styles.infoValue}>{checkInData.schedule}</Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Sede:</Text>
+              <Text style={styles.infoValue}>{checkInData.location}</Text>
+            </View>
 
             <TouchableOpacity
               style={styles.confirmButton}
               onPress={handleConfirmCheckIn}
             >
-              <Text style={styles.confirmButtonText}>Confirmar check-in</Text>
+              <Text style={styles.confirmButtonText}>✓ Confirmar check-in</Text>
             </TouchableOpacity>
           </View>
         )}
 
         {!checkInData && !scanning && (
-          <Text style={styles.resultText}>
-            Apuntá la cámara hacia el código QR para registrar tu asistencia
-          </Text>
+          <View style={styles.instructionCard}>
+            <Text style={styles.instructionIcon}>ℹ️</Text>
+            <Text style={styles.instructionText}>
+              Apuntá la cámara hacia el código QR para registrar tu asistencia
+            </Text>
+          </View>
         )}
 
         {scanning && (
-          <Text style={styles.resultText}>Escaneando código QR...</Text>
+          <View style={styles.scanningCard}>
+            <Text style={styles.scanningText}>🔄 Escaneando código QR...</Text>
+          </View>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -103,28 +124,58 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 24,
+    paddingBottom: 100,
   },
   title: {
-    fontSize: 26,
+    fontSize: 32,
     fontWeight: 'bold',
     color: COLORS.ORANGE,
     textAlign: 'center',
-    marginTop: 32,
-    marginBottom: 16,
+    marginTop: 20,
+    marginBottom: 12,
   },
   subtitle: {
     fontSize: 16,
     color: COLORS.DARK,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 32,
     lineHeight: 24,
+    paddingHorizontal: 8,
+  },
+  qrIconContainer: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  qrIcon: {
+    width: 120,
+    height: 120,
+    borderRadius: 20,
+    backgroundColor: COLORS.WHITE,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: COLORS.ORANGE,
+    borderStyle: 'dashed',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  qrIconText: {
+    fontSize: 60,
   },
   scanButton: {
     backgroundColor: COLORS.ORANGE,
-    borderRadius: 8,
-    paddingVertical: 14,
+    borderRadius: 12,
+    paddingVertical: 16,
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 24,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   scanButtonText: {
     fontSize: 18,
@@ -132,40 +183,91 @@ const styles = StyleSheet.create({
     color: COLORS.WHITE,
   },
   checkInCard: {
-    backgroundColor: COLORS.LIGHTGRAY,
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: COLORS.WHITE,
+    borderRadius: 16,
+    padding: 20,
     marginTop: 8,
     marginBottom: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
   checkInTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     color: COLORS.ORANGE,
-    marginBottom: 8,
+    marginBottom: 16,
   },
-  checkInText: {
-    fontSize: 17,
+  infoRow: {
+    flexDirection: 'row',
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  infoLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.GRAY,
+    width: 80,
+  },
+  infoValue: {
+    fontSize: 16,
     color: COLORS.DARK,
-    marginBottom: 4,
+    fontWeight: '500',
+    flex: 1,
   },
   confirmButton: {
     backgroundColor: COLORS.ORANGE,
-    borderRadius: 8,
-    paddingVertical: 12,
+    borderRadius: 10,
+    paddingVertical: 14,
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: 16,
   },
   confirmButtonText: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: 'bold',
     color: COLORS.WHITE,
   },
-  resultText: {
+  instructionCard: {
+    backgroundColor: COLORS.WHITE,
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+    marginTop: 8,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  instructionIcon: {
+    fontSize: 40,
+    marginBottom: 12,
+  },
+  instructionText: {
     fontSize: 16,
     color: COLORS.DARK,
     textAlign: 'center',
-    marginTop: 16,
+    lineHeight: 24,
+  },
+  scanningCard: {
+    backgroundColor: COLORS.WHITE,
+    borderRadius: 12,
+    padding: 24,
+    alignItems: 'center',
+    marginTop: 8,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  scanningText: {
+    fontSize: 18,
+    color: COLORS.ORANGE,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
 

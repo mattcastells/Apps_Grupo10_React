@@ -38,8 +38,13 @@ const authService = {
    */
   register: async (userRequest) => {
     try {
+      console.log('🚀 Registering user:', userRequest);
+      console.log('📡 API Config:', API_CONFIG);
+      console.log('🌐 Full URL:', `${API_CONFIG.BASE_URL}/auth/register`);
+      
       // Mock mode
       if (API_CONFIG.USE_MOCK) {
+        console.log('📱 Using MOCK mode');
         await new Promise(resolve => setTimeout(resolve, 500));
 
         return {
@@ -49,10 +54,13 @@ const authService = {
         };
       }
 
+      console.log('🌐 Making real API call...');
       const response = await apiClient.post('/auth/register', userRequest);
+      console.log('✅ Registration successful:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Registration error:', error.response?.data || error.message);
+      console.error('❌ Registration error:', error.response?.data || error.message);
+      console.error('📊 Error details:', error);
       throw error;
     }
   },

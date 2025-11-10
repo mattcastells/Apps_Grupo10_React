@@ -13,6 +13,50 @@ export const apiClient = axios.create({
   },
 });
 
+// Add request interceptor for debugging
+apiClient.interceptors.request.use(
+  (config) => {
+    console.log('🌐 API Request:', {
+      method: config.method,
+      url: config.url,
+      baseURL: config.baseURL,
+      fullURL: `${config.baseURL}${config.url}`,
+      headers: config.headers,
+      data: config.data,
+    });
+    return config;
+  },
+  (error) => {
+    console.error('❌ Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor for debugging
+apiClient.interceptors.response.use(
+  (response) => {
+    console.log('✅ API Response:', {
+      status: response.status,
+      data: response.data,
+      headers: response.headers,
+    });
+    return response;
+  },
+  (error) => {
+    console.error('❌ API Response Error:', {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+      config: {
+        method: error.config?.method,
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+      },
+    });
+    return Promise.reject(error);
+  }
+);
+
 /**
  * API client with authentication (includes Bearer token)
  */

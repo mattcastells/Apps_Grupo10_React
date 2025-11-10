@@ -77,16 +77,18 @@ const ReservationsScreen = ({ navigation }) => {
 
     return (
       <View style={styles.bookingCard}>
-        <Text style={styles.className}>{item.className}</Text>
+        <View style={styles.cardHeader}>
+          <Text style={styles.className}>{item.className}</Text>
+          {item.status === 'CONFIRMED' && (
+            <View style={styles.statusBadge}>
+              <Text style={styles.statusText}>Confirmada</Text>
+            </View>
+          )}
+        </View>
+        
         <Text style={styles.professorText}>Profesor: {item.professor}</Text>
         <Text style={styles.dateText}>{formattedDate} - {formattedTime}</Text>
         <Text style={styles.locationText}>{item.location}</Text>
-
-        {item.status === 'CONFIRMED' && (
-          <View style={styles.statusBadge}>
-            <Text style={styles.statusText}>Confirmada</Text>
-          </View>
-        )}
 
         <TouchableOpacity
           style={styles.cancelButton}
@@ -131,6 +133,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 24,
+    paddingBottom: 100,
   },
   title: {
     fontSize: 26,
@@ -169,11 +172,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   className: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: COLORS.ORANGE,
-    marginBottom: 8,
+    color: COLORS.DARK,
+    flex: 1,
+    marginRight: 8,
   },
   professorText: {
     fontSize: 16,
@@ -195,8 +205,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
-    alignSelf: 'flex-start',
-    marginBottom: 12,
   },
   statusText: {
     fontSize: 12,

@@ -72,33 +72,30 @@ const HistoryScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Banner */}
-      <View style={styles.banner}>
-        <Text style={styles.bannerText}>Historial de asistencias</Text>
-      </View>
-
-      {/* Content */}
-      <View style={styles.content}>
-        <Text style={styles.title}>Último mes</Text>
-        <Text style={styles.subtitle}>
-          Estas son tus clases asistidas en los últimos 30 días.
-        </Text>
-
-        <FlatList
-          data={history}
-          renderItem={renderHistoryItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>
-                {loading ? 'Cargando...' : 'No hay historial de asistencias'}
-              </Text>
-            </View>
-          }
-        />
-      </View>
+      <FlatList
+        data={history}
+        renderItem={renderHistoryItem}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContent}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        ListHeaderComponent={
+          <>
+            <Text style={styles.title}>Mi Historial</Text>
+            <Text style={styles.subtitle}>Historial de asistencias</Text>
+            <Text style={styles.sectionTitle}>Último mes</Text>
+            <Text style={styles.sectionSubtitle}>
+              Estas son tus clases asistidas en los últimos 30 días.
+            </Text>
+          </>
+        }
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>
+              {loading ? 'Cargando...' : 'No hay historial de asistencias'}
+            </Text>
+          </View>
+        }
+      />
     </SafeAreaView>
   );
 };
@@ -108,39 +105,41 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.BEIGE,
   },
-  banner: {
-    backgroundColor: COLORS.ORANGE,
-    padding: 16,
-  },
-  bannerText: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: COLORS.WHITE,
-  },
-  content: {
-    flex: 1,
+  listContent: {
     padding: 24,
-    paddingBottom: 80,
+    paddingBottom: 100,
   },
   title: {
-    fontSize: 28,
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: COLORS.ORANGE,
+    textAlign: 'center',
+    marginTop: 32,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: COLORS.DARK,
+    letterSpacing: 0.5,
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: COLORS.DARK,
     marginBottom: 8,
   },
-  subtitle: {
+  sectionSubtitle: {
     fontSize: 14,
     color: COLORS.DARK,
     marginBottom: 16,
-  },
-  listContent: {
-    paddingTop: 16,
   },
   historyCard: {
     backgroundColor: COLORS.WHITE,
     borderRadius: 16,
     padding: 16,
-    marginTop: 12,
+    marginBottom: 12,
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
