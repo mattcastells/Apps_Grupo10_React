@@ -1,6 +1,4 @@
 import { apiClientAuth } from './apiClient';
-import { API_CONFIG } from '../utils/constants';
-import { MOCK_HISTORY, MOCK_HISTORY_DETAIL } from './mockData';
 
 /**
  * History Service (Attendance tracking)
@@ -15,12 +13,6 @@ const historyService = {
    */
   getMyHistory: async (userId, from, to) => {
     try {
-      // Mock mode
-      if (API_CONFIG.USE_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return MOCK_HISTORY;
-      }
-
       const response = await apiClientAuth.get('/attendance/my-history', {
         params: {
           userId,
@@ -42,17 +34,6 @@ const historyService = {
    */
   getAttendanceDetail: async (attendanceId) => {
     try {
-      // Mock mode
-      if (API_CONFIG.USE_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const detail = MOCK_HISTORY_DETAIL[attendanceId];
-        if (detail) {
-          return detail;
-        } else {
-          throw new Error('Registro de asistencia no encontrado');
-        }
-      }
-
       const response = await apiClientAuth.get(`/attendance/${attendanceId}`);
       return response.data;
     } catch (error) {

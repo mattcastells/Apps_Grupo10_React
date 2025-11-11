@@ -1,6 +1,4 @@
 import SessionManager from '../utils/SessionManager';
-import { API_CONFIG } from '../utils/constants';
-import { MOCK_TOKEN, MOCK_OTP } from './mockData';
 import { apiClient } from "./apiClient";
 
 /**
@@ -39,28 +37,11 @@ const authService = {
   register: async (userRequest) => {
     try {
       console.log('🚀 Registering user:', userRequest);
-      console.log('📡 API Config:', API_CONFIG);
-      console.log('🌐 Full URL:', `${API_CONFIG.BASE_URL}/auth/register`);
-      
-      // Mock mode
-      if (API_CONFIG.USE_MOCK) {
-        console.log('📱 Using MOCK mode');
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        return {
-          success: true,
-          message: 'Usuario registrado exitosamente. Verifica tu email.',
-          userId: '1',
-        };
-      }
-
-      console.log('🌐 Making real API call...');
       const response = await apiClient.post('/auth/register', userRequest);
       console.log('✅ Registration successful:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Registration error:', error.response?.data || error.message);
-      console.error('📊 Error details:', error);
       throw error;
     }
   },
@@ -73,26 +54,6 @@ const authService = {
    */
   verifyEmail: async (email, otp) => {
     try {
-      // Mock mode
-      if (API_CONFIG.USE_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        if (otp === MOCK_OTP) {
-          const mockResponse = {
-            token: MOCK_TOKEN,
-            userId: '1',
-            email: email,
-            success: true,
-            message: 'Email verificado exitosamente',
-          };
-
-          await SessionManager.setToken(mockResponse.token);
-          return mockResponse;
-        } else {
-          throw new Error('Código OTP inválido');
-        }
-      }
-
       const response = await apiClient.post('/auth/verify-email', {
         email,
         otp,

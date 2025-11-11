@@ -1,9 +1,4 @@
 import { apiClientAuth } from './apiClient';
-import { API_CONFIG } from '../utils/constants';
-import { MOCK_BOOKINGS } from './mockData';
-
-// Simulated bookings array for mock mode
-let mockBookingsArray = [...MOCK_BOOKINGS];
 
 /**
  * Booking Service
@@ -15,12 +10,6 @@ const bookingService = {
    */
   getMyBookings: async () => {
     try {
-      // Mock mode
-      if (API_CONFIG.USE_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return mockBookingsArray;
-      }
-
       const response = await apiClientAuth.get('/booking/my-bookings');
       return response.data;
     } catch (error) {
@@ -36,17 +25,6 @@ const bookingService = {
    */
   getBooking: async (bookingId) => {
     try {
-      // Mock mode
-      if (API_CONFIG.USE_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const booking = mockBookingsArray.find(b => b.bookingId === bookingId.toString());
-        if (booking) {
-          return booking;
-        } else {
-          throw new Error('Reserva no encontrada');
-        }
-      }
-
       const response = await apiClientAuth.get(`/booking/${bookingId}`);
       return response.data;
     } catch (error) {
@@ -62,28 +40,6 @@ const bookingService = {
    */
   createBooking: async (scheduledClassId) => {
     try {
-      // Mock mode
-      if (API_CONFIG.USE_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        const newBooking = {
-          bookingId: `b${mockBookingsArray.length + 1}`,
-          className: 'Clase Reservada',
-          classDateTime: new Date().toISOString(),
-          professor: 'Profesor Mock',
-          status: 'CONFIRMED',
-          location: 'Sede Centro',
-          scheduledClassId: scheduledClassId,
-        };
-
-        mockBookingsArray.push(newBooking);
-        return {
-          success: true,
-          message: 'Reserva creada exitosamente',
-          booking: newBooking,
-        };
-      }
-
       const response = await apiClientAuth.post('/booking', {
         scheduledClassId,
       });
@@ -101,22 +57,6 @@ const bookingService = {
    */
   cancelBooking: async (bookingId) => {
     try {
-      // Mock mode
-      if (API_CONFIG.USE_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        const index = mockBookingsArray.findIndex(b => b.bookingId === bookingId.toString());
-        if (index !== -1) {
-          mockBookingsArray.splice(index, 1);
-          return {
-            success: true,
-            message: 'Reserva cancelada exitosamente',
-          };
-        } else {
-          throw new Error('Reserva no encontrada');
-        }
-      }
-
       const response = await apiClientAuth.delete(`/booking/${bookingId}`);
       return response.data;
     } catch (error) {

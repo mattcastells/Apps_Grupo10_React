@@ -1,6 +1,4 @@
 import { apiClientAuth } from './apiClient';
-import { API_CONFIG } from '../utils/constants';
-import { MOCK_CLASSES } from './mockData';
 
 /**
  * Schedule Service
@@ -12,12 +10,6 @@ const scheduleService = {
    */
   getWeeklySchedule: async () => {
     try {
-      // Mock mode
-      if (API_CONFIG.USE_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return MOCK_CLASSES;
-      }
-
       const response = await apiClientAuth.get('/schedule/weekly');
       return response.data;
     } catch (error) {
@@ -34,12 +26,6 @@ const scheduleService = {
    */
   getScheduleByDateRange: async (startDate, endDate) => {
     try {
-      // Mock mode
-      if (API_CONFIG.USE_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return MOCK_CLASSES;
-      }
-
       const response = await apiClientAuth.get('/schedule', {
         params: {
           startDate,
@@ -60,17 +46,6 @@ const scheduleService = {
    */
   getClassDetail: async (classId) => {
     try {
-      // Mock mode
-      if (API_CONFIG.USE_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const classDetail = MOCK_CLASSES.find(c => c.id === classId.toString());
-        if (classDetail) {
-          return classDetail;
-        } else {
-          throw new Error('Clase no encontrada');
-        }
-      }
-
       const response = await apiClientAuth.get(`/schedule/${classId}`);
       return response.data;
     } catch (error) {

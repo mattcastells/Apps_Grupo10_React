@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { COLORS } from '../../utils/constants';
-import { MOCK_BOOKINGS } from '../../services/mockData';
 import bookingService from '../../services/bookingService';
 import { formatDate } from '../../utils/helpers';
 
@@ -32,8 +31,9 @@ const ReservationsScreen = ({ navigation }) => {
       const data = await bookingService.getMyBookings();
       setBookings(data);
     } catch (error) {
-      console.log('Error loading bookings, using mock data');
-      setBookings(MOCK_BOOKINGS);
+      console.error('Error loading bookings:', error);
+      Alert.alert('Error', 'No se pudieron cargar las reservas.');
+      setBookings([]);
     } finally {
       setLoading(false);
     }

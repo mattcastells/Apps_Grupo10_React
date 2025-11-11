@@ -1,5 +1,3 @@
-import { API_CONFIG } from '../utils/constants';
-import { MOCK_USER } from './mockData';
 import { apiClientAuth } from "./apiClient";
 
 /**
@@ -13,12 +11,6 @@ const userService = {
    */
   getUser: async (id) => {
     try {
-      // Mock mode
-      if (API_CONFIG.USE_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return MOCK_USER;
-      }
-
       const response = await apiClientAuth.get(`/users/${id}`);
       return response.data;
     } catch (error) {
@@ -35,15 +27,6 @@ const userService = {
    */
   updateUser: async (id, data) => {
     try {
-      // Mock mode
-      if (API_CONFIG.USE_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return {
-          ...MOCK_USER,
-          ...data,
-        };
-      }
-
       const response = await apiClientAuth.put(`/users/${id}`, data);
       return response.data;
     } catch (error) {
@@ -60,16 +43,6 @@ const userService = {
    */
   updatePhoto: async (id, photoUrl) => {
     try {
-      // Mock mode
-      if (API_CONFIG.USE_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return {
-          success: true,
-          message: 'Foto actualizada exitosamente',
-          photoUrl: photoUrl,
-        };
-      }
-
       const response = await apiClientAuth.put(`/users/${id}/photo`, {
         photoUrl,
       });

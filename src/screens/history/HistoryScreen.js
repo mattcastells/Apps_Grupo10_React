@@ -7,10 +7,10 @@ import {
   FlatList,
   RefreshControl,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { COLORS } from '../../utils/constants';
-import { MOCK_HISTORY } from '../../services/mockData';
 import historyService from '../../services/historyService';
 import { formatDate } from '../../utils/helpers';
 
@@ -31,8 +31,9 @@ const HistoryScreen = ({ navigation }) => {
       const data = await historyService.getMyHistory();
       setHistory(data);
     } catch (error) {
-      console.log('Error loading history, using mock data');
-      setHistory(MOCK_HISTORY);
+      console.error('Error loading history:', error);
+      Alert.alert('Error', 'No se pudo cargar el historial.');
+      setHistory([]);
     } finally {
       setLoading(false);
     }

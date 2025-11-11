@@ -14,7 +14,6 @@ import Card from '../../components/Card';
 import Button from '../../components/Button';
 import { COLORS, DISCIPLINES, LOCATIONS } from '../../utils/constants';
 import scheduleService from '../../services/scheduleService';
-import { MOCK_CLASSES } from '../../services/mockData';
 import { formatDate, formatTime } from '../../utils/helpers';
 
 const HomeScreen = ({ navigation }) => {
@@ -37,8 +36,9 @@ const HomeScreen = ({ navigation }) => {
       console.log('✅ Clases cargadas:', data);
       setClasses(data);
     } catch (error) {
-      console.log('❌ Error loading classes, using mock data:', error);
-      setClasses(MOCK_CLASSES);
+      console.error('❌ Error loading classes:', error);
+      Alert.alert('Error', 'No se pudieron cargar las clases. Por favor intenta nuevamente.');
+      setClasses([]);
     } finally {
       setLoading(false);
     }

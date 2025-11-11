@@ -38,7 +38,6 @@ export const API_CONFIG = {
   // Use localhost for web, 10.0.2.2 for Android emulator, or your IP for physical devices
   BASE_URL: 'http://10.0.2.2:8080/api/v1', // Change this IP to your machine's IP,
   TIMEOUT: 30000,
-  USE_MOCK: false,
 };
 
 // Storage Keys

@@ -10,7 +10,7 @@ import {
   Linking,
 } from 'react-native';
 import { COLORS } from '../../utils/constants';
-import { MOCK_CLASSES } from '../../services/mockData';
+import scheduleService from '../../services/scheduleService';
 import bookingService from '../../services/bookingService';
 import { formatDate, formatTime } from '../../utils/helpers';
 
@@ -23,13 +23,18 @@ const ClassDetailScreen = ({ route, navigation }) => {
     loadClassDetail();
   }, [classId]);
 
-  const loadClassDetail = () => {
-    const classData = MOCK_CLASSES.find((c) => c.id === classId);
-    if (classData) {
-      setClassDetail(classData);
-    } else {
-      Alert.alert('Error', 'Clase no encontrada');
-      navigation.goBack();
+  const loadClassDetail = async () => {
+    setLoading(true);
+    try {
+      const data = await scheduleService.getClassDetail(classId);
+      setClassDetail(data);
+    } catch (error) {
+      console.error('Error loading class detail:', error);
+      Alert.alert('Error', 'No se pudo cargar la información de la clase', [
+        { text: 'OK', onPress: () => navigation.goBack() },
+      ]);
+    } finally {
+      setLoading(false);
     }
   };
 

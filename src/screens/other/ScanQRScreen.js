@@ -48,20 +48,31 @@ const ScanQRScreen = ({ navigation }) => {
     setScanned(false);
   };
 
-  const handleBarCodeScanned = ({ type, data }) => {
+  const handleBarCodeScanned = async ({ type, data }) => {
     if (scanned) return;
     
     setScanned(true);
     setShowCamera(false);
     
-    // Simular que siempre es exitoso con datos mock
-    const mockQRData = {
-      className: 'Yoga Matutino',
-      schedule: '08:00 - 09:00',
-      location: 'Sede Centro - Sala 3',
-    };
-    
-    setCheckInData(mockQRData);
+    try {
+      // Parse QR code data (expecting JSON with bookingId or classId)
+      const qrData = JSON.parse(data);
+      
+      // TODO: Call backend check-in API
+      // const response = await bookingService.checkIn(qrData.bookingId);
+      // setCheckInData(response);
+      
+      // For now, show the scanned data
+      setCheckInData({
+        className: qrData.className || 'Clase',
+        schedule: qrData.schedule || 'Horario no disponible',
+        location: qrData.location || 'Ubicación no disponible',
+      });
+    } catch (error) {
+      console.error('Error processing QR code:', error);
+      Alert.alert('Error', 'No se pudo procesar el código QR');
+      setScanned(false);
+    }
   };
 
   const handleCloseCamera = () => {

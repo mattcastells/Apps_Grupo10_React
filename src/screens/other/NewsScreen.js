@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,19 +7,38 @@ import {
   FlatList,
   RefreshControl,
   Image,
+  Alert,
 } from 'react-native';
 import { COLORS } from '../../utils/constants';
-import { MOCK_NEWS } from '../../services/mockData';
 
 const NewsScreen = () => {
-  const [news, setNews] = useState(MOCK_NEWS);
+  const [news, setNews] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    loadNews();
+  }, []);
+
+  const loadNews = async () => {
+    setLoading(true);
+    try {
+      // TODO: Implement newsService.getNews() when backend endpoint is ready
+      // const data = await newsService.getNews();
+      // setNews(data);
+      setNews([]);
+    } catch (error) {
+      console.error('Error loading news:', error);
+      Alert.alert('Error', 'No se pudieron cargar las noticias');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const onRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
+    await loadNews();
+    setRefreshing(false);
   };
 
   const renderNewsItem = ({ item }) => (

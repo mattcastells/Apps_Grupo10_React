@@ -5,9 +5,9 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { COLORS } from '../../utils/constants';
-import { MOCK_HISTORY_DETAIL } from '../../services/mockData';
 import historyService from '../../services/historyService';
 import { formatDate } from '../../utils/helpers';
 
@@ -20,18 +20,16 @@ const HistoryDetailScreen = ({ route, navigation }) => {
     loadAttendanceDetail();
   }, [attendanceId]);
 
-  const loadAttendanceDetail = () => {
+  const loadAttendanceDetail = async () => {
     setLoading(true);
     try {
-      const data = MOCK_HISTORY_DETAIL[attendanceId];
-      if (data) {
-        setAttendance(data);
-      } else {
-        navigation.goBack();
-      }
+      const data = await historyService.getAttendanceDetail(attendanceId);
+      setAttendance(data);
     } catch (error) {
-      console.log('Error loading attendance detail');
-      navigation.goBack();
+      console.error('Error loading attendance detail:', error);
+      Alert.alert('Error', 'No se pudo cargar el detalle', [
+        { text: 'OK', onPress: () => navigation.goBack() },
+      ]);
     } finally {
       setLoading(false);
     }
