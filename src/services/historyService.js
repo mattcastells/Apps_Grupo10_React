@@ -1,16 +1,6 @@
 import { apiClientAuth } from './apiClient';
 
-/**
- * History Service (Attendance tracking)
- */
 const historyService = {
-  /**
-   * Get user attendance history
-   * @param {number} userId - User ID
-   * @param {string} from - Start date (YYYY-MM-DD)
-   * @param {string} to - End date (YYYY-MM-DD)
-   * @returns {Promise} List of attendance records
-   */
   getMyHistory: async (userId, from, to) => {
     try {
       const response = await apiClientAuth.get('/attendance/my-history', {
@@ -27,11 +17,6 @@ const historyService = {
     }
   },
 
-  /**
-   * Get attendance detail by ID
-   * @param {number} attendanceId - Attendance record ID
-   * @returns {Promise} Attendance detail data
-   */
   getAttendanceDetail: async (attendanceId) => {
     try {
       const response = await apiClientAuth.get(`/attendance/${attendanceId}`);
@@ -42,10 +27,6 @@ const historyService = {
     }
   },
 
-  /**
-   * Get all user attendance (without date filter)
-   * @returns {Promise} List of all attendance records
-   */
   getAllHistory: async () => {
     try {
       const response = await apiClientAuth.get('/attendance/my-history');
@@ -56,11 +37,6 @@ const historyService = {
     }
   },
 
-  /**
-   * Get attendance statistics
-   * @param {number} userId - User ID
-   * @returns {Promise} Attendance statistics
-   */
   getStatistics: async (userId) => {
     try {
       const response = await apiClientAuth.get(`/attendance/statistics/${userId}`);
@@ -71,12 +47,6 @@ const historyService = {
     }
   },
 
-  /**
-   * Submit review for attended class
-   * @param {number} attendanceId - Attendance record ID
-   * @param {Object} reviewData - Review data (rating, comment)
-   * @returns {Promise} Review submission response
-   */
   submitReview: async (attendanceId, reviewData) => {
     try {
       const response = await apiClientAuth.post(`/attendance/${attendanceId}/review`, reviewData);
@@ -87,11 +57,6 @@ const historyService = {
     }
   },
 
-  /**
-   * Record attendance via QR scan
-   * @param {string} qrData - QR code data
-   * @returns {Promise} Attendance record response
-   */
   recordAttendance: async (qrData) => {
     try {
       const response = await apiClientAuth.post('/attendance/check-in', {

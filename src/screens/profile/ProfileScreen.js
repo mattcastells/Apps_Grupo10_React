@@ -19,14 +19,13 @@ const ProfileScreen = ({ navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
-      // Definimos la función de carga aquí
       const loadData = async () => {
-        if (loading) return; // Evitar cargas duplicadas si ya está en curso
+        if (loading) return;
 
-        console.log('ProfileScreen enfocado. Recargando datos...');
+        console.log('ProfileScreen focused. Reloading user data...');
         setLoading(true);
         try {
-          await refreshUser(); // Usamos la función del contexto
+          await refreshUser();
         } catch (error) {
           console.error('Error loading user data:', error);
         } finally {
@@ -34,13 +33,8 @@ const ProfileScreen = ({ navigation }) => {
         }
       };
 
-      // Ejecutamos la carga
       loadData();
-
-      // La dependencia de este 'useCallback' es 'refreshUser'.
-      // Si 'refreshUser' cambiara (no debería, pero es la regla),
-      // se recrearía esta función.
-    }, [refreshUser]) // <--- Dependencia correcta
+    }, [refreshUser])
   );
 
   const handleEditProfile = () => {

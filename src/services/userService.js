@@ -1,14 +1,6 @@
 import { apiClientAuth } from "./apiClient";
 
-/**
- * User Service
- */
 const userService = {
-  /**
-   * Get user by ID
-   * @param {number} id - User ID
-   * @returns {Promise} User data
-   */
   getUser: async (id) => {
     try {
       const response = await apiClientAuth.get(`/users/${id}`);
@@ -19,12 +11,6 @@ const userService = {
     }
   },
 
-  /**
-   * Update user data
-   * @param {number} id - User ID
-   * @param {Object} data - User data to update
-   * @returns {Promise} Updated user data
-   */
   updateUser: async (id, data) => {
     try {
       const response = await apiClientAuth.put(`/users/${id}`, data);
@@ -35,12 +21,6 @@ const userService = {
     }
   },
 
-  /**
-   * Update user profile photo
-   * @param {number} id - User ID
-   * @param {string} photoUrl - Photo URL or base64
-   * @returns {Promise} Updated user data
-   */
   updatePhoto: async (id, photoUrl) => {
     try {
       const response = await apiClientAuth.put(`/users/${id}/photo`, {
@@ -53,12 +33,6 @@ const userService = {
     }
   },
 
-  /**
-   * Upload profile photo (FormData)
-   * @param {number} id - User ID
-   * @param {FormData} formData - Form data with photo file
-   * @returns {Promise} Updated user data
-   */
   uploadPhoto: async (id, formData) => {
     try {
       const response = await apiClientAuth.post(`/users/${id}/upload-photo`, formData, {
@@ -73,11 +47,6 @@ const userService = {
     }
   },
 
-  /**
-   * Delete user account
-   * @param {number} id - User ID
-   * @returns {Promise} Deletion response
-   */
   deleteUser: async (id) => {
     try {
       const response = await apiClientAuth.delete(`/users/${id}`);
@@ -88,13 +57,6 @@ const userService = {
     }
   },
 
-  /**
-   * Change user password
-   * @param {number} id - User ID
-   * @param {string} currentPassword - Current password
-   * @param {string} newPassword - New password
-   * @returns {Promise} Password change response
-   */
   changePassword: async (id, currentPassword, newPassword) => {
     try {
       const response = await apiClientAuth.put(`/users/${id}/change-password`, {

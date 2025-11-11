@@ -1,13 +1,6 @@
 import { apiClientAuth } from './apiClient';
 
-/**
- * Schedule Service
- */
 const scheduleService = {
-  /**
-   * Get weekly schedule (all classes for the week)
-   * @returns {Promise} Weekly schedule data
-   */
   getWeeklySchedule: async () => {
     try {
       const response = await apiClientAuth.get('/schedule/weekly');
@@ -18,12 +11,6 @@ const scheduleService = {
     }
   },
 
-  /**
-   * Get schedule by date range
-   * @param {string} startDate - Start date (YYYY-MM-DD)
-   * @param {string} endDate - End date (YYYY-MM-DD)
-   * @returns {Promise} Schedule data
-   */
   getScheduleByDateRange: async (startDate, endDate) => {
     try {
       const response = await apiClientAuth.get('/schedule', {
@@ -39,11 +26,6 @@ const scheduleService = {
     }
   },
 
-  /**
-   * Get class detail by scheduled class ID
-   * @param {number} classId - Scheduled class ID
-   * @returns {Promise} Class detail data
-   */
   getClassDetail: async (classId) => {
     try {
       const response = await apiClientAuth.get(`/schedule/${classId}`);
@@ -54,11 +36,6 @@ const scheduleService = {
     }
   },
 
-  /**
-   * Get schedule by discipline
-   * @param {string} discipline - Discipline name
-   * @returns {Promise} Schedule data filtered by discipline
-   */
   getScheduleByDiscipline: async (discipline) => {
     try {
       const response = await apiClientAuth.get('/schedule', {
@@ -92,11 +69,6 @@ const scheduleService = {
     }
   },
 
-  /**
-   * Search schedule with filters
-   * @param {Object} filters - Filter object (discipline, location, date, etc.)
-   * @returns {Promise} Filtered schedule data
-   */
   searchSchedule: async (filters) => {
     try {
       const response = await apiClientAuth.get('/schedule', {

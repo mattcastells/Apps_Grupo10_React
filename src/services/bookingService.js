@@ -1,13 +1,6 @@
 import { apiClientAuth } from './apiClient';
 
-/**
- * Booking Service
- */
 const bookingService = {
-  /**
-   * Get all user bookings
-   * @returns {Promise} List of user bookings
-   */
   getMyBookings: async () => {
     try {
       const response = await apiClientAuth.get('/booking/my-bookings');
@@ -18,11 +11,6 @@ const bookingService = {
     }
   },
 
-  /**
-   * Get booking by ID
-   * @param {number} bookingId - Booking ID
-   * @returns {Promise} Booking details
-   */
   getBooking: async (bookingId) => {
     try {
       const response = await apiClientAuth.get(`/booking/${bookingId}`);
@@ -33,11 +21,6 @@ const bookingService = {
     }
   },
 
-  /**
-   * Create new booking
-   * @param {number} scheduledClassId - Scheduled class ID
-   * @returns {Promise} Created booking data
-   */
   createBooking: async (scheduledClassId) => {
     try {
       const response = await apiClientAuth.post('/booking', {
@@ -50,11 +33,6 @@ const bookingService = {
     }
   },
 
-  /**
-   * Cancel booking
-   * @param {number} bookingId - Booking ID
-   * @returns {Promise} Cancellation response
-   */
   cancelBooking: async (bookingId) => {
     try {
       const response = await apiClientAuth.delete(`/booking/${bookingId}`);
@@ -83,10 +61,6 @@ const bookingService = {
     }
   },
 
-  /**
-   * Get past bookings
-   * @returns {Promise} List of past bookings
-   */
   getPastBookings: async () => {
     try {
       const response = await apiClientAuth.get('/booking/my-bookings', {
@@ -101,11 +75,6 @@ const bookingService = {
     }
   },
 
-  /**
-   * Check if class is bookable
-   * @param {number} scheduledClassId - Scheduled class ID
-   * @returns {Promise} Availability status
-   */
   checkAvailability: async (scheduledClassId) => {
     try {
       const response = await apiClientAuth.get(`/booking/check-availability/${scheduledClassId}`);
