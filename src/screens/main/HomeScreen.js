@@ -13,10 +13,12 @@ import { Picker } from '@react-native-picker/picker';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
 import { COLORS, DISCIPLINES, LOCATIONS } from '../../utils/constants';
+import { useTheme } from '../../context/ThemeContext';
 import scheduleService from '../../services/scheduleService';
 import { formatDate, formatTime } from '../../utils/helpers';
 
 const HomeScreen = ({ navigation }) => {
+  const { theme, isDarkMode } = useTheme();
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -82,24 +84,24 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const renderClassItem = ({ item }) => (
-    <Card onPress={() => handleClassPress(item)} style={styles.classCard}>
+    <Card onPress={() => handleClassPress(item)} style={[styles.classCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
       <View style={styles.cardHeader}>
-        <Text style={styles.className}>{item.name || item.discipline}</Text>
-        <View style={[styles.badge, { backgroundColor: COLORS.ORANGE }]}>
+        <Text style={[styles.className, { color: theme.text }]}>{item.name || item.discipline}</Text>
+        <View style={[styles.badge, { backgroundColor: theme.primary }]}>
           <Text style={styles.badgeText}>{item.discipline}</Text>
         </View>
       </View>
 
       <View style={styles.cardContent}>
-        <Text style={styles.infoText}>Instructor: {item.professor || item.teacher || 'N/A'}</Text>
-        <Text style={styles.infoText}>Sede: {item.location || item.site || 'N/A'}</Text>
-        <Text style={styles.infoText}>
+        <Text style={[styles.infoText, { color: theme.textSecondary }]}>Instructor: {item.professor || item.teacher || 'N/A'}</Text>
+        <Text style={[styles.infoText, { color: theme.textSecondary }]}>Sede: {item.location || item.site || 'N/A'}</Text>
+        <Text style={[styles.infoText, { color: theme.textSecondary }]}>
           Fecha: {item.dateTime ? new Date(item.dateTime).toLocaleDateString() : 'N/A'}
         </Text>
-        <Text style={styles.infoText}>
+        <Text style={[styles.infoText, { color: theme.textSecondary }]}>
           Duración: {item.durationMinutes || 60} min
         </Text>
-        <Text style={styles.infoText}>
+        <Text style={[styles.infoText, { color: theme.textSecondary }]}>
           Cupos: {item.availableSlots || 0}
         </Text>
       </View>
@@ -109,7 +111,7 @@ const HomeScreen = ({ navigation }) => {
   const filteredClasses = getFilteredClasses();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
       <FlatList
         data={filteredClasses}
         renderItem={renderClassItem}
@@ -118,65 +120,56 @@ const HomeScreen = ({ navigation }) => {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         ListHeaderComponent={
           <>
-            {/* Logo */}
             <View style={styles.logoContainer}>
-              <View style={styles.logoPlaceholder}>
+              <View style={[styles.logoPlaceholder, { backgroundColor: theme.primary }]}>
                 <Text style={styles.logoText}>RF</Text>
               </View>
             </View>
 
-            {/* Title */}
-            <Text style={styles.title}>¡Bienvenido a RitmoFit!</Text>
+            <Text style={[styles.title, { color: theme.text }]}>¡Bienvenido a RitmoFit!</Text>
 
-            {/* Subtitle */}
-            <Text style={styles.subtitle}>
+            <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
               Tu espacio para entrenar, reservar clases y mantenerte informado.
             </Text>
 
-            {/* Quick Access Section */}
-            <Text style={styles.sectionTitle}>Accesos rápidos</Text>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Accesos rápidos</Text>
 
-            {/* Quick Access Buttons */}
             <View style={styles.quickAccessContainer}>
               <TouchableOpacity
-                style={[styles.quickButton, styles.quickButtonOrange]}
+                style={[styles.quickButton, { backgroundColor: theme.primary }]}
                 onPress={handleReserveClass}
               >
                 <Text style={styles.quickButtonText}>Reservar clase</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.quickButton, styles.quickButtonDark]}
+                style={[styles.quickButton, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}
                 onPress={handleMyProfile}
               >
-                <Text style={styles.quickButtonText}>Mi perfil</Text>
+                <Text style={[styles.quickButtonText, { color: theme.text }]}>Mi perfil</Text>
               </TouchableOpacity>
             </View>
 
-            {/* Featured Card */}
-            <Card style={styles.featuredCard}>
+            <Card style={[styles.featuredCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
               <View style={styles.featuredCardContent}>
                 <View style={styles.featuredIcon}>
                   <Text style={styles.featuredIconText}>📅</Text>
                 </View>
                 <View style={styles.featuredTextContainer}>
-                  <Text style={styles.featuredTitle}>Próxima clase: Yoga - 10:00</Text>
-                  <Text style={styles.featuredSubtitle}>¡No olvides tu clase!</Text>
+                  <Text style={[styles.featuredTitle, { color: theme.primary }]}>Próxima clase: Yoga - 10:00</Text>
+                  <Text style={[styles.featuredSubtitle, { color: theme.textSecondary }]}>¡No olvides tu clase!</Text>
                 </View>
               </View>
             </Card>
 
-            {/* Catalog Title */}
-            <Text style={styles.catalogTitle}>Catálogo de Clases y Turnos</Text>
+            <Text style={[styles.catalogTitle, { color: theme.primary }]}>Catálogo de Clases y Turnos</Text>
 
-            {/* Filters */}
             <View style={styles.filtersContainer}>
-              {/* Location Picker */}
-              <View style={styles.filterItem}>
+              <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
                 <Picker
                   selectedValue={selectedLocation}
                   onValueChange={setSelectedLocation}
-                  style={styles.picker}
+                  style={[styles.picker, { color: isDarkMode ? COLORS.WHITE : theme.text }]}
                 >
                   {LOCATIONS.map((location) => (
                     <Picker.Item key={location} label={location} value={location} />
@@ -184,12 +177,11 @@ const HomeScreen = ({ navigation }) => {
                 </Picker>
               </View>
 
-              {/* Discipline Picker */}
-              <View style={styles.filterItem}>
+              <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
                 <Picker
                   selectedValue={selectedDiscipline}
                   onValueChange={setSelectedDiscipline}
-                  style={styles.picker}
+                  style={[styles.picker, { color: isDarkMode ? COLORS.WHITE : theme.text }]}
                 >
                   {DISCIPLINES.map((discipline) => (
                     <Picker.Item key={discipline} label={discipline} value={discipline} />
@@ -197,12 +189,11 @@ const HomeScreen = ({ navigation }) => {
                 </Picker>
               </View>
 
-              {/* Date Picker */}
-              <View style={styles.filterItem}>
+              <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
                 <Picker
                   selectedValue={selectedDate}
                   onValueChange={setSelectedDate}
-                  style={styles.picker}
+                  style={[styles.picker, { color: isDarkMode ? COLORS.WHITE : theme.text }]}
                 >
                   <Picker.Item label="Todas" value="Todas" />
                   <Picker.Item label="Hoy" value="Hoy" />
@@ -212,13 +203,12 @@ const HomeScreen = ({ navigation }) => {
               </View>
             </View>
 
-            {/* Classes List Title */}
-            <Text style={styles.classesListTitle}>Clases disponibles</Text>
+            <Text style={[styles.classesListTitle, { color: theme.text }]}>Clases disponibles</Text>
           </>
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>
+            <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
               {loading ? 'Cargando clases...' : 'No hay clases disponibles'}
             </Text>
           </View>
@@ -231,7 +221,6 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BEIGE,
   },
   listContent: {
     padding: 24,
@@ -246,32 +235,28 @@ const styles = StyleSheet.create({
     width: 180,
     height: 180,
     borderRadius: 90,
-    backgroundColor: COLORS.ORANGE,
     justifyContent: 'center',
     alignItems: 'center',
   },
   logoText: {
     fontSize: 72,
     fontWeight: 'bold',
-    color: COLORS.WHITE,
+    color: '#FFFFFF',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: COLORS.ORANGE,
     textAlign: 'center',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 17,
-    color: COLORS.DARK,
     textAlign: 'center',
     marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.DARK,
     marginBottom: 12,
   },
   quickAccessContainer: {
@@ -288,19 +273,12 @@ const styles = StyleSheet.create({
     minHeight: 50,
     marginHorizontal: 4,
   },
-  quickButtonOrange: {
-    backgroundColor: COLORS.ORANGE,
-  },
-  quickButtonDark: {
-    backgroundColor: COLORS.DARK,
-  },
   quickButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: COLORS.WHITE,
+    color: '#FFFFFF',
   },
   featuredCard: {
-    backgroundColor: COLORS.WHITE,
     elevation: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -331,18 +309,15 @@ const styles = StyleSheet.create({
   featuredTitle: {
     fontSize: 17,
     fontWeight: 'bold',
-    color: COLORS.ORANGE,
     marginBottom: 6,
     lineHeight: 22,
   },
   featuredSubtitle: {
     fontSize: 14,
-    color: COLORS.GRAY,
   },
   catalogTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: COLORS.ORANGE,
     marginTop: 16,
     marginBottom: 16,
     lineHeight: 28,
@@ -356,28 +331,24 @@ const styles = StyleSheet.create({
   filterItem: {
     flex: 1,
     borderWidth: 1,
-    borderColor: COLORS.GRAY,
     borderRadius: 8,
-    backgroundColor: COLORS.WHITE,
     height: 56,
     justifyContent: 'center',
     overflow: 'hidden',
   },
   picker: {
     height: 56,
-    color: COLORS.DARK,
     fontSize: 14,
+    color: COLORS.WHITE,
   },
   classesListTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: COLORS.DARK,
     marginTop: 16,
     marginBottom: 12,
   },
   classCard: {
     marginBottom: 12,
-    backgroundColor: COLORS.WHITE,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -388,7 +359,6 @@ const styles = StyleSheet.create({
   className: {
     fontSize: 18,
     fontWeight: '700',
-    color: COLORS.DARK,
     flex: 1,
   },
   badge: {
@@ -399,14 +369,13 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 12,
     fontWeight: '600',
-    color: COLORS.WHITE,
+    color: '#FFFFFF',
   },
   cardContent: {
     gap: 4,
   },
   infoText: {
     fontSize: 14,
-    color: COLORS.GRAY,
     marginBottom: 2,
   },
   emptyContainer: {
@@ -415,7 +384,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: COLORS.GRAY,
     textAlign: 'center',
   },
 });

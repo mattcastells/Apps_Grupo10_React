@@ -11,9 +11,11 @@ import {
 } from 'react-native';
 import { CameraView, Camera } from 'expo-camera';
 import { COLORS } from '../../utils/constants';
+import { useTheme } from '../../context/ThemeContext';
 import historyService from '../../services/historyService';
 
 const ScanQRScreen = ({ navigation }) => {
+  const { theme } = useTheme();
   const [hasPermission, setHasPermission] = useState(null);
   const [scanning, setScanning] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
@@ -98,23 +100,23 @@ const ScanQRScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>Escanear QR</Text>
+        <Text style={[styles.title, { color: theme.primary }]}>Escanear QR</Text>
 
-        <Text style={styles.subtitle}>
+        <Text style={[styles.subtitle, { color: theme.text }]}>
           Usá el escáner para ingresar a tu clase registrando tu asistencia
         </Text>
 
         {/* QR Icon Placeholder */}
         <View style={styles.qrIconContainer}>
-          <View style={styles.qrIcon}>
+          <View style={[styles.qrIcon, { backgroundColor: theme.card, borderColor: theme.primary }]}>
             <Text style={styles.qrIconText}>📱</Text>
           </View>
         </View>
 
         <TouchableOpacity
-          style={styles.scanButton}
+          style={[styles.scanButton, { backgroundColor: theme.primary }]}
           onPress={handleScanQR}
           disabled={scanning}
         >
@@ -124,23 +126,23 @@ const ScanQRScreen = ({ navigation }) => {
         </TouchableOpacity>
 
         {checkInData && (
-          <View style={styles.checkInCard}>
-            <Text style={styles.checkInTitle}>✅ Datos del turno</Text>
+          <View style={[styles.checkInCard, { backgroundColor: theme.card }]}>
+            <Text style={[styles.checkInTitle, { color: theme.primary }]}>✅ Datos del turno</Text>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Clase:</Text>
-              <Text style={styles.infoValue}>{checkInData.className}</Text>
+              <Text style={[styles.infoValue, { color: theme.text }]}>{checkInData.className}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Horario:</Text>
-              <Text style={styles.infoValue}>{checkInData.schedule}</Text>
+              <Text style={[styles.infoValue, { color: theme.text }]}>{checkInData.schedule}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Sede:</Text>
-              <Text style={styles.infoValue}>{checkInData.location}</Text>
+              <Text style={[styles.infoValue, { color: theme.text }]}>{checkInData.location}</Text>
             </View>
 
             <TouchableOpacity
-              style={styles.confirmButton}
+              style={[styles.confirmButton, { backgroundColor: theme.primary }]}
               onPress={handleConfirmCheckIn}
             >
               <Text style={styles.confirmButtonText}>✓ Confirmar check-in</Text>
@@ -149,9 +151,9 @@ const ScanQRScreen = ({ navigation }) => {
         )}
 
         {!checkInData && (
-          <View style={styles.instructionCard}>
+          <View style={[styles.instructionCard, { backgroundColor: theme.card }]}>
             <Text style={styles.instructionIcon}>ℹ️</Text>
-            <Text style={styles.instructionText}>
+            <Text style={[styles.instructionText, { color: theme.text }]}>
               Apuntá la cámara hacia el código QR para registrar tu asistencia
             </Text>
           </View>
@@ -205,7 +207,6 @@ const ScanQRScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BEIGE,
   },
   scrollContent: {
     padding: 24,
@@ -214,14 +215,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: COLORS.ORANGE,
     textAlign: 'center',
     marginTop: 20,
     marginBottom: 12,
   },
   subtitle: {
     fontSize: 16,
-    color: COLORS.DARK,
     textAlign: 'center',
     marginBottom: 32,
     lineHeight: 24,
@@ -235,11 +234,9 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 20,
-    backgroundColor: COLORS.WHITE,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: COLORS.ORANGE,
     borderStyle: 'dashed',
     elevation: 4,
     shadowColor: '#000',
@@ -251,7 +248,6 @@ const styles = StyleSheet.create({
     fontSize: 60,
   },
   scanButton: {
-    backgroundColor: COLORS.ORANGE,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
@@ -268,7 +264,6 @@ const styles = StyleSheet.create({
     color: COLORS.WHITE,
   },
   checkInCard: {
-    backgroundColor: COLORS.WHITE,
     borderRadius: 16,
     padding: 20,
     marginTop: 8,
@@ -282,7 +277,6 @@ const styles = StyleSheet.create({
   checkInTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: COLORS.ORANGE,
     marginBottom: 16,
   },
   infoRow: {
@@ -298,12 +292,10 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 16,
-    color: COLORS.DARK,
     fontWeight: '500',
     flex: 1,
   },
   confirmButton: {
-    backgroundColor: COLORS.ORANGE,
     borderRadius: 10,
     paddingVertical: 14,
     alignItems: 'center',
@@ -315,7 +307,6 @@ const styles = StyleSheet.create({
     color: COLORS.WHITE,
   },
   instructionCard: {
-    backgroundColor: COLORS.WHITE,
     borderRadius: 12,
     padding: 20,
     alignItems: 'center',
@@ -332,12 +323,10 @@ const styles = StyleSheet.create({
   },
   instructionText: {
     fontSize: 16,
-    color: COLORS.DARK,
     textAlign: 'center',
     lineHeight: 24,
   },
   scanningCard: {
-    backgroundColor: COLORS.WHITE,
     borderRadius: 12,
     padding: 24,
     alignItems: 'center',
@@ -350,7 +339,6 @@ const styles = StyleSheet.create({
   },
   scanningText: {
     fontSize: 18,
-    color: COLORS.ORANGE,
     fontWeight: '600',
     textAlign: 'center',
   },

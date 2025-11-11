@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
   },
   picker: {
     height: 48,
-    color: COLORS.DARK,
+    color: COLORS.WHITE,
   },
   saveButton: {
     backgroundColor: COLORS.ORANGE,

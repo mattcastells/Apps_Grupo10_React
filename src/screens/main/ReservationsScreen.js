@@ -10,11 +10,12 @@ import {
   Alert,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { COLORS } from '../../utils/constants';
+import { useTheme } from '../../context/ThemeContext';
 import bookingService from '../../services/bookingService';
 import { formatDate } from '../../utils/helpers';
 
 const ReservationsScreen = ({ navigation }) => {
+  const { theme, isDarkMode } = useTheme();
   const [bookings, setBookings] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -76,34 +77,34 @@ const ReservationsScreen = ({ navigation }) => {
     const formattedTime = `${hours}:${minutes}`;
 
     return (
-      <View style={styles.bookingCard}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.className}>{item.className}</Text>
-          <Text style={styles.timeText}>{formattedTime}</Text>
+      <View style={[styles.bookingCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
+        <View style={[styles.cardHeader, { borderBottomColor: theme.border }]}>
+          <Text style={[styles.className, { color: theme.text }]}>{item.className}</Text>
+          <Text style={[styles.timeText, { backgroundColor: theme.primary }]}>{formattedTime}</Text>
         </View>
-        <View style={styles.cardDivider} />
+        <View style={[styles.cardDivider, { backgroundColor: theme.border }]} />
         <View style={styles.cardBody}>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Profesor:</Text>
-            <Text style={styles.infoValue}>{item.professor}</Text>
+            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Profesor:</Text>
+            <Text style={[styles.infoValue, { color: theme.text }]}>{item.professor}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Sede:</Text>
-            <Text style={styles.infoValue}>{item.location}</Text>
+            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Sede:</Text>
+            <Text style={[styles.infoValue, { color: theme.text }]}>{item.location}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Fecha:</Text>
-            <Text style={styles.infoValue}>{formattedDate}</Text>
+            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Fecha:</Text>
+            <Text style={[styles.infoValue, { color: theme.text }]}>{formattedDate}</Text>
           </View>
           {item.status === 'CONFIRMED' && (
-            <View style={styles.statusBadge}>
+            <View style={[styles.statusBadge, { backgroundColor: theme.success }]}>
               <Text style={styles.statusText}>✓ Confirmada</Text>
             </View>
           )}
         </View>
 
         <TouchableOpacity
-          style={styles.cancelButton}
+          style={[styles.cancelButton, { backgroundColor: theme.error }]}
           onPress={() => handleCancelBooking(item.bookingId)}
         >
           <Text style={styles.cancelButtonText}>Cancelar Reserva</Text>
@@ -113,15 +114,15 @@ const ReservationsScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Mis Reservas</Text>
-        <Text style={styles.subtitle}>Próximas clases</Text>
-        <Text style={styles.description}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
+      <View style={[styles.header, { backgroundColor: theme.backgroundSecondary }]}>
+        <Text style={[styles.title, { color: theme.primary }]}>Mis Reservas</Text>
+        <Text style={[styles.subtitle, { color: theme.text }]}>Próximas clases</Text>
+        <Text style={[styles.description, { color: theme.textSecondary }]}>
           Tus reservas confirmadas
         </Text>
       </View>
-      <View style={styles.contentContainer}>
+      <View style={[styles.contentContainer, { backgroundColor: theme.container, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
         <FlatList
           data={bookings}
           renderItem={renderBookingItem}
@@ -130,7 +131,7 @@ const ReservationsScreen = ({ navigation }) => {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>
+              <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
                 {loading ? 'Cargando...' : 'No tenés reservas'}
               </Text>
             </View>
@@ -144,10 +145,8 @@ const ReservationsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BEIGE,
   },
   header: {
-    backgroundColor: COLORS.BEIGE,
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 16,
@@ -155,23 +154,19 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: COLORS.ORANGE,
     marginBottom: 12,
   },
   subtitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.DARK,
     marginBottom: 4,
   },
   description: {
     fontSize: 14,
-    color: COLORS.GRAY,
     lineHeight: 20,
   },
   contentContainer: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
     borderRadius: 24,
     marginHorizontal: 20,
     marginTop: 8,
@@ -188,7 +183,6 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   bookingCard: {
-    backgroundColor: COLORS.WHITE,
     borderRadius: 12,
     padding: 18,
     marginBottom: 14,
@@ -205,26 +199,22 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.LIGHTGRAY,
   },
   className: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: COLORS.DARK,
     flex: 1,
   },
   timeText: {
     fontSize: 16,
     fontWeight: '700',
-    color: COLORS.WHITE,
-    backgroundColor: COLORS.ORANGE,
+    color: '#FFFFFF',
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 10,
   },
   cardDivider: {
     height: 1,
-    backgroundColor: COLORS.LIGHTGRAY,
     marginBottom: 12,
   },
   cardBody: {
@@ -238,17 +228,14 @@ const styles = StyleSheet.create({
   infoLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: COLORS.GRAY,
     width: 85,
   },
   infoValue: {
     fontSize: 14,
-    color: COLORS.DARK,
     flex: 1,
     fontWeight: '500',
   },
   statusBadge: {
-    backgroundColor: COLORS.SUCCESS,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
@@ -258,10 +245,9 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: COLORS.WHITE,
+    color: '#FFFFFF',
   },
   cancelButton: {
-    backgroundColor: COLORS.ERROR,
     borderRadius: 10,
     paddingVertical: 12,
     alignItems: 'center',
@@ -270,7 +256,7 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: COLORS.WHITE,
+    color: '#FFFFFF',
   },
   emptyContainer: {
     padding: 40,
@@ -279,7 +265,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: COLORS.GRAY,
     textAlign: 'center',
   },
 });

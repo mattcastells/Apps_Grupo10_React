@@ -2,9 +2,8 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS } from '../utils/constants';
+import { useTheme } from '../context/ThemeContext';
 
-// Screens
 import HomeScreen from '../screens/main/HomeScreen';
 import ClassDetailScreen from '../screens/main/ClassDetailScreen';
 import ReservationsScreen from '../screens/main/ReservationsScreen';
@@ -24,9 +23,9 @@ const HomeStack = () => {
     <Stack.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: COLORS.PRIMARY,
+          backgroundColor: '#F26A3E',
         },
-        headerTintColor: COLORS.TEXT_LIGHT,
+        headerTintColor: '#FFFFFF',
         headerTitleStyle: {
           fontWeight: 'bold',
         },
@@ -48,9 +47,9 @@ const ReservationsStack = () => {
     <Stack.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: COLORS.PRIMARY,
+          backgroundColor: '#F26A3E',
         },
-        headerTintColor: COLORS.TEXT_LIGHT,
+        headerTintColor: '#FFFFFF',
         headerTitleStyle: {
           fontWeight: 'bold',
         },
@@ -71,9 +70,9 @@ const HistoryStack = () => {
     <Stack.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: COLORS.PRIMARY,
+          backgroundColor: '#F26A3E',
         },
-        headerTintColor: COLORS.TEXT_LIGHT,
+        headerTintColor: '#FFFFFF',
         headerTitleStyle: {
           fontWeight: 'bold',
         },
@@ -99,9 +98,9 @@ const NewsStack = () => {
     <Stack.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: COLORS.PRIMARY,
+          backgroundColor: '#F26A3E',
         },
-        headerTintColor: COLORS.TEXT_LIGHT,
+        headerTintColor: '#FFFFFF',
         headerTitleStyle: {
           fontWeight: 'bold',
         },
@@ -118,9 +117,9 @@ const ProfileStack = () => {
     <Stack.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: COLORS.PRIMARY,
+          backgroundColor: '#F26A3E',
         },
-        headerTintColor: COLORS.TEXT_LIGHT,
+        headerTintColor: '#FFFFFF',
         headerTitleStyle: {
           fontWeight: 'bold',
         },
@@ -146,9 +145,9 @@ const ScanStack = () => {
     <Stack.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: COLORS.PRIMARY,
+          backgroundColor: '#F26A3E',
         },
-        headerTintColor: COLORS.TEXT_LIGHT,
+        headerTintColor: '#FFFFFF',
         headerTitleStyle: {
           fontWeight: 'bold',
         },
@@ -164,6 +163,8 @@ const ScanStack = () => {
 };
 
 const MainTabs = () => {
+  const { theme } = useTheme();
+  
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -186,12 +187,12 @@ const MainTabs = () => {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: COLORS.TAB_ACTIVE,
-        tabBarInactiveTintColor: COLORS.TAB_INACTIVE,
+        tabBarActiveTintColor: theme.tabActive,
+        tabBarInactiveTintColor: theme.tabInactive,
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: COLORS.BACKGROUND,
-          borderTopColor: COLORS.BORDER,
+          backgroundColor: theme.card,
+          borderTopColor: theme.border,
         },
       })}
     >
