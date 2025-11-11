@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,27 +7,66 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Modal,
 } from 'react-native';
+import { CameraView, Camera } from 'expo-camera';
 import { COLORS } from '../../utils/constants';
 import historyService from '../../services/historyService';
 
 const ScanQRScreen = ({ navigation }) => {
+  const [hasPermission, setHasPermission] = useState(null);
   const [scanning, setScanning] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
   const [checkInData, setCheckInData] = useState(null);
+  const [scanned, setScanned] = useState(false);
+
+  useEffect(() => {
+    requestCameraPermission();
+  }, []);
+
+  const requestCameraPermission = async () => {
+    const { status } = await Camera.requestCameraPermissionsAsync();
+    setHasPermission(status === 'granted');
+  };
 
   const handleScanQR = async () => {
-    setScanning(true);
+    if (hasPermission === null) {
+      Alert.alert('Esperando permisos', 'Por favor espera mientras se verifican los permisos de la cámara');
+      return;
+    }
+    
+    if (hasPermission === false) {
+      Alert.alert(
+        'Permiso denegado',
+        'Necesitamos acceso a la cámara para escanear el código QR. Por favor habilita los permisos en la configuración de tu dispositivo.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
 
-    // Simular escaneo exitoso con datos mock
-    setTimeout(() => {
-      const mockQRData = {
-        className: 'Yoga Matutino',
-        schedule: '08:00 - 09:00',
-        location: 'Sede Centro - Sala 3',
-      };
-      setCheckInData(mockQRData);
-      setScanning(false);
-    }, 1500);
+    setShowCamera(true);
+    setScanned(false);
+  };
+
+  const handleBarCodeScanned = ({ type, data }) => {
+    if (scanned) return;
+    
+    setScanned(true);
+    setShowCamera(false);
+    
+    // Simular que siempre es exitoso con datos mock
+    const mockQRData = {
+      className: 'Yoga Matutino',
+      schedule: '08:00 - 09:00',
+      location: 'Sede Centro - Sala 3',
+    };
+    
+    setCheckInData(mockQRData);
+  };
+
+  const handleCloseCamera = () => {
+    setShowCamera(false);
+    setScanned(false);
   };
 
   const handleConfirmCheckIn = async () => {
@@ -69,7 +108,7 @@ const ScanQRScreen = ({ navigation }) => {
           disabled={scanning}
         >
           <Text style={styles.scanButtonText}>
-            {scanning ? '🔍 Escaneando...' : '📷 Iniciar escaneo'}
+             Iniciar escaneo
           </Text>
         </TouchableOpacity>
 
@@ -98,7 +137,7 @@ const ScanQRScreen = ({ navigation }) => {
           </View>
         )}
 
-        {!checkInData && !scanning && (
+        {!checkInData && (
           <View style={styles.instructionCard}>
             <Text style={styles.instructionIcon}>ℹ️</Text>
             <Text style={styles.instructionText}>
@@ -106,13 +145,48 @@ const ScanQRScreen = ({ navigation }) => {
             </Text>
           </View>
         )}
-
-        {scanning && (
-          <View style={styles.scanningCard}>
-            <Text style={styles.scanningText}>🔄 Escaneando código QR...</Text>
-          </View>
-        )}
       </ScrollView>
+
+      {/* Camera Modal */}
+      <Modal
+        visible={showCamera}
+        animationType="slide"
+        onRequestClose={handleCloseCamera}
+      >
+        <View style={styles.cameraContainer}>
+          <CameraView
+            style={styles.camera}
+            facing="back"
+            onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+            barcodeScannerSettings={{
+              barcodeTypes: ['qr'],
+            }}
+          >
+            <View style={styles.cameraOverlay}>
+              <View style={styles.cameraHeader}>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={handleCloseCamera}
+                >
+                  <Text style={styles.closeButtonText}>✕ Cerrar</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.scanArea}>
+                <View style={styles.scanFrame}>
+                  <View style={[styles.corner, styles.topLeft]} />
+                  <View style={[styles.corner, styles.topRight]} />
+                  <View style={[styles.corner, styles.bottomLeft]} />
+                  <View style={[styles.corner, styles.bottomRight]} />
+                </View>
+                <Text style={styles.scanInstruction}>
+                  Posicioná el código QR dentro del marco
+                </Text>
+              </View>
+            </View>
+          </CameraView>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -268,6 +342,85 @@ const styles = StyleSheet.create({
     color: COLORS.ORANGE,
     fontWeight: '600',
     textAlign: 'center',
+  },
+  cameraContainer: {
+    flex: 1,
+    backgroundColor: COLORS.DARK,
+  },
+  camera: {
+    flex: 1,
+  },
+  cameraOverlay: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  cameraHeader: {
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  closeButton: {
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  closeButtonText: {
+    color: COLORS.WHITE,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  scanArea: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  scanFrame: {
+    width: 250,
+    height: 250,
+    position: 'relative',
+  },
+  corner: {
+    position: 'absolute',
+    width: 40,
+    height: 40,
+    borderColor: COLORS.ORANGE,
+  },
+  topLeft: {
+    top: 0,
+    left: 0,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+  },
+  topRight: {
+    top: 0,
+    right: 0,
+    borderTopWidth: 4,
+    borderRightWidth: 4,
+  },
+  bottomLeft: {
+    bottom: 0,
+    left: 0,
+    borderBottomWidth: 4,
+    borderLeftWidth: 4,
+  },
+  bottomRight: {
+    bottom: 0,
+    right: 0,
+    borderBottomWidth: 4,
+    borderRightWidth: 4,
+  },
+  scanInstruction: {
+    color: COLORS.WHITE,
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 40,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
   },
 });
 
