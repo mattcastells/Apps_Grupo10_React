@@ -27,6 +27,49 @@ export const COLORS = {
   TAB_INACTIVE: '#999999',
 };
 
+export const THEME_COLORS = {
+  light: {
+    primary: '#F26A3E',
+    secondary: '#232323',
+    accent: '#FF8A50',
+    background: '#FFFFFF',
+    backgroundSecondary: '#f5e1ce',
+    container: '#F5F5F5',
+    card: '#FFFFFF',
+    text: '#232323',
+    textSecondary: '#444444',
+    textLight: '#666666',
+    textInverted: '#FFFFFF',
+    border: '#E0E0E0',
+    divider: '#E0E0E0',
+    success: '#34C759',
+    error: '#D32F2F',
+    warning: '#FF9500',
+    tabActive: '#F26A3E',
+    tabInactive: '#999999',
+  },
+  dark: {
+    primary: '#F26A3E',
+    secondary: '#FFFFFF',
+    accent: '#FF8A50',
+    background: '#121212',
+    backgroundSecondary: '#1E1E1E',
+    container: '#2C2C2C',
+    card: '#1E1E1E',
+    text: '#FFFFFF',
+    textSecondary: '#B3B3B3',
+    textLight: '#888888',
+    textInverted: '#232323',
+    border: '#3A3A3A',
+    divider: '#3A3A3A',
+    success: '#34C759',
+    error: '#FF6B6B',
+    warning: '#FFB84D',
+    tabActive: '#F26A3E',
+    tabInactive: '#FFFFFF',
+  },
+};
+
 export const API_CONFIG = {
   BASE_URL: 'http://10.0.2.2:8080/api/v1', // Use 10.0.2.2 for Android emulator
   TIMEOUT: 30000,

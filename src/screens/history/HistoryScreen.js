@@ -11,11 +11,13 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { COLORS } from '../../utils/constants';
 import createHistoryService from '../../services/historyService';
+import { useTheme } from '../../context/ThemeContext';
 import { formatDate } from '../../utils/helpers';
 import { useAxios } from '../../hooks/useAxios';
 import { AuthContext } from '../../context/AuthContext';
 
 const HistoryScreen = ({ navigation }) => {
+  const { theme, isDarkMode } = useTheme();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -60,26 +62,26 @@ const HistoryScreen = ({ navigation }) => {
 
     return (
       <TouchableOpacity
-        style={styles.historyCard}
+        style={[styles.historyCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}
         onPress={() => handleHistoryItemPress(item)}
       >
-        <View style={styles.cardHeader}>
-          <Text style={styles.disciplineText}>{item.discipline}</Text>
-          <Text style={styles.timeText}>{formattedTime}</Text>
+        <View style={[styles.cardHeader, { borderBottomColor: theme.border }]}>
+          <Text style={[styles.disciplineText, { color: theme.text }]}>{item.discipline}</Text>
+          <Text style={[styles.timeText, { backgroundColor: theme.primary }]}>{formattedTime}</Text>
         </View>
-        <View style={styles.cardDivider} />
+        <View style={[styles.cardDivider, { backgroundColor: theme.border }]} />
         <View style={styles.cardBody}>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Profesor:</Text>
-            <Text style={styles.infoValue}>{item.teacher}</Text>
+            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Profesor:</Text>
+            <Text style={[styles.infoValue, { color: theme.text }]}>{item.teacher}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Sede:</Text>
-            <Text style={styles.infoValue}>{item.site}</Text>
+            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Sede:</Text>
+            <Text style={[styles.infoValue, { color: theme.text }]}>{item.site}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Fecha:</Text>
-            <Text style={styles.infoValue}>{formattedDate}</Text>
+            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Fecha:</Text>
+            <Text style={[styles.infoValue, { color: theme.text }]}>{formattedDate}</Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -87,15 +89,15 @@ const HistoryScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Mi Historial</Text>
-        <Text style={styles.subtitle}>Último mes</Text>
-        <Text style={styles.description}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
+      <View style={[styles.header, { backgroundColor: theme.backgroundSecondary }]}>
+        <Text style={[styles.title, { color: theme.primary }]}>Mi Historial</Text>
+        <Text style={[styles.subtitle, { color: theme.text }]}>Último mes</Text>
+        <Text style={[styles.description, { color: theme.textSecondary }]}>
           Tus clases asistidas en los últimos 30 días
         </Text>
       </View>
-      <View style={styles.contentContainer}>
+      <View style={[styles.contentContainer, { backgroundColor: theme.container, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
         <FlatList
           data={history}
           renderItem={renderHistoryItem}
@@ -104,7 +106,7 @@ const HistoryScreen = ({ navigation }) => {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>
+              <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
                 {loading ? 'Cargando...' : 'No hay historial de asistencias'}
               </Text>
             </View>
@@ -118,10 +120,8 @@ const HistoryScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BEIGE,
   },
   header: {
-    backgroundColor: COLORS.BEIGE,
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 16,
@@ -129,23 +129,19 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: COLORS.ORANGE,
     marginBottom: 12,
   },
   subtitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.DARK,
     marginBottom: 4,
   },
   description: {
     fontSize: 14,
-    color: COLORS.GRAY,
     lineHeight: 20,
   },
   contentContainer: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
     borderRadius: 24,
     marginHorizontal: 20,
     marginTop: 8,
@@ -162,7 +158,6 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   historyCard: {
-    backgroundColor: COLORS.WHITE,
     borderRadius: 12,
     padding: 18,
     marginBottom: 14,
@@ -179,26 +174,22 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.LIGHTGRAY,
   },
   disciplineText: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: COLORS.DARK,
     flex: 1,
   },
   timeText: {
     fontSize: 16,
     fontWeight: '700',
-    color: COLORS.WHITE,
-    backgroundColor: COLORS.ORANGE,
+    color: '#FFFFFF',
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 10,
   },
   cardDivider: {
     height: 1,
-    backgroundColor: COLORS.LIGHTGRAY,
     marginBottom: 12,
   },
   cardBody: {
@@ -211,12 +202,10 @@ const styles = StyleSheet.create({
   infoLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: COLORS.GRAY,
     width: 85,
   },
   infoValue: {
     fontSize: 14,
-    color: COLORS.DARK,
     flex: 1,
     fontWeight: '500',
   },
@@ -227,7 +216,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: COLORS.GRAY,
     textAlign: 'center',
   },
 });

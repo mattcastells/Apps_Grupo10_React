@@ -1,12 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { COLORS } from '../utils/constants';
+import { useTheme } from '../context/ThemeContext';
 
 const Card = ({ children, onPress, style, title, subtitle }) => {
+  const { theme } = useTheme();
+
   const CardContent = (
-    <View style={[styles.card, style]}>
-      {title && <Text style={styles.title}>{title}</Text>}
-      {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+    <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }, style]}>
+      {title && <Text style={[styles.title, { color: theme.text }]}>{title}</Text>}
+      {subtitle && <Text style={[styles.subtitle, { color: theme.textSecondary }]}>{subtitle}</Text>}
       {children}
     </View>
   );
@@ -24,7 +26,6 @@ const Card = ({ children, onPress, style, title, subtitle }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: COLORS.BACKGROUND,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -37,17 +38,14 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
     borderWidth: 1,
-    borderColor: COLORS.BORDER,
   },
   title: {
     fontSize: 18,
     fontWeight: '700',
-    color: COLORS.TEXT_PRIMARY,
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
-    color: COLORS.TEXT_SECONDARY,
     marginBottom: 8,
   },
 });

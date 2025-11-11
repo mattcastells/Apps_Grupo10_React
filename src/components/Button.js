@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { COLORS } from '../utils/constants';
+import { useTheme } from '../context/ThemeContext';
 
 const Button = ({
   title,
@@ -11,28 +12,30 @@ const Button = ({
   style,
   textStyle,
 }) => {
+  const { theme } = useTheme();
+
   const getButtonStyle = () => {
     if (disabled) {
-      return styles.buttonDisabled;
+      return { backgroundColor: theme.border };
     }
     switch (variant) {
       case 'secondary':
-        return styles.buttonSecondary;
+        return { backgroundColor: theme.secondary };
       case 'outline':
-        return styles.buttonOutline;
+        return { backgroundColor: 'transparent', borderWidth: 2, borderColor: theme.primary };
       case 'danger':
-        return styles.buttonDanger;
+        return { backgroundColor: theme.error };
       default:
-        return styles.buttonPrimary;
+        return { backgroundColor: theme.primary };
     }
   };
 
   const getTextStyle = () => {
     switch (variant) {
       case 'outline':
-        return styles.textOutline;
+        return { color: theme.primary };
       default:
-        return styles.text;
+        return { color: theme.textInverted };
     }
   };
 
@@ -44,9 +47,9 @@ const Button = ({
       activeOpacity={0.7}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'outline' ? COLORS.PRIMARY : COLORS.TEXT_LIGHT} />
+        <ActivityIndicator color={variant === 'outline' ? theme.primary : theme.textInverted} />
       ) : (
-        <Text style={[getTextStyle(), textStyle]}>{title}</Text>
+        <Text style={[styles.text, getTextStyle(), textStyle]}>{title}</Text>
       )}
     </TouchableOpacity>
   );
@@ -61,30 +64,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: 50,
   },
-  buttonPrimary: {
-    backgroundColor: COLORS.PRIMARY,
-  },
-  buttonSecondary: {
-    backgroundColor: COLORS.SECONDARY,
-  },
-  buttonOutline: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: COLORS.PRIMARY,
-  },
-  buttonDanger: {
-    backgroundColor: COLORS.ERROR,
-  },
-  buttonDisabled: {
-    backgroundColor: COLORS.BORDER,
-  },
   text: {
-    color: COLORS.TEXT_LIGHT,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  textOutline: {
-    color: COLORS.PRIMARY,
     fontSize: 16,
     fontWeight: '600',
   },
