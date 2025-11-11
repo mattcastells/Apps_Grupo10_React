@@ -25,7 +25,7 @@ const LoginScreen = ({ navigation }) => {
     setErrorMessage('');
 
     if (!email.trim()) {
-      setErrorMessage('El usuario o email es requerido');
+      setErrorMessage('El email es requerido');
       return;
     }
 
@@ -73,7 +73,7 @@ const LoginScreen = ({ navigation }) => {
             <Input
               value={email}
               onChangeText={setEmail}
-              placeholder="Usuario o Email"
+              placeholder="Email"
               keyboardType="email-address"
               inputStyle={styles.input}
               style={styles.inputContainer}
