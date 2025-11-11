@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,11 +11,11 @@ import {
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import Card from '../../components/Card';
-import Button from '../../components/Button';
 import { COLORS, DISCIPLINES, LOCATIONS } from '../../utils/constants';
+import createScheduleService from '../../services/scheduleService';
+import { useAxios } from '../../hooks/useAxios';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
-import scheduleService from '../../services/scheduleService';
-import { formatDate, formatTime } from '../../utils/helpers';
 
 const HomeScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
@@ -25,12 +25,10 @@ const HomeScreen = ({ navigation }) => {
   const [selectedDiscipline, setSelectedDiscipline] = useState('Todos');
   const [selectedLocation, setSelectedLocation] = useState('Todas');
   const [selectedDate, setSelectedDate] = useState('Todas');
+  const axiosInstance = useAxios();
+  const scheduleService = createScheduleService(axiosInstance);
 
-  useEffect(() => {
-    loadClasses();
-  }, []);
-
-  const loadClasses = async () => {
+  const loadClasses = useCallback(async () => {
     setLoading(true);
     try {
       console.log('🔄 Cargando clases desde el backend...');
@@ -44,7 +42,13 @@ const HomeScreen = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadClasses();
+    }, [loadClasses])
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -69,16 +73,16 @@ const HomeScreen = ({ navigation }) => {
     return classes.filter((item) => {
       // Filtro por disciplina
       const matchDiscipline =
-        selectedDiscipline === 'Todos' || 
+        selectedDiscipline === 'Todos' ||
         item.discipline === selectedDiscipline ||
         item.name?.includes(selectedDiscipline);
-      
+
       // Filtro por ubicación/sede
-      const matchLocation = 
-        selectedLocation === 'Todas' || 
+      const matchLocation =
+        selectedLocation === 'Todas' ||
         item.location === selectedLocation ||
         item.site === selectedLocation;
-      
+
       return matchDiscipline && matchLocation;
     });
   };

@@ -1,9 +1,7 @@
-import { apiClientAuth } from './apiClient';
-
-const bookingService = {
+const createBookingService = (axiosInstance) => ({
   getMyBookings: async () => {
     try {
-      const response = await apiClientAuth.get('/booking/my-bookings');
+      const response = await axiosInstance.get('/booking/my-bookings');
       return response.data;
     } catch (error) {
       console.error('Get bookings error:', error.response?.data || error.message);
@@ -13,7 +11,7 @@ const bookingService = {
 
   getBooking: async (bookingId) => {
     try {
-      const response = await apiClientAuth.get(`/booking/${bookingId}`);
+      const response = await axiosInstance.get(`/booking/${bookingId}`);
       return response.data;
     } catch (error) {
       console.error('Get booking error:', error.response?.data || error.message);
@@ -23,7 +21,7 @@ const bookingService = {
 
   createBooking: async (scheduledClassId) => {
     try {
-      const response = await apiClientAuth.post('/booking', {
+      const response = await axiosInstance.post('/booking', {
         scheduledClassId,
       });
       return response.data;
@@ -35,7 +33,7 @@ const bookingService = {
 
   cancelBooking: async (bookingId) => {
     try {
-      const response = await apiClientAuth.delete(`/booking/${bookingId}`);
+      const response = await axiosInstance.delete(`/booking/${bookingId}`);
       return response.data;
     } catch (error) {
       console.error('Cancel booking error:', error.response?.data || error.message);
@@ -49,7 +47,7 @@ const bookingService = {
    */
   getUpcomingBookings: async () => {
     try {
-      const response = await apiClientAuth.get('/booking/my-bookings', {
+      const response = await axiosInstance.get('/booking/my-bookings', {
         params: {
           upcoming: true,
         },
@@ -63,7 +61,7 @@ const bookingService = {
 
   getPastBookings: async () => {
     try {
-      const response = await apiClientAuth.get('/booking/my-bookings', {
+      const response = await axiosInstance.get('/booking/my-bookings', {
         params: {
           past: true,
         },
@@ -77,13 +75,13 @@ const bookingService = {
 
   checkAvailability: async (scheduledClassId) => {
     try {
-      const response = await apiClientAuth.get(`/booking/check-availability/${scheduledClassId}`);
+      const response = await axiosInstance.get(`/booking/check-availability/${scheduledClassId}`);
       return response.data;
     } catch (error) {
       console.error('Check availability error:', error.response?.data || error.message);
       throw error;
     }
   },
-};
+});
 
-export default bookingService;
+export default createBookingService;

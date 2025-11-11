@@ -1,7 +1,6 @@
 import SessionManager from '../utils/SessionManager';
-import { apiClient } from "./apiClient";
 
-const authService = {
+const createAuthService = (apiClient) => ({
   login: async (email, password) => {
     try {
       const response = await apiClient.post('/auth/login', {
@@ -72,6 +71,6 @@ const authService = {
       throw error;
     }
   },
-};
+});
 
-export default authService;
+export default createAuthService;

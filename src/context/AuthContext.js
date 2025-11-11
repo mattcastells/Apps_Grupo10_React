@@ -1,8 +1,11 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import SessionManager, { setToken, deleteToken, getToken } from '../utils/SessionManager';
-import authService, { requestOtp, validateOtp } from '../services/authService';
-import userService from "../services/userService";
-import { extractUserIdFromToken } from "../utils/helpers";
+import SessionManager from '../utils/SessionManager';
+import createAuthService from '../services/authService';
+import createUserService from '../services/userService';
+import { extractUserIdFromToken } from '../utils/helpers';
+import axios from 'axios';
+import { API_CONFIG } from '../utils/constants';
+import { createApiClient } from '../services/apiClient';
 
 export const AuthContext = createContext();
 
@@ -17,8 +20,32 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [token, setToken] = useState(null);
+  const [token, setTokenState] = useState(null);
   const [user, setUser] = useState(null);
+
+  const apiClient = createApiClient();
+  const authService = createAuthService(apiClient);
+
+  const axiosInstance = axios.create({
+    baseURL: API_CONFIG.BASE_URL,
+    timeout: API_CONFIG.TIMEOUT,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  axiosInstance.interceptors.request.use(
+    async (config) => {
+      const token = await SessionManager.getToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
+  const userService = createUserService(axiosInstance);
 
   useEffect(() => {
     checkAuth();
@@ -31,7 +58,6 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(authenticated);
 
       if (authenticated) {
-        // Load user data
         const token = await SessionManager.getToken();
         if (token) {
           await loadUserData(token);
@@ -40,7 +66,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Auth check error:', error);
       setIsAuthenticated(false);
-      setToken(null);
+      setTokenState(null);
     } finally {
       setIsLoading(false);
     }
@@ -56,19 +82,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Login User
   const login = async (email, password) => {
     try {
       const response = await authService.login(email, password);
-      const { token } = response.data; // Obtenemos el token de la respuesta
+      const { token } = response.data;
 
-      // Persistir token en SecureStore y cargar user Data
-      await setToken(token);
+      await SessionManager.setToken(token);
       await loadUserData(token);
 
-      // Actualizar Auth Context
       setIsAuthenticated(true);
-      setToken(token);
+      setTokenState(token);
 
       return response;
     } catch (error) {
@@ -77,7 +100,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Register new user
   const register = async (userRequest) => {
     try {
       const response = await authService.register(userRequest);
@@ -88,13 +110,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Verify email with OTP
   const verifyEmail = async (email, otp) => {
     try {
       const response = await authService.verifyEmail(email, otp);
       setIsAuthenticated(true);
 
-      // Load user data
       if (response.userId) {
         await loadUserData(response.userId);
       }
@@ -106,13 +126,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // TODO: Update user data in context
   const logout = async () => {
     try {
       await SessionManager.clear();
       setIsAuthenticated(false);
-      setToken(null);
-      setUser(null)
+      setTokenState(null);
+      setUser(null);
     } catch (error) {
       console.error('Logout error:', error);
       throw error;
@@ -127,7 +146,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // TODO: Update user data in context
   const refreshUser = async () => {
     try {
       const token = await SessionManager.getToken();

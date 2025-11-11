@@ -9,9 +9,11 @@ import {
   Alert,
   Linking,
 } from 'react-native';
+import { COLORS } from '../../utils/constants';
+import createScheduleService from '../../services/scheduleService';
+import createBookingService from '../../services/bookingService';
+import { useAxios } from '../../hooks/useAxios';
 import { useTheme } from '../../context/ThemeContext';
-import scheduleService from '../../services/scheduleService';
-import bookingService from '../../services/bookingService';
 import { formatDate, formatTime } from '../../utils/helpers';
 
 const ClassDetailScreen = ({ route, navigation }) => {
@@ -19,6 +21,9 @@ const ClassDetailScreen = ({ route, navigation }) => {
   const { classId } = route.params;
   const [classDetail, setClassDetail] = useState(null);
   const [loading, setLoading] = useState(false);
+  const axiosInstance = useAxios();
+  const scheduleService = createScheduleService(axiosInstance);
+  const bookingService = createBookingService(axiosInstance);
 
   useEffect(() => {
     loadClassDetail();
@@ -67,7 +72,9 @@ const ClassDetailScreen = ({ route, navigation }) => {
 
   const handleViewMap = () => {
     const locationQuery = classDetail?.location || 'RitmoFit';
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationQuery)}`;
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      locationQuery
+    )}`;
     Linking.openURL(url);
   };
 

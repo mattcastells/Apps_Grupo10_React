@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useContext } from 'react';
 import {
   View,
   Text,
@@ -9,23 +9,22 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { COLORS } from '../../utils/constants';
+import createHistoryService from '../../services/historyService';
 import { useTheme } from '../../context/ThemeContext';
-import historyService from '../../services/historyService';
 import { formatDate } from '../../utils/helpers';
+import { useAxios } from '../../hooks/useAxios';
+import { AuthContext } from '../../context/AuthContext';
 
 const HistoryScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const axiosInstance = useAxios();
+  const historyService = createHistoryService(axiosInstance);
 
-  useFocusEffect(
-    useCallback(() => {
-      loadHistory();
-    }, [])
-  );
-
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     setLoading(true);
     try {
       const data = await historyService.getMyHistory();
@@ -36,7 +35,13 @@ const HistoryScreen = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadHistory();
+    }, [loadHistory])
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);
