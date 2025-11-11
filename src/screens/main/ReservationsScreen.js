@@ -79,22 +79,34 @@ const ReservationsScreen = ({ navigation }) => {
       <View style={styles.bookingCard}>
         <View style={styles.cardHeader}>
           <Text style={styles.className}>{item.className}</Text>
+          <Text style={styles.timeText}>{formattedTime}</Text>
+        </View>
+        <View style={styles.cardDivider} />
+        <View style={styles.cardBody}>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Profesor:</Text>
+            <Text style={styles.infoValue}>{item.professor}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Sede:</Text>
+            <Text style={styles.infoValue}>{item.location}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Fecha:</Text>
+            <Text style={styles.infoValue}>{formattedDate}</Text>
+          </View>
           {item.status === 'CONFIRMED' && (
             <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>Confirmada</Text>
+              <Text style={styles.statusText}>✓ Confirmada</Text>
             </View>
           )}
         </View>
-        
-        <Text style={styles.professorText}>Profesor: {item.professor}</Text>
-        <Text style={styles.dateText}>{formattedDate} - {formattedTime}</Text>
-        <Text style={styles.locationText}>{item.location}</Text>
 
         <TouchableOpacity
           style={styles.cancelButton}
           onPress={() => handleCancelBooking(item.bookingId)}
         >
-          <Text style={styles.cancelButtonText}>Cancelar</Text>
+          <Text style={styles.cancelButtonText}>Cancelar Reserva</Text>
         </TouchableOpacity>
       </View>
     );
@@ -102,26 +114,29 @@ const ReservationsScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <FlatList
-        data={bookings}
-        renderItem={renderBookingItem}
-        keyExtractor={(item) => item.bookingId}
-        contentContainerStyle={styles.listContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        ListHeaderComponent={
-          <>
-            <Text style={styles.title}>Reservas</Text>
-            <Text style={styles.subtitle}>Mis Reservas</Text>
-          </>
-        }
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>
-              {loading ? 'Cargando...' : 'No tenés reservas'}
-            </Text>
-          </View>
-        }
-      />
+      <View style={styles.header}>
+        <Text style={styles.title}>Mis Reservas</Text>
+        <Text style={styles.subtitle}>Próximas clases</Text>
+        <Text style={styles.description}>
+          Tus reservas confirmadas
+        </Text>
+      </View>
+      <View style={styles.contentContainer}>
+        <FlatList
+          data={bookings}
+          renderItem={renderBookingItem}
+          keyExtractor={(item) => item.bookingId}
+          contentContainerStyle={styles.listContent}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>
+                {loading ? 'Cargando...' : 'No tenés reservas'}
+              </Text>
+            </View>
+          }
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -131,80 +146,114 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.BEIGE,
   },
-  listContent: {
-    padding: 24,
-    paddingBottom: 100,
+  header: {
+    backgroundColor: COLORS.BEIGE,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 16,
   },
   title: {
-    fontSize: 26,
+    fontSize: 32,
     fontWeight: 'bold',
     color: COLORS.ORANGE,
-    textAlign: 'center',
-    marginTop: 32,
-    marginBottom: 32,
+    marginBottom: 12,
   },
   subtitle: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
     color: COLORS.DARK,
-    letterSpacing: 0.5,
-    marginBottom: 16,
+    marginBottom: 4,
   },
-  emptyContainer: {
-    padding: 24,
-    alignItems: 'center',
+  description: {
+    fontSize: 14,
+    color: COLORS.GRAY,
+    lineHeight: 20,
   },
-  emptyText: {
-    fontSize: 18,
-    color: COLORS.DARK,
-    textAlign: 'center',
-    marginTop: 24,
-    marginBottom: 24,
+  contentContainer: {
+    flex: 1,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 24,
+    marginHorizontal: 20,
+    marginTop: 8,
+    marginBottom: 20,
+    paddingTop: 20,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+  },
+  listContent: {
+    padding: 20,
+    paddingBottom: 100,
   },
   bookingCard: {
     backgroundColor: COLORS.WHITE,
     borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    elevation: 4,
+    padding: 18,
+    marginBottom: 14,
+    elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowOpacity: 0.1,
+    shadowRadius: 3.5,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.LIGHTGRAY,
   },
   className: {
     fontSize: 20,
     fontWeight: 'bold',
     color: COLORS.DARK,
     flex: 1,
-    marginRight: 8,
   },
-  professorText: {
+  timeText: {
     fontSize: 16,
-    color: COLORS.DARK,
-    marginBottom: 4,
+    fontWeight: '700',
+    color: COLORS.WHITE,
+    backgroundColor: COLORS.ORANGE,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 10,
   },
-  dateText: {
+  cardDivider: {
+    height: 1,
+    backgroundColor: COLORS.LIGHTGRAY,
+    marginBottom: 12,
+  },
+  cardBody: {
+    gap: 10,
+    marginBottom: 12,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  infoLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.GRAY,
+    width: 85,
+  },
+  infoValue: {
     fontSize: 14,
     color: COLORS.DARK,
-    marginBottom: 4,
-  },
-  locationText: {
-    fontSize: 14,
-    color: COLORS.DARK,
-    marginBottom: 8,
+    flex: 1,
+    fontWeight: '500',
   },
   statusBadge: {
-    backgroundColor: COLORS.ORANGE,
+    backgroundColor: COLORS.SUCCESS,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginTop: 4,
   },
   statusText: {
     fontSize: 12,
@@ -212,16 +261,26 @@ const styles = StyleSheet.create({
     color: COLORS.WHITE,
   },
   cancelButton: {
-    backgroundColor: COLORS.GRAY,
-    borderRadius: 8,
-    paddingVertical: 10,
+    backgroundColor: COLORS.ERROR,
+    borderRadius: 10,
+    paddingVertical: 12,
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: 8,
   },
   cancelButtonText: {
     fontSize: 14,
     fontWeight: 'bold',
     color: COLORS.WHITE,
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: COLORS.GRAY,
+    textAlign: 'center',
   },
 });
 

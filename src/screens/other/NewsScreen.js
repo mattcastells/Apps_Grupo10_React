@@ -26,7 +26,6 @@ const NewsScreen = () => {
       // TODO: Implement newsService.getNews() when backend endpoint is ready
       // const data = await newsService.getNews();
       // setNews(data);
-      setNews([]);
     } catch (error) {
       console.error('Error loading news:', error);
       Alert.alert('Error', 'No se pudieron cargar las noticias');
@@ -44,6 +43,7 @@ const NewsScreen = () => {
   const renderNewsItem = ({ item }) => (
     <View style={styles.newsCard}>
       <Image source={{ uri: item.image }} style={styles.newsImage} />
+      <View style={styles.cardDivider} />
       <View style={styles.newsContent}>
         <Text style={styles.newsDate}>{item.date}</Text>
         <Text style={styles.newsTitle}>{item.title}</Text>
@@ -54,21 +54,28 @@ const NewsScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <FlatList
-        data={news}
-        renderItem={renderNewsItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        ListHeaderComponent={
-          <Text style={styles.title}>Noticias</Text>
-        }
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No hay noticias disponibles</Text>
-          </View>
-        }
-      />
+      <View style={styles.header}>
+        <Text style={styles.title}>Noticias</Text>
+        <Text style={styles.subtitle}>Mantente informado</Text>
+        <Text style={styles.description}>
+          Últimas novedades y actualizaciones del gimnasio
+        </Text>
+      </View>
+      
+      <View style={styles.contentContainer}>
+        <FlatList
+          data={news}
+          renderItem={renderNewsItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No hay noticias disponibles</Text>
+            </View>
+          }
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -78,25 +85,54 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.BEIGE,
   },
-  listContent: {
-    padding: 16,
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 20,
+    backgroundColor: COLORS.BEIGE,
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
-    color: COLORS.BLACK,
-    textAlign: 'center',
-    marginTop: 24,
-    marginBottom: 28,
+    color: COLORS.ORANGE,
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.DARK,
+    marginBottom: 4,
+  },
+  description: {
+    fontSize: 14,
+    color: COLORS.GRAY,
+    lineHeight: 20,
+  },
+  contentContainer: {
+    flex: 1,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 24,
+    marginHorizontal: 20,
+    marginTop: 8,
+    marginBottom: 20,
+    paddingTop: 20,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  listContent: {
+    padding: 16,
   },
   newsCard: {
     backgroundColor: COLORS.WHITE,
     borderRadius: 12,
     marginBottom: 16,
-    elevation: 4,
+    elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.1,
     shadowRadius: 4,
     overflow: 'hidden',
   },
@@ -105,26 +141,28 @@ const styles = StyleSheet.create({
     height: 200,
     backgroundColor: COLORS.LIGHTGRAY,
   },
+  cardDivider: {
+    height: 1,
+    backgroundColor: '#E0E0E0',
+  },
   newsContent: {
     padding: 16,
   },
   newsDate: {
     fontSize: 12,
     color: COLORS.GRAY,
-    marginBottom: 4,
+    marginBottom: 8,
   },
   newsTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: COLORS.DARK,
-    marginTop: 4,
     marginBottom: 8,
   },
   newsText: {
     fontSize: 14,
     color: COLORS.DARK,
     lineHeight: 20,
-    marginTop: 8,
   },
   emptyContainer: {
     padding: 32,
