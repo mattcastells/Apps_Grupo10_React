@@ -18,7 +18,7 @@ import { MOCK_CLASSES } from '../../services/mockData';
 import { formatDate, formatTime } from '../../utils/helpers';
 
 const HomeScreen = ({ navigation }) => {
-  const [classes, setClasses] = useState(MOCK_CLASSES);
+  const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedDiscipline, setSelectedDiscipline] = useState('Todos');
@@ -32,10 +32,12 @@ const HomeScreen = ({ navigation }) => {
   const loadClasses = async () => {
     setLoading(true);
     try {
+      console.log('🔄 Cargando clases desde el backend...');
       const data = await scheduleService.getWeeklySchedule();
+      console.log('✅ Clases cargadas:', data);
       setClasses(data);
     } catch (error) {
-      console.log('Error loading classes, using mock data');
+      console.log('❌ Error loading classes, using mock data:', error);
       setClasses(MOCK_CLASSES);
     } finally {
       setLoading(false);
@@ -63,9 +65,18 @@ const HomeScreen = ({ navigation }) => {
 
   const getFilteredClasses = () => {
     return classes.filter((item) => {
+      // Filtro por disciplina
       const matchDiscipline =
-        selectedDiscipline === 'Todos' || item.discipline === selectedDiscipline;
-      const matchLocation = selectedLocation === 'Todas' || item.location === selectedLocation;
+        selectedDiscipline === 'Todos' || 
+        item.discipline === selectedDiscipline ||
+        item.name?.includes(selectedDiscipline);
+      
+      // Filtro por ubicación/sede
+      const matchLocation = 
+        selectedLocation === 'Todas' || 
+        item.location === selectedLocation ||
+        item.site === selectedLocation;
+      
       return matchDiscipline && matchLocation;
     });
   };
