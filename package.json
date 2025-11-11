@@ -6,7 +6,8 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --tunnel --ios",
-    "web": "expo start --tunnel --web"
+    "web": "expo start --tunnel --web",
+    "tunnel": "expo start --tunnel"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -18,6 +19,7 @@
     "expo": "^54.0.18",
     "expo-linking": "^8.0.8",
     "expo-local-authentication": "^17.0.7",
+    "expo-secure-store": "^15.0.7",
     "expo-status-bar": "~3.0.8",
     "react": "19.1.0",
     "react-dom": "19.1.0",
