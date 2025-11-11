@@ -33,8 +33,8 @@ export const COLORS = {
 
 // API Configuration
 export const API_CONFIG = {
-  //BASE_URL: 'http://10.0.2.2:8080/api/v1',
-  BASE_URL: 'http://192.168.0.164:8080/api/v1',
+  //BASE_URL: 'http://10.0.2.2:8080/api/v1', // URL -> IP especial del emulador de Android
+  BASE_URL: 'http://192.168.0.164:8080/api/v1', // URL personalizada IPv4
   TIMEOUT: 30000,
   USE_MOCK: false, // Set to false to use real backend
 };
