@@ -8,13 +8,16 @@ import {
   Alert,
 } from 'react-native';
 import { COLORS } from '../../utils/constants';
-import historyService from '../../services/historyService';
+import createHistoryService from '../../services/historyService';
 import { formatDate } from '../../utils/helpers';
+import { useAxios } from '../../hooks/useAxios';
 
 const HistoryDetailScreen = ({ route, navigation }) => {
   const { attendanceId } = route.params;
   const [attendance, setAttendance] = useState(null);
   const [loading, setLoading] = useState(false);
+  const axiosInstance = useAxios();
+  const historyService = createHistoryService(axiosInstance);
 
   useEffect(() => {
     loadAttendanceDetail();

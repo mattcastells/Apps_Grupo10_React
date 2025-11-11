@@ -1,9 +1,7 @@
-import { apiClientAuth } from './apiClient';
-
-const scheduleService = {
+const createScheduleService = (axiosInstance) => ({
   getWeeklySchedule: async () => {
     try {
-      const response = await apiClientAuth.get('/schedule/weekly');
+      const response = await axiosInstance.get('/schedule/weekly');
       return response.data;
     } catch (error) {
       console.error('Get weekly schedule error:', error.response?.data || error.message);
@@ -13,7 +11,7 @@ const scheduleService = {
 
   getScheduleByDateRange: async (startDate, endDate) => {
     try {
-      const response = await apiClientAuth.get('/schedule', {
+      const response = await axiosInstance.get('/schedule', {
         params: {
           startDate,
           endDate,
@@ -28,7 +26,7 @@ const scheduleService = {
 
   getClassDetail: async (classId) => {
     try {
-      const response = await apiClientAuth.get(`/schedule/${classId}`);
+      const response = await axiosInstance.get(`/schedule/${classId}`);
       return response.data;
     } catch (error) {
       console.error('Get class detail error:', error.response?.data || error.message);
@@ -38,7 +36,7 @@ const scheduleService = {
 
   getScheduleByDiscipline: async (discipline) => {
     try {
-      const response = await apiClientAuth.get('/schedule', {
+      const response = await axiosInstance.get('/schedule', {
         params: {
           discipline,
         },
@@ -57,7 +55,7 @@ const scheduleService = {
    */
   getScheduleByLocation: async (location) => {
     try {
-      const response = await apiClientAuth.get('/schedule', {
+      const response = await axiosInstance.get('/schedule', {
         params: {
           location,
         },
@@ -71,7 +69,7 @@ const scheduleService = {
 
   searchSchedule: async (filters) => {
     try {
-      const response = await apiClientAuth.get('/schedule', {
+      const response = await axiosInstance.get('/schedule', {
         params: filters,
       });
       return response.data;
@@ -80,6 +78,6 @@ const scheduleService = {
       throw error;
     }
   },
-};
+});
 
-export default scheduleService;
+export default createScheduleService;

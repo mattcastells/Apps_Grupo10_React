@@ -1,9 +1,7 @@
-import { apiClientAuth } from "./apiClient";
-
-const userService = {
+const createUserService = (axiosInstance) => ({
   getUser: async (id) => {
     try {
-      const response = await apiClientAuth.get(`/users/${id}`);
+      const response = await axiosInstance.get(`/users/${id}`);
       return response.data;
     } catch (error) {
       console.error('Get user error:', error.response?.data || error.message);
@@ -13,7 +11,7 @@ const userService = {
 
   updateUser: async (id, data) => {
     try {
-      const response = await apiClientAuth.put(`/users/${id}`, data);
+      const response = await axiosInstance.put(`/users/${id}`, data);
       return response.data;
     } catch (error) {
       console.error('Update user error:', error.response?.data || error.message);
@@ -23,7 +21,7 @@ const userService = {
 
   updatePhoto: async (id, photoUrl) => {
     try {
-      const response = await apiClientAuth.put(`/users/${id}/photo`, {
+      const response = await axiosInstance.put(`/users/${id}/photo`, {
         photoUrl,
       });
       return response.data;
@@ -35,7 +33,7 @@ const userService = {
 
   uploadPhoto: async (id, formData) => {
     try {
-      const response = await apiClientAuth.post(`/users/${id}/upload-photo`, formData, {
+      const response = await axiosInstance.post(`/users/${id}/upload-photo`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -49,7 +47,7 @@ const userService = {
 
   deleteUser: async (id) => {
     try {
-      const response = await apiClientAuth.delete(`/users/${id}`);
+      const response = await axiosInstance.delete(`/users/${id}`);
       return response.data;
     } catch (error) {
       console.error('Delete user error:', error.response?.data || error.message);
@@ -59,7 +57,7 @@ const userService = {
 
   changePassword: async (id, currentPassword, newPassword) => {
     try {
-      const response = await apiClientAuth.put(`/users/${id}/change-password`, {
+      const response = await axiosInstance.put(`/users/${id}/change-password`, {
         currentPassword,
         newPassword,
       });
@@ -69,6 +67,6 @@ const userService = {
       throw error;
     }
   },
-};
+});
 
-export default userService;
+export default createUserService;

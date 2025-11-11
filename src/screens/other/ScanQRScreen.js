@@ -11,7 +11,8 @@ import {
 } from 'react-native';
 import { CameraView, Camera } from 'expo-camera';
 import { COLORS } from '../../utils/constants';
-import historyService from '../../services/historyService';
+import createHistoryService from '../../services/historyService';
+import { useAxios } from '../../hooks/useAxios';
 
 const ScanQRScreen = ({ navigation }) => {
   const [hasPermission, setHasPermission] = useState(null);
@@ -19,6 +20,8 @@ const ScanQRScreen = ({ navigation }) => {
   const [showCamera, setShowCamera] = useState(false);
   const [checkInData, setCheckInData] = useState(null);
   const [scanned, setScanned] = useState(false);
+  const axiosInstance = useAxios();
+  const historyService = createHistoryService(axiosInstance);
 
   useEffect(() => {
     requestCameraPermission();

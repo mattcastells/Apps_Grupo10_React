@@ -11,21 +11,18 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { COLORS } from '../../utils/constants';
-import bookingService from '../../services/bookingService';
+import createBookingService from '../../services/bookingService';
 import { formatDate } from '../../utils/helpers';
+import { useAxios } from '../../hooks/useAxios';
 
 const ReservationsScreen = ({ navigation }) => {
   const [bookings, setBookings] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const axiosInstance = useAxios();
+  const bookingService = createBookingService(axiosInstance);
 
-  useFocusEffect(
-    useCallback(() => {
-      loadBookings();
-    }, [])
-  );
-
-  const loadBookings = async () => {
+  const loadBookings = useCallback(async () => {
     setLoading(true);
     try {
       const data = await bookingService.getMyBookings();
@@ -37,7 +34,13 @@ const ReservationsScreen = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadBookings();
+    }, [loadBookings])
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);

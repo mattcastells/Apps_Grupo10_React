@@ -10,14 +10,18 @@ import {
   Linking,
 } from 'react-native';
 import { COLORS } from '../../utils/constants';
-import scheduleService from '../../services/scheduleService';
-import bookingService from '../../services/bookingService';
-import { formatDate, formatTime } from '../../utils/helpers';
+import createScheduleService from '../../services/scheduleService';
+import createBookingService from '../../services/bookingService';
+import { formatDate } from '../../utils/helpers';
+import { useAxios } from '../../hooks/useAxios';
 
 const ClassDetailScreen = ({ route, navigation }) => {
   const { classId } = route.params;
   const [classDetail, setClassDetail] = useState(null);
   const [loading, setLoading] = useState(false);
+  const axiosInstance = useAxios();
+  const scheduleService = createScheduleService(axiosInstance);
+  const bookingService = createBookingService(axiosInstance);
 
   useEffect(() => {
     loadClassDetail();
@@ -66,7 +70,9 @@ const ClassDetailScreen = ({ route, navigation }) => {
 
   const handleViewMap = () => {
     const locationQuery = classDetail?.location || 'RitmoFit';
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationQuery)}`;
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      locationQuery
+    )}`;
     Linking.openURL(url);
   };
 
@@ -91,7 +97,10 @@ const ClassDetailScreen = ({ route, navigation }) => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
             <Text style={styles.backButtonText}>←</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Detalle de Clase</Text>
@@ -102,12 +111,20 @@ const ClassDetailScreen = ({ route, navigation }) => {
           <Text style={styles.classTitle}>{classDetail.name}</Text>
 
           <View style={styles.infoContainer}>
-            <Text style={styles.infoText}>👨‍🏫   Profesor: {classDetail.professor}</Text>
-            <Text style={styles.infoText}>📅   Fecha: {formattedDate}</Text>
-            <Text style={styles.infoText}>🕐   Horario: {formattedTime}</Text>
-            <Text style={styles.infoText}>⏱️   Duración: {classDetail.durationMinutes} min</Text>
-            <Text style={styles.infoText}>📍   Ubicación: {classDetail.location}</Text>
-            <Text style={styles.infoText}>👥   Cupos disponibles: {classDetail.availableSlots}</Text>
+            <Text style={styles.infoText}>
+              👨‍🏫 Profesor: {classDetail.professor}
+            </Text>
+            <Text style={styles.infoText}>📅 Fecha: {formattedDate}</Text>
+            <Text style={styles.infoText}>🕐 Horario: {formattedTime}</Text>
+            <Text style={styles.infoText}>
+              ⏱️ Duración: {classDetail.durationMinutes} min
+            </Text>
+            <Text style={styles.infoText}>
+              📍 Ubicación: {classDetail.location}
+            </Text>
+            <Text style={styles.infoText}>
+              👥 Cupos disponibles: {classDetail.availableSlots}
+            </Text>
           </View>
         </View>
 
@@ -122,10 +139,14 @@ const ClassDetailScreen = ({ route, navigation }) => {
         {/* Important Info Card */}
         <View style={styles.infoCard}>
           <Text style={styles.sectionTitle}>Información importante</Text>
-          <Text style={styles.bulletText}>• Llegá 10 minutos antes del inicio de la clase</Text>
+          <Text style={styles.bulletText}>
+            • Llegá 10 minutos antes del inicio de la clase
+          </Text>
           <Text style={styles.bulletText}>• Traé tu botella de agua y toalla</Text>
           <Text style={styles.bulletText}>• Usá ropa cómoda para entrenar</Text>
-          <Text style={styles.bulletText}>• Si cancelás, hacelo con 2 horas de anticipación</Text>
+          <Text style={styles.bulletText}>
+            • Si cancelás, hacelo con 2 horas de anticipación
+          </Text>
         </View>
 
         {/* View Map Button */}

@@ -15,8 +15,9 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import { useAuth } from '../../context/AuthContext';
 import { COLORS, GENDERS } from '../../utils/constants';
-import userService from '../../services/userService';
+import createUserService from '../../services/userService';
 import { validateAge } from '../../utils/helpers';
+import { useAxios } from '../../hooks/useAxios';
 
 const EditUserScreen = ({ navigation }) => {
   const { user, updateUser } = useAuth();
@@ -29,6 +30,8 @@ const EditUserScreen = ({ navigation }) => {
     gender: 'MALE',
   });
   const [loading, setLoading] = useState(false);
+  const axiosInstance = useAxios();
+  const userService = createUserService(axiosInstance);
 
   useEffect(() => {
     if (user) {
