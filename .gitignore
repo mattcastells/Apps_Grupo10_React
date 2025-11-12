@@ -40,6 +40,13 @@ yarn-error.*
 /ios
 /android
 
-# Local development folders (not for remote)
+
+# IDE
+.idea/
+.vscode/
+
+# Backend folder (Spring Boot backend)
 /backend/
+
+# Claude Code settings
 /.claude/

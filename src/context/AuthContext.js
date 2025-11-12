@@ -1,8 +1,11 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import SessionManager, { saveToken, removeToken, getToken } from '../utils/SessionManager';
-import authService, { requestOtp, validateOtp } from '../services/authService';
-import userService from "../services/userService";
-import { extractUserIdFromToken } from "../utils/helpers";
+import SessionManager from '../utils/SessionManager';
+import createAuthService from '../services/authService';
+import createUserService from '../services/userService';
+import { extractUserIdFromToken } from '../utils/helpers';
+import axios from 'axios';
+import { API_CONFIG } from '../utils/constants';
+import { createApiClient } from '../services/apiClient';
 
 export const AuthContext = createContext();
 
@@ -17,8 +20,35 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [token, setToken] = useState(null);
+  const [token, setTokenState] = useState(null);
   const [user, setUser] = useState(null);
+
+  // 🔐 Estado en memoria para tracking de autenticación biométrica
+  const [hasBiometricAuthenticated, setHasBiometricAuthenticated] = useState(false);
+
+  const apiClient = createApiClient();
+  const authService = createAuthService(apiClient);
+
+  const axiosInstance = axios.create({
+    baseURL: API_CONFIG.BASE_URL,
+    timeout: API_CONFIG.TIMEOUT,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  axiosInstance.interceptors.request.use(
+    async (config) => {
+      const token = await SessionManager.getToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
+  const userService = createUserService(axiosInstance);
 
   useEffect(() => {
     checkAuth();
@@ -31,7 +61,6 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(authenticated);
 
       if (authenticated) {
-        // Load user data
         const token = await SessionManager.getToken();
         if (token) {
           await loadUserData(token);
@@ -40,7 +69,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Auth check error:', error);
       setIsAuthenticated(false);
-      setToken(null);
+      setTokenState(null);
     } finally {
       setIsLoading(false);
     }
@@ -56,12 +85,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Login User
   const login = async (email, password) => {
     try {
       const response = await authService.login(email, password);
+      const { token } = response.data;
+
+      await SessionManager.setToken(token);
+      await loadUserData(token);
+
       setIsAuthenticated(true);
-      setToken(response.data.token);
+      setTokenState(token);
+
+      // 🔐 Cuando el usuario se loguea manualmente, marcarlo como autenticado biométricamente
+      setHasBiometricAuthenticated(true);
 
       return response;
     } catch (error) {
@@ -70,7 +106,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Register new user
   const register = async (userRequest) => {
     try {
       const response = await authService.register(userRequest);
@@ -81,13 +116,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Verify email with OTP
   const verifyEmail = async (email, otp) => {
     try {
       const response = await authService.verifyEmail(email, otp);
       setIsAuthenticated(true);
 
-      // Load user data
+      // 🔐 Al verificar email en registro, marcarlo como autenticado biométricamente
+      setHasBiometricAuthenticated(true);
+
       if (response.userId) {
         await loadUserData(response.userId);
       }
@@ -99,29 +135,37 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // TODO: Update user data in context
   const logout = async () => {
     try {
       await SessionManager.clear();
       setIsAuthenticated(false);
-      setToken(null);
+      setTokenState(null);
+      setUser(null);
+      setHasBiometricAuthenticated(false); // 🔐 Resetear autenticación biométrica
     } catch (error) {
       console.error('Logout error:', error);
       throw error;
     }
   };
 
-  // TODO: Update user data in context
+  // 🔐 Marcar que el usuario se autenticó exitosamente con biometría en esta sesión
+  const markBiometricAuthenticated = () => {
+    setHasBiometricAuthenticated(true);
+  };
+
+  // 🔐 Verificar si ya se autenticó con biometría en esta sesión
+  const needsBiometricAuth = () => {
+    return !hasBiometricAuthenticated;
+  };
+
   const updateUser = async (userData) => {
     try {
       setUser(userData);
-      await SessionManager.saveUserData(userData);
     } catch (error) {
       console.error('Update user context error:', error);
     }
   };
 
-  // TODO: Update user data in context
   const refreshUser = async () => {
     try {
       const token = await SessionManager.getToken();
@@ -143,6 +187,9 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateUser,
     refreshUser,
+    // 🔐 Funciones para manejo de autenticación biométrica
+    markBiometricAuthenticated,
+    needsBiometricAuth,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

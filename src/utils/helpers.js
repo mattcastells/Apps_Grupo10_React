@@ -1,8 +1,6 @@
 import { DATE_FORMAT, TIME_FORMAT } from './constants';
 
-/**
- * Format date to DD/MM/YYYY
- */
+// Format date to DD/MM/YYYY
 export const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
@@ -12,12 +10,9 @@ export const formatDate = (dateString) => {
   return `${day}/${month}/${year}`;
 };
 
-/**
- * Format time to HH:mm
- */
+// Format time to HH:mm
 export const formatTime = (timeString) => {
   if (!timeString) return '';
-  // Handle "HH:mm:ss" or "HH:mm" format
   const parts = timeString.split(':');
   if (parts.length >= 2) {
     return `${parts[0]}:${parts[1]}`;
@@ -25,42 +20,31 @@ export const formatTime = (timeString) => {
   return timeString;
 };
 
-/**
- * Format datetime
- */
+// Format datetime
 export const formatDateTime = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
   return `${formatDate(dateString)} ${formatTime(date.toTimeString())}`;
 };
 
-/**
- * Validate email format
- */
+// Validate email format
 export const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
 
-/**
- * Validate age (must be 18+)
- */
+// Validate age (must be 18+)
 export const validateAge = (age) => {
   const numAge = parseInt(age, 10);
   return !isNaN(numAge) && numAge >= 18 && numAge <= 120;
 };
 
-/**
- * Validate password strength
- */
+// Validate password strength (minimum 6 characters)
 export const validatePassword = (password) => {
-  // At least 6 characters
   return password && password.length >= 6;
 };
 
-/**
- * Extract user ID from JWT token
- */
+// Extract user ID from JWT token
 export const extractUserIdFromToken = (token) => {
   try {
     if (!token) return null;
@@ -80,9 +64,7 @@ export const extractUserIdFromToken = (token) => {
   }
 };
 
-/**
- * Parse QR code data
- */
+// Parse QR code data
 export const parseQRData = (qrData) => {
   try {
     const data = JSON.parse(qrData);
@@ -93,9 +75,7 @@ export const parseQRData = (qrData) => {
   }
 };
 
-/**
- * Get date range (from 30 days ago to today)
- */
+// Get date range (from N days ago to today)
 export const getDateRange = (days = 30) => {
   const to = new Date();
   const from = new Date();
@@ -107,27 +87,21 @@ export const getDateRange = (days = 30) => {
   };
 };
 
-/**
- * Format date to ISO (YYYY-MM-DD)
- */
+// Format date to ISO (YYYY-MM-DD)
 export const formatDateToISO = (date) => {
   if (!date) return '';
   const d = new Date(date);
   return d.toISOString().split('T')[0];
 };
 
-/**
- * Get day of week
- */
+// Get day of week in Spanish
 export const getDayOfWeek = (dateString) => {
   const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
   const date = new Date(dateString);
   return days[date.getDay()];
 };
 
-/**
- * Calculate age from birthdate
- */
+// Calculate age from birthdate
 export const calculateAge = (birthDate) => {
   const today = new Date();
   const birth = new Date(birthDate);

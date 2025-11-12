@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,49 +7,98 @@ import {
   FlatList,
   RefreshControl,
   Image,
+  Alert,
 } from 'react-native';
-import { COLORS } from '../../utils/constants';
-import { MOCK_NEWS } from '../../services/mockData';
+import { useTheme } from '../../context/ThemeContext';
 
 const NewsScreen = () => {
-  const [news, setNews] = useState(MOCK_NEWS);
+  const { theme } = useTheme();
+  const [news, setNews] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    loadNews();
+  }, []);
+
+  const loadNews = async () => {
+    setLoading(true);
+    try {
+      // Mock noticias - mismas que en la app Android (Reemplazar cuando tengamos el backend)
+      const mockNews = [
+        {
+          id: '1',
+          date: '2025-09-07',
+          title: '¡Nueva clase de Zumba!',
+          content: 'Sumate este viernes a las 19hs en el salón principal.',
+          image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80' // Imagen de Zumba
+        },
+        {
+          id: '2',
+          date: '2025-09-05',
+          title: 'Cierre por mantenimiento',
+          content: 'El gimnasio permanecerá cerrado el lunes 15/9 por tareas de mantenimiento.',
+          image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80' // Imagen de gym
+        },
+        {
+          id: '3',
+          date: '2025-09-01',
+          title: 'Promo amigos',
+          content: 'Traé un amigo y ambos obtienen un 20% de descuento en la próxima cuota.',
+          image: 'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80' // Imagen de gym amigos
+        }
+      ];
+      setNews(mockNews);
+    } catch (error) {
+      console.error('Error loading news:', error);
+      Alert.alert('Error', 'No se pudieron cargar las noticias');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const onRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
+    await loadNews();
+    setRefreshing(false);
   };
 
   const renderNewsItem = ({ item }) => (
-    <View style={styles.newsCard}>
+    <View style={[styles.newsCard, { backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border }]}>
       <Image source={{ uri: item.image }} style={styles.newsImage} />
+      <View style={[styles.cardDivider, { backgroundColor: theme.divider }]} />
       <View style={styles.newsContent}>
-        <Text style={styles.newsDate}>{item.date}</Text>
-        <Text style={styles.newsTitle}>{item.title}</Text>
-        <Text style={styles.newsText}>{item.content}</Text>
+        <Text style={[styles.newsDate, { color: theme.textSecondary }]}>{item.date}</Text>
+        <Text style={[styles.newsTitle, { color: theme.text }]}>{item.title}</Text>
+        <Text style={[styles.newsText, { color: theme.text }]}>{item.content}</Text>
       </View>
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <FlatList
-        data={news}
-        renderItem={renderNewsItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        ListHeaderComponent={
-          <Text style={styles.title}>Noticias</Text>
-        }
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No hay noticias disponibles</Text>
-          </View>
-        }
-      />
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
+      <View style={[styles.header, { backgroundColor: theme.backgroundSecondary }]}>
+        <Text style={[styles.title, { color: theme.primary }]}>Noticias</Text>
+        <Text style={[styles.subtitle, { color: theme.text }]}>Mantente informado</Text>
+        <Text style={[styles.description, { color: theme.textSecondary }]}>
+          Últimas noticias y novedades del gimnasio
+        </Text>
+      </View>
+      
+      <View style={[styles.contentContainer, { backgroundColor: theme.container, borderWidth: 1, borderColor: theme.border }]}>
+        <FlatList
+          data={news}
+          renderItem={renderNewsItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={[styles.emptyText, { color: theme.text }]}>No hay noticias disponibles</Text>
+            </View>
+          }
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -57,55 +106,75 @@ const NewsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BEIGE,
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 20,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  description: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  contentContainer: {
+    flex: 1,
+    borderRadius: 24,
+    marginHorizontal: 20,
+    marginTop: 8,
+    marginBottom: 20,
+    paddingTop: 20,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
   listContent: {
     padding: 16,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: COLORS.BLACK,
-    textAlign: 'center',
-    marginTop: 24,
-    marginBottom: 28,
-  },
   newsCard: {
-    backgroundColor: COLORS.WHITE,
     borderRadius: 12,
     marginBottom: 16,
-    elevation: 4,
+    elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.1,
     shadowRadius: 4,
     overflow: 'hidden',
   },
   newsImage: {
     width: '100%',
     height: 200,
-    backgroundColor: COLORS.LIGHTGRAY,
+    backgroundColor: '#F5F5F5',
+  },
+  cardDivider: {
+    height: 1,
   },
   newsContent: {
     padding: 16,
   },
   newsDate: {
     fontSize: 12,
-    color: COLORS.GRAY,
-    marginBottom: 4,
+    marginBottom: 8,
   },
   newsTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.DARK,
-    marginTop: 4,
     marginBottom: 8,
   },
   newsText: {
     fontSize: 14,
-    color: COLORS.DARK,
     lineHeight: 20,
-    marginTop: 8,
   },
   emptyContainer: {
     padding: 32,
@@ -113,7 +182,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: COLORS.DARK,
     textAlign: 'center',
   },
 });

@@ -1,61 +1,63 @@
-// src/hooks/useAxios.js
 import { useContext, useEffect, useRef } from 'react';
-import { AuthContext } from '../context/AuthContext';
-import apiClient from '../services/apiClient';
+import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
+import { AuthContext } from '../context/AuthContext';
+import SessionManager from '../utils/SessionManager';
+import { API_CONFIG } from '../utils/constants';
 
 export const useAxios = () => {
-  const { authState, logout } = useContext(AuthContext);
+  const { logout } = useContext(AuthContext);
   const navigation = useNavigation();
 
-  // Usamos useRef para mantener la misma instancia de interceptores
-  const apiRef = useRef(apiClient);
+  const axiosInstance = useRef(
+    axios.create({
+      baseURL: API_CONFIG.BASE_URL,
+      timeout: API_CONFIG.TIMEOUT,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+  );
 
   useEffect(() => {
-    // Interceptor de Petición (Request)
-    // Se ejecuta ANTES de que salga cada petición
-    const requestInterceptor = apiRef.current.interceptors.request.use(
-      (config) => {
-        if (authState.token) {
-          config.headers.Authorization = `Bearer ${authState.token}`;
+    const instance = axiosInstance.current;
+
+    const requestInterceptor = instance.interceptors.request.use(
+      async (config) => {
+        const token = await SessionManager.getToken();
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
         }
+
+        console.log('Axios Request Interceptor:', {
+          url: config.url,
+          headers: config.headers,
+          params: config.params,
+        });
+
         return config;
       },
-      (error) => {
-        return Promise.reject(error);
-      }
+      (error) => Promise.reject(error)
     );
 
-    // Interceptor de Respuesta (Response)
-    // Se ejecuta CUANDO vuelve una respuesta (exitosa o error)
-    const responseInterceptor = apiRef.current.interceptors.response.use(
-      (response) => response, // Si es exitosa (2xx), solo la deja pasar
-      async (error) => {
-        const originalRequest = error.config;
-
-        // Si el error es 401 (No autorizado) Y no es un reintento
-        if (error.response?.status === 401 && !originalRequest._retry) {
-          originalRequest._retry = true; // Marcamos como reintento
-
-          console.warn('Token expired or invalid. Logging out.');
+    const responseInterceptor = instance.interceptors.response.use(
+      (res) => res,
+      async (err) => {
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          console.warn('Error 401/403 detectado por useAxios. Deslogueando...');
           await logout();
-
-          // Reseteamos la navegación al stack de Auth
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'AuthStack' }], // Asegúrese que 'AuthStack' sea el nombre correcto en su Root
-          });
+          // The AppNavigator will handle the redirection automatically
         }
-        return Promise.reject(error);
+        return Promise.reject(err);
       }
     );
 
-    // Limpieza al desmontar el componente (o al cambiar authState)
+    // Cleanup function
     return () => {
-      apiRef.current.interceptors.request.eject(requestInterceptor);
-      apiRef.current.interceptors.response.eject(responseInterceptor);
+      instance.interceptors.request.eject(requestInterceptor);
+      instance.interceptors.response.eject(responseInterceptor);
     };
-  }, [authState.token, logout, navigation]); // Depende del token
+  }, [logout, navigation]);
 
-  return apiRef.current; // Devolvemos la instancia de Axios configurada
+  return axiosInstance.current;
 };

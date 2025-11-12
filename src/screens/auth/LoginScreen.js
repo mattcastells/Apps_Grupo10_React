@@ -10,12 +10,13 @@ import {
   Image,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
-import { COLORS } from '../../utils/constants';
 
 const LoginScreen = ({ navigation }) => {
   const { login } = useAuth();
+  const { theme } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,7 +26,7 @@ const LoginScreen = ({ navigation }) => {
     setErrorMessage('');
 
     if (!email.trim()) {
-      setErrorMessage('El usuario o email es requerido');
+      setErrorMessage('El email es requerido');
       return;
     }
 
@@ -52,34 +53,30 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.content}>
-            {/* Logo placeholder - 160x160 */}
             <View style={styles.logoContainer}>
-              <View style={styles.logoPlaceholder}>
+              <View style={[styles.logoPlaceholder, { backgroundColor: theme.primary }]}>
                 <Text style={styles.logoText}>RF</Text>
               </View>
             </View>
 
-            {/* Title */}
-            <Text style={styles.title}>Iniciar Sesión</Text>
+            <Text style={[styles.title, { color: theme.primary }]}>Iniciar Sesión</Text>
 
-            {/* Email Input */}
             <Input
               value={email}
               onChangeText={setEmail}
-              placeholder="Usuario o Email"
+              placeholder="Email"
               keyboardType="email-address"
               inputStyle={styles.input}
               style={styles.inputContainer}
             />
 
-            {/* Password Input */}
             <Input
               value={password}
               onChangeText={setPassword}
@@ -89,25 +86,22 @@ const LoginScreen = ({ navigation }) => {
               style={styles.inputContainer}
             />
 
-            {/* Error Message */}
             {errorMessage ? (
-              <Text style={styles.errorText}>{errorMessage}</Text>
+              <Text style={[styles.errorText, { color: theme.error }]}>{errorMessage}</Text>
             ) : null}
 
-            {/* Login Button */}
             <Button
               title="Iniciar Sesión"
               onPress={handleLogin}
               loading={loading}
-              style={styles.loginButton}
+              style={[styles.loginButton, { backgroundColor: '#0066CC' }]}
               textStyle={styles.buttonText}
             />
 
-            {/* Register Button */}
             <Button
               title="Registrarse"
               onPress={handleCreateAccount}
-              style={styles.registerButton}
+              style={[styles.registerButton, { backgroundColor: theme.primary }]}
               textStyle={styles.buttonText}
             />
           </View>
@@ -120,7 +114,6 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BEIGE,
   },
   keyboardView: {
     flex: 1,
@@ -141,19 +134,17 @@ const styles = StyleSheet.create({
     width: 160,
     height: 160,
     borderRadius: 80,
-    backgroundColor: COLORS.ORANGE,
     justifyContent: 'center',
     alignItems: 'center',
   },
   logoText: {
     fontSize: 64,
     fontWeight: 'bold',
-    color: COLORS.WHITE,
+    color: '#FFFFFF',
   },
   title: {
     fontSize: 26,
     fontWeight: 'bold',
-    color: COLORS.ORANGE,
     marginBottom: 24,
     textAlign: 'center',
   },
@@ -162,31 +153,24 @@ const styles = StyleSheet.create({
   },
   input: {
     fontSize: 18,
-    color: COLORS.DARK,
-    backgroundColor: COLORS.WHITE,
-    borderColor: COLORS.GRAY,
-    borderWidth: 1,
     minHeight: 48,
   },
   errorText: {
     fontSize: 15,
-    color: COLORS.ERROR,
     textAlign: 'center',
     marginBottom: 12,
   },
   loginButton: {
-    backgroundColor: COLORS.HOLO_BLUE_DARK,
     marginBottom: 18,
     minHeight: 48,
   },
   registerButton: {
-    backgroundColor: COLORS.ORANGE,
     marginBottom: 18,
     minHeight: 48,
   },
   buttonText: {
     fontSize: 17,
-    color: COLORS.WHITE,
+    color: '#FFFFFF',
   },
 });
 

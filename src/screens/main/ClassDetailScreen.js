@@ -10,26 +10,37 @@ import {
   Linking,
 } from 'react-native';
 import { COLORS } from '../../utils/constants';
-import { MOCK_CLASSES } from '../../services/mockData';
-import bookingService from '../../services/bookingService';
+import createScheduleService from '../../services/scheduleService';
+import createBookingService from '../../services/bookingService';
+import { useAxios } from '../../hooks/useAxios';
+import { useTheme } from '../../context/ThemeContext';
 import { formatDate, formatTime } from '../../utils/helpers';
 
 const ClassDetailScreen = ({ route, navigation }) => {
+  const { theme, isDarkMode } = useTheme();
   const { classId } = route.params;
   const [classDetail, setClassDetail] = useState(null);
   const [loading, setLoading] = useState(false);
+  const axiosInstance = useAxios();
+  const scheduleService = createScheduleService(axiosInstance);
+  const bookingService = createBookingService(axiosInstance);
 
   useEffect(() => {
     loadClassDetail();
   }, [classId]);
 
-  const loadClassDetail = () => {
-    const classData = MOCK_CLASSES.find((c) => c.id === classId);
-    if (classData) {
-      setClassDetail(classData);
-    } else {
-      Alert.alert('Error', 'Clase no encontrada');
-      navigation.goBack();
+  const loadClassDetail = async () => {
+    setLoading(true);
+    try {
+      const data = await scheduleService.getClassDetail(classId);
+      setClassDetail(data);
+    } catch (error) {
+      console.error('Error loading class detail:', error);
+      Alert.alert('Error', 'No se pudo cargar la información de la clase', [
+        { text: 'OK', onPress: () => navigation.goBack() },
+      ]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,15 +72,17 @@ const ClassDetailScreen = ({ route, navigation }) => {
 
   const handleViewMap = () => {
     const locationQuery = classDetail?.location || 'RitmoFit';
-    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationQuery)}`;
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      locationQuery
+    )}`;
     Linking.openURL(url);
   };
 
   if (!classDetail) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Cargando...</Text>
+          <Text style={[styles.loadingText, { color: theme.text }]}>Cargando...</Text>
         </View>
       </SafeAreaView>
     );
@@ -82,55 +95,49 @@ const ClassDetailScreen = ({ route, navigation }) => {
   const formattedTime = `${hours}:${minutes}`;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={[styles.backButton, { backgroundColor: theme.primary }]} onPress={() => navigation.goBack()}>
             <Text style={styles.backButtonText}>←</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Detalle de Clase</Text>
+          <Text style={[styles.headerTitle, { color: theme.text }]}>Detalle de Clase</Text>
         </View>
 
-        {/* Main Card */}
-        <View style={styles.mainCard}>
-          <Text style={styles.classTitle}>{classDetail.name}</Text>
+        <View style={[styles.mainCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
+          <Text style={[styles.classTitle, { color: theme.primary }]}>{classDetail.name}</Text>
 
           <View style={styles.infoContainer}>
-            <Text style={styles.infoText}>👨‍🏫   Profesor: {classDetail.professor}</Text>
-            <Text style={styles.infoText}>📅   Fecha: {formattedDate}</Text>
-            <Text style={styles.infoText}>🕐   Horario: {formattedTime}</Text>
-            <Text style={styles.infoText}>⏱️   Duración: {classDetail.durationMinutes} min</Text>
-            <Text style={styles.infoText}>📍   Ubicación: {classDetail.location}</Text>
-            <Text style={styles.infoText}>👥   Cupos disponibles: {classDetail.availableSlots}</Text>
+            <Text style={[styles.infoText, { color: theme.text }]}>👨‍🏫   Profesor: {classDetail.professor}</Text>
+            <Text style={[styles.infoText, { color: theme.text }]}>📅   Fecha: {formattedDate}</Text>
+            <Text style={[styles.infoText, { color: theme.text }]}>🕐   Horario: {formattedTime}</Text>
+            <Text style={[styles.infoText, { color: theme.text }]}>⏱️   Duración: {classDetail.durationMinutes} min</Text>
+            <Text style={[styles.infoText, { color: theme.text }]}>📍   Ubicación: {classDetail.location}</Text>
+            <Text style={[styles.infoText, { color: theme.text }]}>👥   Cupos disponibles: {classDetail.availableSlots}</Text>
           </View>
         </View>
 
-        {/* Description Card */}
-        <View style={styles.descriptionCard}>
-          <Text style={styles.sectionTitle}>Descripción</Text>
-          <Text style={styles.descriptionText}>
+        <View style={[styles.descriptionCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
+          <Text style={[styles.sectionTitle, { color: theme.primary }]}>Descripción</Text>
+          <Text style={[styles.descriptionText, { color: theme.text }]}>
             {classDetail.description || 'Sin descripción disponible.'}
           </Text>
         </View>
 
-        {/* Important Info Card */}
-        <View style={styles.infoCard}>
-          <Text style={styles.sectionTitle}>Información importante</Text>
-          <Text style={styles.bulletText}>• Llegá 10 minutos antes del inicio de la clase</Text>
-          <Text style={styles.bulletText}>• Traé tu botella de agua y toalla</Text>
-          <Text style={styles.bulletText}>• Usá ropa cómoda para entrenar</Text>
-          <Text style={styles.bulletText}>• Si cancelás, hacelo con 2 horas de anticipación</Text>
+        <View style={[styles.infoCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
+          <Text style={[styles.sectionTitle, { color: theme.primary }]}>Información importante</Text>
+          <Text style={[styles.bulletText, { color: theme.text }]}>• Llegá 10 minutos antes del inicio de la clase</Text>
+          <Text style={[styles.bulletText, { color: theme.text }]}>• Traé tu botella de agua y toalla</Text>
+          <Text style={[styles.bulletText, { color: theme.text }]}>• Usá ropa cómoda para entrenar</Text>
+          <Text style={[styles.bulletText, { color: theme.text }]}>• Si cancelás, hacelo con 2 horas de anticipación</Text>
         </View>
 
-        {/* View Map Button */}
-        <TouchableOpacity style={styles.mapButton} onPress={handleViewMap}>
-          <Text style={styles.mapButtonText}>Ver Mapa</Text>
+        <TouchableOpacity style={[styles.mapButton, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]} onPress={handleViewMap}>
+          <Text style={[styles.mapButtonText, { color: theme.primary }]}>Ver Mapa</Text>
         </TouchableOpacity>
 
-        {/* Reserve Button */}
         <TouchableOpacity
-          style={styles.reserveButton}
+          style={[styles.reserveButton, { backgroundColor: theme.primary }]}
           onPress={handleBookClass}
           disabled={loading}
         >
@@ -146,7 +153,6 @@ const ClassDetailScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BEIGE,
   },
   loadingContainer: {
     flex: 1,
@@ -155,7 +161,6 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: COLORS.DARK,
   },
   scrollContent: {
     padding: 24,
@@ -169,7 +174,6 @@ const styles = StyleSheet.create({
   backButton: {
     width: 48,
     height: 48,
-    backgroundColor: COLORS.ORANGE,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
@@ -177,18 +181,16 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 20,
-    color: COLORS.WHITE,
+    color: '#FFFFFF',
     fontWeight: 'bold',
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: COLORS.DARK,
     flex: 1,
     textAlign: 'center',
   },
   mainCard: {
-    backgroundColor: COLORS.WHITE,
     borderRadius: 12,
     padding: 24,
     marginBottom: 24,
@@ -201,7 +203,6 @@ const styles = StyleSheet.create({
   classTitle: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: COLORS.ORANGE,
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -210,11 +211,9 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 18,
-    color: COLORS.DARK,
     marginBottom: 8,
   },
   descriptionCard: {
-    backgroundColor: COLORS.WHITE,
     borderRadius: 12,
     padding: 20,
     marginBottom: 24,
@@ -227,16 +226,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: COLORS.ORANGE,
     marginBottom: 12,
   },
   descriptionText: {
     fontSize: 16,
-    color: COLORS.DARK,
     lineHeight: 24,
   },
   infoCard: {
-    backgroundColor: COLORS.WHITE,
     borderRadius: 12,
     padding: 20,
     marginBottom: 32,
@@ -248,12 +244,10 @@ const styles = StyleSheet.create({
   },
   bulletText: {
     fontSize: 16,
-    color: COLORS.DARK,
     lineHeight: 24,
     marginBottom: 4,
   },
   mapButton: {
-    backgroundColor: COLORS.WHITE,
     height: 56,
     borderRadius: 8,
     justifyContent: 'center',
@@ -268,10 +262,8 @@ const styles = StyleSheet.create({
   mapButtonText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.ORANGE,
   },
   reserveButton: {
-    backgroundColor: COLORS.ORANGE,
     height: 56,
     borderRadius: 8,
     justifyContent: 'center',
@@ -285,7 +277,7 @@ const styles = StyleSheet.create({
   reserveButtonText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.WHITE,
+    color: '#FFFFFF',
   },
 });
 

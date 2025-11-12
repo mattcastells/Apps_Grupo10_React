@@ -1,23 +1,19 @@
-// RitmoFit Colors (Exact from Android)
-export const COLORS = {
-  // Main colors
-  ORANGE: '#F26A3E',        // ritmofit_orange
-  BEIGE: '#f5e1ce',         // ritmofit_beige
-  DARK: '#232323',          // ritmofit_dark
-  GRAY: '#444444',          // ritmofit_gray
-  LIGHTGRAY: '#F5F5F5',     // ritmofit_lightgray
-  ACCENT: '#FF8A50',        // ritmofit_accent
+import { Platform } from 'react-native';
 
-  // Standard colors
+export const COLORS = {
+  ORANGE: '#F26A3E',
+  BEIGE: '#f5e1ce',
+  DARK: '#232323',
+  GRAY: '#444444',
+  LIGHTGRAY: '#F5F5F5',
+  ACCENT: '#FF8A50',
   WHITE: '#FFFFFF',
   BLACK: '#000000',
   ERROR: '#D32F2F',
   SUCCESS: '#34C759',
-
-  // Android system colors
   HOLO_BLUE_DARK: '#0099CC',
 
-  // Legacy names for compatibility
+  // Legacy aliases for compatibility
   PRIMARY: '#F26A3E',
   SECONDARY: '#232323',
   BACKGROUND: '#FFFFFF',
@@ -31,14 +27,56 @@ export const COLORS = {
   TAB_INACTIVE: '#999999',
 };
 
-// API Configuration
-export const API_CONFIG = {
-  BASE_URL: 'http://10.0.2.2:8080/api/v1',
-  TIMEOUT: 30000,
-  USE_MOCK: false, // Set to false to use real backend
+export const THEME_COLORS = {
+  light: {
+    primary: '#F26A3E',
+    secondary: '#232323',
+    accent: '#FF8A50',
+    background: '#FFFFFF',
+    backgroundSecondary: '#f5e1ce',
+    container: '#F5F5F5',
+    card: '#FFFFFF',
+    text: '#232323',
+    textSecondary: '#444444',
+    textLight: '#666666',
+    textInverted: '#FFFFFF',
+    border: '#E0E0E0',
+    divider: '#E0E0E0',
+    success: '#34C759',
+    error: '#D32F2F',
+    warning: '#FF9500',
+    tabActive: '#F26A3E',
+    tabInactive: '#999999',
+  },
+  dark: {
+    primary: '#F26A3E',
+    secondary: '#FFFFFF',
+    accent: '#FF8A50',
+    background: '#121212',
+    backgroundSecondary: '#1E1E1E',
+    container: '#2C2C2C',
+    card: '#1E1E1E',
+    text: '#FFFFFF',
+    textSecondary: '#B3B3B3',
+    textLight: '#888888',
+    textInverted: '#232323',
+    border: '#3A3A3A',
+    divider: '#3A3A3A',
+    success: '#34C759',
+    error: '#FF6B6B',
+    warning: '#FFB84D',
+    tabActive: '#F26A3E',
+    tabInactive: '#FFFFFF',
+  },
 };
 
-// Storage Keys
+// API Configuration
+export const API_CONFIG = {
+  BASE_URL: 'http://10.0.2.2:8080/api/v1', // Use 10.0.2.2 for Android emulator
+  // BASE_URL: 'http://192.168.0.164:8080/api/v1', // URL personalizada IPv4 (descomentá esta si usás tu red local)
+  TIMEOUT: 30000,
+};
+
 export const STORAGE_KEYS = {
   AUTH_TOKEN: '@ritmofit_auth_token',
   USER_ID: '@ritmofit_user_id',

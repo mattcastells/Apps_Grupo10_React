@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TextInput, Text, StyleSheet } from 'react-native';
-import { COLORS } from '../utils/constants';
+import { useTheme } from '../context/ThemeContext';
 
 const Input = ({
   label,
@@ -16,21 +16,28 @@ const Input = ({
   style,
   inputStyle,
 }) => {
+  const { theme } = useTheme();
+
   return (
     <View style={[styles.container, style]}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label && <Text style={[styles.label, { color: theme.text }]}>{label}</Text>}
       <TextInput
         style={[
           styles.input,
-          error && styles.inputError,
-          !editable && styles.inputDisabled,
+          {
+            backgroundColor: theme.card,
+            borderColor: theme.border,
+            color: theme.text,
+          },
+          error && { borderColor: theme.error },
+          !editable && { backgroundColor: theme.container, color: theme.textSecondary },
           multiline && styles.inputMultiline,
           inputStyle,
         ]}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={COLORS.TEXT_SECONDARY}
+        placeholderTextColor={theme.textLight}
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
         editable={editable}
@@ -39,7 +46,7 @@ const Input = ({
         autoCapitalize="none"
         autoCorrect={false}
       />
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error && <Text style={[styles.errorText, { color: theme.error }]}>{error}</Text>}
     </View>
   );
 };
@@ -51,26 +58,15 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: COLORS.TEXT_PRIMARY,
     marginBottom: 8,
   },
   input: {
-    backgroundColor: COLORS.BACKGROUND,
     borderWidth: 1,
-    borderColor: COLORS.BORDER,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
-    color: COLORS.TEXT_PRIMARY,
     minHeight: 50,
-  },
-  inputError: {
-    borderColor: COLORS.ERROR,
-  },
-  inputDisabled: {
-    backgroundColor: COLORS.CARD_BG,
-    color: COLORS.TEXT_SECONDARY,
   },
   inputMultiline: {
     minHeight: 100,
@@ -78,7 +74,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 12,
-    color: COLORS.ERROR,
     marginTop: 4,
   },
 });

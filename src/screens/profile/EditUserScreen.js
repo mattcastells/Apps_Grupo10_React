@@ -17,9 +17,10 @@ import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
 import { useAuth } from '../../context/AuthContext';
 import { COLORS, GENDERS } from '../../utils/constants';
-import userService from '../../services/userService';
+import createUserService from '../../services/userService';
 import cloudinaryService from '../../services/cloudinaryService';
 import { validateAge } from '../../utils/helpers';
+import { useAxios } from '../../hooks/useAxios';
 
 const EditUserScreen = ({ navigation }) => {
   const { user, updateUser, refreshUser } = useAuth();
@@ -33,6 +34,8 @@ const EditUserScreen = ({ navigation }) => {
   });
   const [loading, setLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const axiosInstance = useAxios();
+  const userService = createUserService(axiosInstance);
 
   useEffect(() => {
     if (user) {
@@ -101,7 +104,7 @@ const EditUserScreen = ({ navigation }) => {
 
   const selectPhotoFromCamera = async () => {
     // Solicitar permisos para usar la cámara
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    const { status} = await ImagePicker.requestCameraPermissionsAsync();
 
     if (status !== 'granted') {
       Alert.alert(
@@ -241,20 +244,15 @@ const EditUserScreen = ({ navigation }) => {
 
           {/* Avatar */}
           <View style={styles.avatarContainer}>
-            {user?.photoUrl ? (
-              <Image source={{ uri: user.photoUrl }} style={styles.avatar} />
-            ) : (
-              <View style={styles.avatarPlaceholder}>
-                <Text style={styles.avatarText}>
-                  {user?.name?.charAt(0).toUpperCase() || 'U'}
-                </Text>
-              </View>
-            )}
+            <Image
+              source={{ uri: user?.photoUrl || 'https://i.pravatar.cc/300?img=12' }}
+              style={styles.avatar}
+            />
           </View>
 
           {/* Change Photo Button */}
           <TouchableOpacity
-            style={[styles.photoButton, uploadingPhoto && styles.photoButtonDisabled]}
+            style={styles.photoButton}
             onPress={handleChangePhoto}
             disabled={uploadingPhoto}
           >
@@ -383,29 +381,12 @@ const styles = StyleSheet.create({
     borderRadius: 60,
     backgroundColor: COLORS.LIGHTGRAY,
   },
-  avatarPlaceholder: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: COLORS.ORANGE,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: COLORS.WHITE,
-  },
   photoButton: {
     backgroundColor: COLORS.ORANGE,
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',
     marginBottom: 16,
-  },
-  photoButtonDisabled: {
-    backgroundColor: COLORS.GRAY,
-    opacity: 0.6,
   },
   photoButtonText: {
     fontSize: 15,
@@ -447,7 +428,7 @@ const styles = StyleSheet.create({
   },
   picker: {
     height: 48,
-    color: COLORS.DARK,
+    color: COLORS.WHITE,
   },
   saveButton: {
     backgroundColor: COLORS.ORANGE,

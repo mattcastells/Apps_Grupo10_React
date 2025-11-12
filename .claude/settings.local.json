@@ -1,11 +1,10 @@
 {
   "permissions": {
     "allow": [
+      "Bash(tree:*)",
       "Bash(npm install:*)",
-      "Bash(dir:*)",
-      "Bash(nul)",
-      "Bash(npm run android:*)",
-      "Bash(npx react-native:*)"
+      "Bash(ipconfig:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []
