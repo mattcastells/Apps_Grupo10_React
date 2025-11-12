@@ -44,3 +44,9 @@ yarn-error.*
 # IDE
 .idea/
 .vscode/
+
+# Backend folder (Spring Boot backend)
+/backend/
+
+# Claude Code settings
+/.claude/
