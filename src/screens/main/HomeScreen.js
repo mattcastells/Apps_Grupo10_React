@@ -11,14 +11,17 @@ import {
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import Card from '../../components/Card';
+import BiometricPrompt from '../../components/BiometricPrompt';
 import { COLORS, DISCIPLINES, LOCATIONS } from '../../utils/constants';
 import createScheduleService from '../../services/scheduleService';
 import { useAxios } from '../../hooks/useAxios';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 
 const HomeScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
+  const { needsBiometricAuth, logout } = useAuth();
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -27,6 +30,20 @@ const HomeScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState('Todas');
   const axiosInstance = useAxios();
   const scheduleService = createScheduleService(axiosInstance);
+
+  // 🔐 Estado para controlar si debe mostrar el prompt biométrico
+  const [showBiometricPrompt, setShowBiometricPrompt] = useState(false);
+
+  useEffect(() => {
+    // 🔐 Verificar si necesita autenticación biométrica al entrar al Home
+    if (needsBiometricAuth()) {
+      // Necesita autenticarse, mostrar el prompt
+      setShowBiometricPrompt(true);
+    } else {
+      // Ya se autenticó en esta sesión, cargar clases normalmente
+      loadClasses();
+    }
+  }, []);
 
   const loadClasses = useCallback(async () => {
     setLoading(true);
@@ -67,6 +84,40 @@ const HomeScreen = ({ navigation }) => {
 
   const handleMyProfile = () => {
     navigation.navigate('Profile');
+  };
+
+  // 🔐 Callbacks para BiometricPrompt
+  const handleBiometricSuccess = () => {
+    // Autenticación exitosa, cargar las clases y continuar con el flujo
+    console.log('[HomeScreen] Autenticación biométrica exitosa');
+    loadClasses();
+  };
+
+  const handleBiometricFailure = async (reason) => {
+    // Autenticación fallida o sin enrolamiento, desloguear y redirigir a login
+    console.log('[HomeScreen] Autenticación biométrica fallida. Razón:', reason);
+
+    Alert.alert(
+      'Autenticación requerida',
+      'No se pudo completar la autenticación. Serás redirigido al login.',
+      [
+        {
+          text: 'OK',
+          onPress: async () => {
+            await logout();
+            // La navegación al login se hace automáticamente por el AppNavigator
+          },
+        },
+      ]
+    );
+  };
+
+  const handleBiometricCancel = async () => {
+    // Usuario canceló la autenticación, desloguear y redirigir a login
+    console.log('[HomeScreen] Autenticación biométrica cancelada');
+
+    await logout();
+    // La navegación al login se hace automáticamente por el AppNavigator
   };
 
   const getFilteredClasses = () => {
@@ -116,6 +167,16 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
+      {/* 🔐 BiometricPrompt - Se muestra solo si showBiometricPrompt es true */}
+      {showBiometricPrompt && (
+        <BiometricPrompt
+          onSuccess={handleBiometricSuccess}
+          onFailure={handleBiometricFailure}
+          onCancel={handleBiometricCancel}
+          maxAttempts={2}
+        />
+      )}
+
       <FlatList
         data={filteredClasses}
         renderItem={renderClassItem}

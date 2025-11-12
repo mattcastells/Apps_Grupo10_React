@@ -23,6 +23,9 @@ export const AuthProvider = ({ children }) => {
   const [token, setTokenState] = useState(null);
   const [user, setUser] = useState(null);
 
+  // 🔐 Estado en memoria para tracking de autenticación biométrica
+  const [hasBiometricAuthenticated, setHasBiometricAuthenticated] = useState(false);
+
   const apiClient = createApiClient();
   const authService = createAuthService(apiClient);
 
@@ -93,6 +96,9 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       setTokenState(token);
 
+      // 🔐 Cuando el usuario se loguea manualmente, marcarlo como autenticado biométricamente
+      setHasBiometricAuthenticated(true);
+
       return response;
     } catch (error) {
       console.error('Login error:', error);
@@ -115,6 +121,9 @@ export const AuthProvider = ({ children }) => {
       const response = await authService.verifyEmail(email, otp);
       setIsAuthenticated(true);
 
+      // 🔐 Al verificar email en registro, marcarlo como autenticado biométricamente
+      setHasBiometricAuthenticated(true);
+
       if (response.userId) {
         await loadUserData(response.userId);
       }
@@ -132,10 +141,21 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(false);
       setTokenState(null);
       setUser(null);
+      setHasBiometricAuthenticated(false); // 🔐 Resetear autenticación biométrica
     } catch (error) {
       console.error('Logout error:', error);
       throw error;
     }
+  };
+
+  // 🔐 Marcar que el usuario se autenticó exitosamente con biometría en esta sesión
+  const markBiometricAuthenticated = () => {
+    setHasBiometricAuthenticated(true);
+  };
+
+  // 🔐 Verificar si ya se autenticó con biometría en esta sesión
+  const needsBiometricAuth = () => {
+    return !hasBiometricAuthenticated;
   };
 
   const updateUser = async (userData) => {
@@ -167,6 +187,9 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateUser,
     refreshUser,
+    // 🔐 Funciones para manejo de autenticación biométrica
+    markBiometricAuthenticated,
+    needsBiometricAuth,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
