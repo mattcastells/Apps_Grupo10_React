@@ -22,7 +22,7 @@ import cloudinaryService from '../../services/cloudinaryService';
 import { validateAge } from '../../utils/helpers';
 
 const EditUserScreen = ({ navigation }) => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, refreshUser } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -148,8 +148,8 @@ const EditUserScreen = ({ navigation }) => {
 
       if (result.success) {
         Alert.alert('Éxito', 'Foto de perfil actualizada correctamente');
-        // Refrescar datos del usuario para ver la nueva foto
-        await updateUser({ ...user, photoUrl: result.photoUrl });
+        // Refrescar datos del usuario desde el backend para ver la nueva foto
+        await refreshUser();
       }
     } catch (error) {
       console.error('Error al subir foto:', error);

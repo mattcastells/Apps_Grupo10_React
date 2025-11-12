@@ -20,7 +20,14 @@ const userService = {
       }
 
       const response = await apiClientAuth.get(`/users/${id}`);
-      return response.data;
+      const userData = response.data;
+
+      // Map backend field 'profilePicture' to frontend field 'photoUrl'
+      if (userData.profilePicture) {
+        userData.photoUrl = userData.profilePicture;
+      }
+
+      return userData;
     } catch (error) {
       console.error('Get user error:', error.response?.data || error.message);
       throw error;

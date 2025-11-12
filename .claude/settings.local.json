@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(dir:*)",
+      "Bash(nul)",
+      "Bash(npm run android:*)",
+      "Bash(npx react-native:*)"
     ],
     "deny": [],
     "ask": []

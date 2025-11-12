@@ -24,9 +24,9 @@ const CLOUDINARY_CONFIG = {
  * Este endpoint debe coincidir con tu controller de Spring Boot
  */
 const BACKEND_ENDPOINTS = {
-  // Endpoint del backend: PUT /{id}/photo
+  // Endpoint del backend: PUT /users/{id}/photo
   // Se reemplaza {id} dinámicamente con el userId
-  SAVE_PHOTO_URL: (userId) => `/${userId}/photo`,
+  SAVE_PHOTO_URL: (userId) => `/users/${userId}/photo`,
 };
 
 /**
