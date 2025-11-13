@@ -1,5 +1,4 @@
 import { API_CONFIG } from '../utils/constants';
-import { apiClientAuth } from './apiClient';
 
 /**
  * Cloudinary Configuration
@@ -30,10 +29,11 @@ const BACKEND_ENDPOINTS = {
 };
 
 /**
- * Cloudinary Service
- * Maneja la subida de im�genes a Cloudinary y la comunicaci�n con el backend
+ * Cloudinary Service Factory
+ * Crea un servicio para manejar la subida de imágenes a Cloudinary y la comunicación con el backend
+ * @param {Object} axiosInstance - Instancia autenticada de axios (del hook useAxios)
  */
-const cloudinaryService = {
+const createCloudinaryService = (axiosInstance) => ({
   /**
    * Sube una imagen a Cloudinary
    * @param {Object} imageData - Datos de la imagen desde react-native-image-picker
@@ -57,7 +57,7 @@ const cloudinaryService = {
       // Agregar el upload preset (necesario para uploads unsigned)
       formData.append('upload_preset', CLOUDINARY_CONFIG.UPLOAD_PRESET);
 
-      // Construcci�n de la URL de Cloudinary
+      // Construcción de la URL de Cloudinary
       const cloudinaryUrl = `${CLOUDINARY_CONFIG.BASE_URL}/${CLOUDINARY_CONFIG.CLOUD_NAME}/image/upload`;
 
       console.log('Subiendo imagen a Cloudinary...');
@@ -82,11 +82,11 @@ const cloudinaryService = {
       return {
         success: true,
         url: data.secure_url, // URL segura (https) de la imagen
-        publicId: data.public_id, // ID p�blico en Cloudinary (�til para eliminar despu�s)
+        publicId: data.public_id, // ID público en Cloudinary (útil para eliminar después)
         format: data.format, // Formato de la imagen
         width: data.width,
         height: data.height,
-        cloudinaryResponse: data, // Respuesta completa por si necesitas m�s datos
+        cloudinaryResponse: data, // Respuesta completa por si necesitas más datos
       };
     } catch (error) {
       console.error('Error uploading to Cloudinary:', error);
@@ -122,8 +122,8 @@ const cloudinaryService = {
         photoUrl: imageUrl,
       };
 
-      // Enviar al backend: PUT /{id}/photo con body { photoUrl: "..." }
-      await apiClientAuth.put(endpoint, requestBody);
+      // Enviar al backend: PUT /users/{id}/photo con body { photoUrl: "..." }
+      await axiosInstance.put(endpoint, requestBody);
 
       console.log('URL guardada en el backend exitosamente');
 
@@ -156,14 +156,15 @@ const cloudinaryService = {
     try {
       // Paso 1: Subir a Cloudinary
       console.log('Iniciando proceso de subida de imagen...');
-      const cloudinaryResult = await cloudinaryService.uploadToCloudinary(imageData);
+      const service = createCloudinaryService(axiosInstance);
+      const cloudinaryResult = await service.uploadToCloudinary(imageData);
 
       if (!cloudinaryResult.success) {
         throw new Error('Error al subir imagen a Cloudinary');
       }
 
       // Paso 2: Guardar URL en el backend
-      const backendResult = await cloudinaryService.saveImageUrlToBackend(userId, cloudinaryResult.url);
+      const backendResult = await service.saveImageUrlToBackend(userId, cloudinaryResult.url);
 
       return {
         success: true,
@@ -179,16 +180,16 @@ const cloudinaryService = {
 
   /**
    * Elimina una imagen de Cloudinary (opcional)
-   * Requiere configuraci�n adicional con API Key y API Secret en el backend
+   * Requiere configuración adicional con API Key y API Secret en el backend
    * @param {string} publicId - Public ID de la imagen en Cloudinary
    * @returns {Promise<Object>} - Respuesta del backend
    */
   deleteFromCloudinary: async (publicId) => {
     try {
-      // Esta operaci�n debe hacerse desde el backend por seguridad
+      // Esta operación debe hacerse desde el backend por seguridad
       // No se puede hacer directamente desde el cliente sin exponer credenciales
 
-      const response = await apiClientAuth.delete('/eliminarFotoCloudinary', {
+      const response = await axiosInstance.delete('/eliminarFotoCloudinary', {
         data: { publicId }
       });
 
@@ -198,7 +199,7 @@ const cloudinaryService = {
       throw error;
     }
   },
-};
+});
 
-export default cloudinaryService;
+export default createCloudinaryService;
 export { CLOUDINARY_CONFIG, BACKEND_ENDPOINTS };

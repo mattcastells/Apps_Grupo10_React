@@ -15,13 +15,16 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import Button from '../../components/Button';
 import { useFocusEffect } from '@react-navigation/native';
-import cloudinaryService from '../../services/cloudinaryService';
+import createCloudinaryService from '../../services/cloudinaryService';
+import { useAxios } from '../../hooks/useAxios';
 
 const ProfileScreen = ({ navigation }) => {
   const { user, logout, refreshUser } = useAuth();
   const { isDarkMode, toggleTheme, theme } = useTheme();
   const [loading, setLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const axiosInstance = useAxios();
+  const cloudinaryService = createCloudinaryService(axiosInstance);
 
   useFocusEffect(
     useCallback(() => {

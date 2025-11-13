@@ -18,7 +18,7 @@ import { Picker } from '@react-native-picker/picker';
 import { useAuth } from '../../context/AuthContext';
 import { COLORS, GENDERS } from '../../utils/constants';
 import createUserService from '../../services/userService';
-import cloudinaryService from '../../services/cloudinaryService';
+import createCloudinaryService from '../../services/cloudinaryService';
 import { validateAge } from '../../utils/helpers';
 import { useAxios } from '../../hooks/useAxios';
 
@@ -36,6 +36,7 @@ const EditUserScreen = ({ navigation }) => {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const axiosInstance = useAxios();
   const userService = createUserService(axiosInstance);
+  const cloudinaryService = createCloudinaryService(axiosInstance);
 
   useEffect(() => {
     if (user) {

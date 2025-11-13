@@ -72,8 +72,8 @@ export const THEME_COLORS = {
 
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: 'http://10.0.2.2:8080/api/v1', // Use 10.0.2.2 for Android emulator
-  // BASE_URL: 'http://192.168.0.164:8080/api/v1', // URL personalizada IPv4 (descomentá esta si usás tu red local)
+  //BASE_URL: 'http://10.0.2.2:8080/api/v1', // Use 10.0.2.2 for Android emulator
+  BASE_URL: 'http://192.168.0.164:8080/api/v1', // URL personalizada IPv4 (descomentá esta si usás tu red local)
   TIMEOUT: 30000,
 };
 
