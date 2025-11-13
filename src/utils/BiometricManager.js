@@ -5,14 +5,14 @@ import { Alert, Platform } from 'react-native';
 /**
  * BiometricManager
  *
- * Gestiona toda la lógica de autenticación biométrica usando expo-local-authentication.
- * Proporciona métodos para verificar disponibilidad, solicitar autenticación y manejar
- * el flujo completo de biometría en la aplicación.
+ * Manages all biometric authentication logic using expo-local-authentication.
+ * Provides methods to verify availability, request authentication and handle
+ * the complete biometric flow in the application.
  */
 class BiometricManager {
   /**
-   * Verifica si el dispositivo tiene hardware biométrico disponible
-   * @returns {Promise<boolean>} true si el dispositivo soporta biometría
+   * Verifies if the device has biometric hardware available
+   * @returns {Promise<boolean>} true if device supports biometrics
    */
   async isBiometricAvailable() {
     try {
@@ -25,21 +25,17 @@ class BiometricManager {
   }
 
   /**
-   * Verifica si el dispositivo tiene al menos un método de enrolamiento configurado
-   * (FaceID, TouchID, huella, PIN, patrón, etc.)
+   * Verifies if the device has at least one enrollment method configured
+   * (FaceID, TouchID, fingerprint, PIN, pattern, etc.)
    *
-   * NOTA IMPORTANTE: Este método tiene un bug conocido en expo-local-authentication
-   * donde puede devolver false incluso cuando el dispositivo SÍ tiene enrolamiento.
+   * IMPORTANT NOTE: This method has a known bug in expo-local-authentication
+   * where it may return false even when the device DOES have enrollment.
    *
-   * @returns {Promise<boolean>} true si hay métodos de autenticación enrolados
+   * @returns {Promise<boolean>} true if there are enrolled authentication methods
    */
   async isEnrolled() {
     try {
       const enrolled = await LocalAuthentication.isEnrolledAsync();
-
-      // 🔍 DEBUG: Descomentar para ver el valor real que devuelve
-      // console.log('[BiometricManager] isEnrolledAsync returned:', enrolled);
-
       return enrolled;
     } catch (error) {
       console.error('[BiometricManager] Error checking enrollment:', error);
@@ -48,8 +44,8 @@ class BiometricManager {
   }
 
   /**
-   * Obtiene los tipos de autenticación biométrica disponibles en el dispositivo
-   * @returns {Promise<Array>} Array de tipos disponibles (FINGERPRINT, FACIAL_RECOGNITION, IRIS)
+   * Gets the types of biometric authentication available on the device
+   * @returns {Promise<Array>} Array of available types (FINGERPRINT, FACIAL_RECOGNITION, IRIS)
    */
   async getSupportedAuthenticationTypes() {
     try {
@@ -62,9 +58,9 @@ class BiometricManager {
   }
 
   /**
-   * Genera un mensaje descriptivo basado en los tipos de autenticación disponibles
-   * @param {Array} types - Array de tipos de autenticación
-   * @returns {string} Mensaje descriptivo (ej: "Face ID", "Huella digital", etc.)
+   * Generates a descriptive message based on available authentication types
+   * @param {Array} types - Array of authentication types
+   * @returns {string} Descriptive message (e.g. "Face ID", "Huella digital", etc.)
    */
   getAuthenticationTypeMessage(types) {
     if (!types || types.length === 0) {
@@ -93,12 +89,12 @@ class BiometricManager {
   }
 
   /**
-   * Solicita autenticación biométrica al usuario
+   * Requests biometric authentication from the user
    *
-   * @param {Object} options - Opciones de autenticación
-   * @param {string} options.promptMessage - Mensaje a mostrar en el prompt (default: "Autentícate para acceder a la aplicación")
-   * @param {string} options.cancelLabel - Etiqueta del botón cancelar (default: "Cancelar")
-   * @param {boolean} options.disableDeviceFallback - Deshabilitar fallback a PIN/patrón (default: false)
+   * @param {Object} options - Authentication options
+   * @param {string} options.promptMessage - Message to show in prompt (default: "Autentícate para acceder a la aplicación")
+   * @param {string} options.cancelLabel - Cancel button label (default: "Cancelar")
+   * @param {boolean} options.disableDeviceFallback - Disable fallback to PIN/pattern (default: false)
    * @returns {Promise<Object>} { success: boolean, error?: string }
    */
   async authenticate(options = {}) {
@@ -119,7 +115,6 @@ class BiometricManager {
       if (result.success) {
         return { success: true };
       } else {
-        // El usuario canceló o falló la autenticación
         return {
           success: false,
           error: result.error || 'Autenticación cancelada o fallida'
@@ -135,18 +130,16 @@ class BiometricManager {
   }
 
   /**
-   * Abre la configuración del dispositivo para que el usuario configure
-   * un método de enrolamiento (huella, Face ID, PIN, etc.)
+   * Opens device settings so the user can configure
+   * an enrollment method (fingerprint, Face ID, PIN, etc.)
    *
-   * Usa expo-linking para abrir la app de Settings del sistema operativo.
+   * Uses expo-linking to open the OS Settings app.
    */
   async openDeviceSettings() {
     try {
       if (Platform.OS === 'ios') {
-        // En iOS, abre la configuración general
         await Linking.openURL('app-settings:');
       } else if (Platform.OS === 'android') {
-        // En Android, intenta abrir la configuración de seguridad
         await Linking.openURL('app-settings:');
       }
       return true;
@@ -161,8 +154,8 @@ class BiometricManager {
   }
 
   /**
-   * Muestra un diálogo alertando al usuario que debe configurar un método
-   * de enrolamiento en su dispositivo, con opción de ir a Settings
+   * Shows a dialog alerting the user that they must configure an enrollment
+   * method on their device, with option to go to Settings
    */
   async promptEnrollment() {
     return new Promise((resolve) => {
@@ -187,50 +180,25 @@ class BiometricManager {
     });
   }
 
-  // ============================================================================
-  // 🐛 WORKAROUND PARA BUG DE isEnrolledAsync
-  // ============================================================================
-  //
-  // UBICACIÓN: BiometricManager.js - Método authenticateWithWorkaround()
-  //
-  // Este método es una versión alternativa que puedes usar mientras el bug de
-  // isEnrolledAsync no esté resuelto. Simplemente muestra un alert con el
-  // valor que devuelve isEnrolledAsync y permite continuar sin autenticar.
-  //
-  // PARA USAR ESTE WORKAROUND:
-  // 1. En HomeScreen.js, reemplaza la llamada a authenticateBiometric()
-  //    por authenticateWithWorkaround()
-  // 2. Esto mostrará un alert indicando el bug y dejará pasar al usuario
-  //
-  // CÓDIGO A CAMBIAR EN HomeScreen.js:
-  // ❌ CÓDIGO ACTUAL (producción):
-  //    const result = await biometricManager.authenticateBiometric();
-  //
-  // ✅ CÓDIGO CON WORKAROUND (para testing):
-  //    const result = await biometricManager.authenticateWithWorkaround();
-  //
-  // ============================================================================
-
   /**
-   * 🐛 VERSIÓN WORKAROUND - Para usar durante el bug de isEnrolledAsync
+   * WORKAROUND version - To use during isEnrolledAsync bug
    *
-   * Este método verifica el enrolamiento y, si devuelve false, muestra un
-   * alert explicando el bug y permite continuar sin autenticar.
+   * This method checks enrollment and, if it returns false, shows an
+   * alert explaining the bug and allows to continue without authenticating.
    *
-   * @returns {Promise<Object>} { success: true, workaround: true } siempre pasa
+   * @returns {Promise<Object>} { success: true, workaround: true } always passes
    */
   async authenticateWithWorkaround() {
     try {
-      console.log('[BiometricManager] 🐛 USANDO WORKAROUND PARA BUG DE isEnrolledAsync');
+      console.log('[BiometricManager] USING WORKAROUND FOR isEnrolledAsync BUG');
 
       const enrolled = await this.isEnrolled();
 
-      console.log(`[BiometricManager] isEnrolledAsync devolvió: ${enrolled}`);
+      console.log(`[BiometricManager] isEnrolledAsync returned: ${enrolled}`);
 
       if (!enrolled) {
-        // Mostrar alert explicando el bug
         Alert.alert(
-          '🐛 Workaround activo',
+          'Workaround activo',
           `isEnrolledAsync() devolvió: ${enrolled}\n\nEste es el bug conocido de Expo. En producción, aquí se pediría autenticación o se redirigiría a Settings.\n\nPor ahora, te dejamos pasar sin autenticar.`,
           [
             {
@@ -240,37 +208,33 @@ class BiometricManager {
           ]
         );
 
-        // Dejar pasar al usuario sin autenticar
         return { success: true, workaround: true };
       }
 
-      // Si enrolled es true, proceder con autenticación normal
       return await this.authenticate({
         promptMessage: 'Autentícate para acceder a la aplicación',
       });
 
     } catch (error) {
       console.error('[BiometricManager] Error en workaround:', error);
-      // En caso de error, también dejar pasar
       return { success: true, workaround: true };
     }
   }
 
   /**
-   * Flujo completo de autenticación biométrica con todas las validaciones
+   * Complete biometric authentication flow with all validations
    *
-   * Este es el método principal que debes llamar desde tu app.
-   * Maneja todo el flujo:
-   * 1. Verifica si hay hardware disponible
-   * 2. Verifica si hay enrolamiento
-   * 3. Si no hay enrolamiento, ofrece ir a Settings
-   * 4. Si hay enrolamiento, solicita autenticación
+   * This is the main method you should call from your app.
+   * Handles the complete flow:
+   * 1. Checks if hardware is available
+   * 2. Checks if there is enrollment
+   * 3. If no enrollment, offers to go to Settings
+   * 4. If there is enrollment, requests authentication
    *
    * @returns {Promise<Object>} { success: boolean, reason?: string }
    */
   async authenticateBiometric() {
     try {
-      // 1. Verificar si el dispositivo tiene hardware biométrico
       const hasHardware = await this.isBiometricAvailable();
 
       if (!hasHardware) {
@@ -284,21 +248,17 @@ class BiometricManager {
         };
       }
 
-      // 2. Verificar si hay métodos de enrolamiento configurados
       const enrolled = await this.isEnrolled();
 
       if (!enrolled) {
-        // No hay enrolamiento, ofrecer ir a Settings
         const userWantsToEnroll = await this.promptEnrollment();
 
         if (userWantsToEnroll) {
-          // Usuario fue a Settings, retornar false para que vuelva a intentar después
           return {
             success: false,
             reason: 'went_to_settings'
           };
         } else {
-          // Usuario canceló, no puede continuar
           return {
             success: false,
             reason: 'no_enrollment'
@@ -306,7 +266,6 @@ class BiometricManager {
         }
       }
 
-      // 3. Hay hardware y hay enrolamiento, solicitar autenticación
       const authResult = await this.authenticate({
         promptMessage: 'Autentícate para acceder a la aplicación',
       });

@@ -2,67 +2,50 @@ import { API_CONFIG } from '../utils/constants';
 
 /**
  * Cloudinary Configuration
- * IMPORTANTE: Reemplaza estos valores con tus datos reales de Cloudinary
  */
 const CLOUDINARY_CONFIG = {
-  // TODO: Reemplazar con el nombre de tu nube de Cloudinary
-  // Lo encuentras en: Cloudinary Dashboard > Account Details > Cloud name
   CLOUD_NAME: 'do7lo4pkj',
-
-  // TODO: Reemplazar con tu upload preset
-  // Lo creas en: Cloudinary Dashboard > Settings > Upload > Upload presets
-  // Debe ser "unsigned" para poder usarlo desde el cliente
   UPLOAD_PRESET: 'ritmofit_unisgned',
-
-  // URL base de Cloudinary (no modificar)
   BASE_URL: 'https://api.cloudinary.com/v1_1',
 };
 
 /**
  * Backend Endpoints Configuration
- * Este endpoint debe coincidir con tu controller de Spring Boot
  */
 const BACKEND_ENDPOINTS = {
-  // Endpoint del backend: PUT /users/{id}/photo
-  // Se reemplaza {id} dinámicamente con el userId
   SAVE_PHOTO_URL: (userId) => `/users/${userId}/photo`,
 };
 
 /**
  * Cloudinary Service Factory
- * Crea un servicio para manejar la subida de imágenes a Cloudinary y la comunicación con el backend
- * @param {Object} axiosInstance - Instancia autenticada de axios (del hook useAxios)
+ * Creates a service to handle image uploads to Cloudinary and backend communication
+ * @param {Object} axiosInstance - Authenticated axios instance (from useAxios hook)
  */
 const createCloudinaryService = (axiosInstance) => ({
   /**
-   * Sube una imagen a Cloudinary
-   * @param {Object} imageData - Datos de la imagen desde react-native-image-picker
-   * @param {string} imageData.uri - URI de la imagen
-   * @param {string} imageData.type - Tipo MIME de la imagen (ej: image/jpeg)
-   * @param {string} imageData.fileName - Nombre del archivo
-   * @returns {Promise<Object>} - Respuesta de Cloudinary con la URL de la imagen
+   * Uploads an image to Cloudinary
+   * @param {Object} imageData - Image data from react-native-image-picker
+   * @param {string} imageData.uri - Image URI
+   * @param {string} imageData.type - Image MIME type (e.g. image/jpeg)
+   * @param {string} imageData.fileName - File name
+   * @returns {Promise<Object>} - Cloudinary response with image URL
    */
   uploadToCloudinary: async (imageData) => {
     try {
-      // Crear FormData para enviar a Cloudinary
       const formData = new FormData();
 
-      // Agregar la imagen
       formData.append('file', {
         uri: imageData.uri,
         type: imageData.type || 'image/jpeg',
         name: imageData.fileName || 'photo.jpg',
       });
 
-      // Agregar el upload preset (necesario para uploads unsigned)
       formData.append('upload_preset', CLOUDINARY_CONFIG.UPLOAD_PRESET);
 
-      // Construcción de la URL de Cloudinary
       const cloudinaryUrl = `${CLOUDINARY_CONFIG.BASE_URL}/${CLOUDINARY_CONFIG.CLOUD_NAME}/image/upload`;
 
       console.log('Subiendo imagen a Cloudinary...');
 
-      // Realizar el upload a Cloudinary
       const response = await fetch(cloudinaryUrl, {
         method: 'POST',
         body: formData,
@@ -81,12 +64,12 @@ const createCloudinaryService = (axiosInstance) => ({
 
       return {
         success: true,
-        url: data.secure_url, // URL segura (https) de la imagen
-        publicId: data.public_id, // ID público en Cloudinary (útil para eliminar después)
-        format: data.format, // Formato de la imagen
+        url: data.secure_url,
+        publicId: data.public_id,
+        format: data.format,
         width: data.width,
         height: data.height,
-        cloudinaryResponse: data, // Respuesta completa por si necesitas más datos
+        cloudinaryResponse: data,
       };
     } catch (error) {
       console.error('Error uploading to Cloudinary:', error);
@@ -95,39 +78,25 @@ const createCloudinaryService = (axiosInstance) => ({
   },
 
   /**
-   * Guarda la URL de la imagen en el backend
-   * @param {string} userId - ID del usuario (se pasa como path param)
-   * @param {string} imageUrl - URL de la imagen en Cloudinary
-   * @returns {Promise<Object>} - Respuesta del backend
+   * Saves image URL to backend
+   * @param {string} userId - User ID (path param)
+   * @param {string} imageUrl - Image URL from Cloudinary
+   * @returns {Promise<Object>} - Backend response
    */
   saveImageUrlToBackend: async (userId, imageUrl) => {
     try {
-      // Mock mode
-      if (API_CONFIG.USE_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return {
-          success: true,
-          message: 'URL de foto guardada exitosamente (MOCK)',
-          photoUrl: imageUrl,
-        };
-      }
-
       console.log(`Guardando URL en el backend para usuario ${userId}...`);
 
-      // Construir el endpoint con el userId en el path
       const endpoint = BACKEND_ENDPOINTS.SAVE_PHOTO_URL(userId);
 
-      // Body según tu UpdatePhotoRequest del backend
       const requestBody = {
         photoUrl: imageUrl,
       };
 
-      // Enviar al backend: PUT /users/{id}/photo con body { photoUrl: "..." }
       await axiosInstance.put(endpoint, requestBody);
 
       console.log('URL guardada en el backend exitosamente');
 
-      // Tu backend retorna ResponseEntity.ok().build(), así que no hay data en la respuesta
       return {
         success: true,
         photoUrl: imageUrl,
@@ -135,7 +104,6 @@ const createCloudinaryService = (axiosInstance) => ({
     } catch (error) {
       console.error('Error saving image URL to backend:', error.response?.data || error.message);
 
-      // Manejar errores específicos del backend
       if (error.response?.status === 400) {
         throw new Error('Solicitud inválida: ' + (error.response?.data || 'Verifica los datos enviados'));
       } else if (error.response?.status === 404) {
@@ -147,14 +115,13 @@ const createCloudinaryService = (axiosInstance) => ({
   },
 
   /**
-   * Proceso completo: Sube imagen a Cloudinary y guarda la URL en el backend
-   * @param {number} userId - ID del usuario
-   * @param {Object} imageData - Datos de la imagen desde react-native-image-picker
-   * @returns {Promise<Object>} - Objeto con la URL de la imagen y la respuesta del backend
+   * Complete process: Upload image to Cloudinary and save URL to backend
+   * @param {number} userId - User ID
+   * @param {Object} imageData - Image data from react-native-image-picker
+   * @returns {Promise<Object>} - Object with image URL and backend response
    */
   uploadAndSaveProfilePhoto: async (userId, imageData) => {
     try {
-      // Paso 1: Subir a Cloudinary
       console.log('Iniciando proceso de subida de imagen...');
       const service = createCloudinaryService(axiosInstance);
       const cloudinaryResult = await service.uploadToCloudinary(imageData);
@@ -163,7 +130,6 @@ const createCloudinaryService = (axiosInstance) => ({
         throw new Error('Error al subir imagen a Cloudinary');
       }
 
-      // Paso 2: Guardar URL en el backend
       const backendResult = await service.saveImageUrlToBackend(userId, cloudinaryResult.url);
 
       return {
@@ -179,16 +145,13 @@ const createCloudinaryService = (axiosInstance) => ({
   },
 
   /**
-   * Elimina una imagen de Cloudinary (opcional)
-   * Requiere configuración adicional con API Key y API Secret en el backend
-   * @param {string} publicId - Public ID de la imagen en Cloudinary
-   * @returns {Promise<Object>} - Respuesta del backend
+   * Deletes an image from Cloudinary (optional)
+   * Requires additional configuration with API Key and API Secret in backend
+   * @param {string} publicId - Public ID of image in Cloudinary
+   * @returns {Promise<Object>} - Backend response
    */
   deleteFromCloudinary: async (publicId) => {
     try {
-      // Esta operación debe hacerse desde el backend por seguridad
-      // No se puede hacer directamente desde el cliente sin exponer credenciales
-
       const response = await axiosInstance.delete('/eliminarFotoCloudinary', {
         data: { publicId }
       });

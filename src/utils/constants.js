@@ -93,26 +93,6 @@ export const GENDERS = [
   { label: 'Otro', value: 'OTHER' },
 ];
 
-// Class Disciplines
-export const DISCIPLINES = [
-  'Todos',
-  'Yoga',
-  'Spinning',
-  'Pilates',
-  'Zumba',
-  'CrossFit',
-  'Boxing',
-];
-
-// Locations
-export const LOCATIONS = [
-  'Todas',
-  'Sede Centro',
-  'Sede Norte',
-  'Sede Sur',
-  'Sede Este',
-];
-
 // Date/Time formats
 export const DATE_FORMAT = 'DD/MM/YYYY';
 export const TIME_FORMAT = 'HH:mm';

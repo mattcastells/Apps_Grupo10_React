@@ -6,19 +6,19 @@ import { useAuth } from '../context/AuthContext';
 /**
  * BiometricPrompt
  *
- * Componente que muestra un overlay bloqueante mientras se realiza
- * la autenticación biométrica. Este componente:
+ * Component that shows a blocking overlay during biometric authentication.
+ * This component:
  *
- * 1. Se muestra automáticamente cuando el componente padre lo monta
- * 2. Solicita autenticación biométrica
- * 3. Maneja el resultado (éxito o fallo)
- * 4. Ejecuta callbacks según el resultado
+ * 1. Automatically shows when the parent component mounts it
+ * 2. Requests biometric authentication
+ * 3. Handles the result (success or failure)
+ * 4. Executes callbacks based on the result
  *
  * Props:
- * - onSuccess: callback cuando la autenticación es exitosa
- * - onFailure: callback cuando la autenticación falla (después de 2 intentos)
- * - onCancel: callback cuando el usuario cancela
- * - maxAttempts: número máximo de intentos (default: 2)
+ * - onSuccess: callback when authentication is successful
+ * - onFailure: callback when authentication fails (after 2 attempts)
+ * - onCancel: callback when user cancels
+ * - maxAttempts: maximum number of attempts (default: 2)
  */
 const BiometricPrompt = ({
   onSuccess,
@@ -33,7 +33,6 @@ const BiometricPrompt = ({
   const { markBiometricAuthenticated } = useAuth();
 
   useEffect(() => {
-    // Iniciar autenticación automáticamente al montar
     startAuthentication();
   }, []);
 
@@ -45,34 +44,12 @@ const BiometricPrompt = ({
       attemptCountRef.current += 1;
       const currentAttempt = attemptCountRef.current;
 
-      // ============================================================================
-      // 🐛 UBICACIÓN DEL WORKAROUND PARA BUG DE isEnrolledAsync
-      // ============================================================================
-      //
-      // ⚠️ IMPORTANTE: Esta es la línea que debes cambiar para activar el workaround.
-      //
-      // VERSIÓN PRODUCCIÓN (actual - funciona si isEnrolledAsync está bien):
       const result = await biometricManager.authenticateBiometric();
-      //
-      // VERSIÓN WORKAROUND (para usar durante el bug de isEnrolledAsync):
-      // const result = await biometricManager.authenticateWithWorkaround();
-      //
-      // El workaround mostrará un Alert con el valor de isEnrolledAsync y dejará
-      // pasar al usuario sin autenticar, para que puedas testear el resto del flujo.
-      //
-      // Para activar el workaround:
-      // 1. Comenta la línea de producción (la que está activa arriba)
-      // 2. Descomenta la línea del workaround
-      // 3. Guarda el archivo
-      //
-      // ============================================================================
 
       if (result.success) {
-        // ✅ Autenticación exitosa
         setMessage('¡Autenticación exitosa!');
         markBiometricAuthenticated();
 
-        // Pequeño delay para que el usuario vea el mensaje de éxito
         setTimeout(() => {
           setIsVisible(false);
           if (onSuccess) {
@@ -81,7 +58,6 @@ const BiometricPrompt = ({
         }, 500);
 
       } else {
-        // ❌ Autenticación falló
         handleAuthenticationFailure(result, currentAttempt);
       }
 
@@ -98,7 +74,6 @@ const BiometricPrompt = ({
     const { reason } = result;
 
     if (reason === 'went_to_settings') {
-      // Usuario fue a Settings, cerrar el modal y esperar que vuelva
       setMessage('Por favor configura tu método de seguridad y vuelve a abrir la app.');
       setTimeout(() => {
         setIsVisible(false);
@@ -110,7 +85,6 @@ const BiometricPrompt = ({
     }
 
     if (reason === 'no_enrollment') {
-      // No hay enrolamiento y el usuario no quiso ir a Settings
       setMessage('Se requiere configurar un método de seguridad en el dispositivo.');
       setTimeout(() => {
         setIsVisible(false);
@@ -122,7 +96,6 @@ const BiometricPrompt = ({
     }
 
     if (reason === 'no_hardware') {
-      // Dispositivo no soporta biometría
       setMessage('Este dispositivo no soporta autenticación biométrica.');
       setTimeout(() => {
         setIsVisible(false);
@@ -133,9 +106,7 @@ const BiometricPrompt = ({
       return;
     }
 
-    // Autenticación cancelada o fallida
     if (currentAttempt < maxAttempts) {
-      // Dar otro intento
       Alert.alert(
         'Autenticación fallida',
         `Intento ${currentAttempt} de ${maxAttempts} falló. ¿Deseas intentar nuevamente?`,
@@ -157,7 +128,6 @@ const BiometricPrompt = ({
         ]
       );
     } else {
-      // Se agotaron los intentos
       Alert.alert(
         'Autenticación fallida',
         'Has excedido el número máximo de intentos. Serás redirigido al login.',

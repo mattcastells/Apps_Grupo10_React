@@ -13,6 +13,7 @@ const Input = ({
   editable = true,
   multiline = false,
   numberOfLines = 1,
+  maxLength,
   style,
   inputStyle,
 }) => {
@@ -43,6 +44,7 @@ const Input = ({
         editable={editable}
         multiline={multiline}
         numberOfLines={numberOfLines}
+        maxLength={maxLength}
         autoCapitalize="none"
         autoCorrect={false}
       />

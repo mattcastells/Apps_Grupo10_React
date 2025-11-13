@@ -87,7 +87,6 @@ const ScanQRScreen = ({ navigation }) => {
 
   const handleConfirmCheckIn = async () => {
     try {
-      // Simulación de check-in exitoso
       Alert.alert('Check-in exitoso', 'Tu asistencia ha sido registrada correctamente', [
         {
           text: 'OK',

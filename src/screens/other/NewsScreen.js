@@ -24,31 +24,8 @@ const NewsScreen = () => {
   const loadNews = async () => {
     setLoading(true);
     try {
-      // Mock noticias - mismas que en la app Android (Reemplazar cuando tengamos el backend)
-      const mockNews = [
-        {
-          id: '1',
-          date: '2025-09-07',
-          title: '¡Nueva clase de Zumba!',
-          content: 'Sumate este viernes a las 19hs en el salón principal.',
-          image: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80' // Imagen de Zumba
-        },
-        {
-          id: '2',
-          date: '2025-09-05',
-          title: 'Cierre por mantenimiento',
-          content: 'El gimnasio permanecerá cerrado el lunes 15/9 por tareas de mantenimiento.',
-          image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80' // Imagen de gym
-        },
-        {
-          id: '3',
-          date: '2025-09-01',
-          title: 'Promo amigos',
-          content: 'Traé un amigo y ambos obtienen un 20% de descuento en la próxima cuota.',
-          image: 'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80' // Imagen de gym amigos
-        }
-      ];
-      setNews(mockNews);
+      // TODO: Implement news endpoint in backend
+      setNews([]);
     } catch (error) {
       console.error('Error loading news:', error);
       Alert.alert('Error', 'No se pudieron cargar las noticias');

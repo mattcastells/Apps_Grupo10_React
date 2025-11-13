@@ -23,7 +23,6 @@ export const AuthProvider = ({ children }) => {
   const [token, setTokenState] = useState(null);
   const [user, setUser] = useState(null);
 
-  // 🔐 Estado en memoria para tracking de autenticación biométrica
   const [hasBiometricAuthenticated, setHasBiometricAuthenticated] = useState(false);
 
   const apiClient = createApiClient();
@@ -96,7 +95,6 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       setTokenState(token);
 
-      // 🔐 Cuando el usuario se loguea manualmente, marcarlo como autenticado biométricamente
       setHasBiometricAuthenticated(true);
 
       return response;
@@ -119,15 +117,6 @@ export const AuthProvider = ({ children }) => {
   const verifyEmail = async (email, otp) => {
     try {
       const response = await authService.verifyEmail(email, otp);
-      setIsAuthenticated(true);
-
-      // 🔐 Al verificar email en registro, marcarlo como autenticado biométricamente
-      setHasBiometricAuthenticated(true);
-
-      if (response.userId) {
-        await loadUserData(response.userId);
-      }
-
       return response;
     } catch (error) {
       console.error('Verify email error:', error);
@@ -141,19 +130,17 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(false);
       setTokenState(null);
       setUser(null);
-      setHasBiometricAuthenticated(false); // 🔐 Resetear autenticación biométrica
+      setHasBiometricAuthenticated(false);
     } catch (error) {
       console.error('Logout error:', error);
       throw error;
     }
   };
 
-  // 🔐 Marcar que el usuario se autenticó exitosamente con biometría en esta sesión
   const markBiometricAuthenticated = () => {
     setHasBiometricAuthenticated(true);
   };
 
-  // 🔐 Verificar si ya se autenticó con biometría en esta sesión
   const needsBiometricAuth = () => {
     return !hasBiometricAuthenticated;
   };
@@ -187,7 +174,6 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateUser,
     refreshUser,
-    // 🔐 Funciones para manejo de autenticación biométrica
     markBiometricAuthenticated,
     needsBiometricAuth,
   };

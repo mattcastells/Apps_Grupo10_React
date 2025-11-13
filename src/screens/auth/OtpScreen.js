@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/Button';
@@ -39,6 +40,18 @@ const OtpScreen = ({ navigation, route }) => {
       await verifyEmail(email, otp.trim());
       setVerified(true);
       setErrorMessage('');
+      
+      // Mostrar mensaje de éxito y redirigir al login
+      Alert.alert(
+        '✅ Verificación exitosa',
+        'Tu cuenta ha sido verificada correctamente. Ahora puedes iniciar sesión con tu email y contraseña.',
+        [
+          {
+            text: 'Ir a Login',
+            onPress: () => navigation.navigate('Login'),
+          },
+        ]
+      );
     } catch (error) {
       setErrorMessage(
         error.response?.data?.message || 'Código OTP inválido. Intenta nuevamente.'
@@ -82,6 +95,7 @@ const OtpScreen = ({ navigation, route }) => {
               placeholder="Código OTP"
               keyboardType="numeric"
               maxLength={6}
+              editable={!verified}
               inputStyle={styles.input}
               style={styles.inputContainer}
             />

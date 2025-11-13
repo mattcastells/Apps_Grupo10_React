@@ -48,6 +48,16 @@ const createScheduleService = (axiosInstance) => ({
     }
   },
 
+  getDisciplines: async () => {
+    try {
+      const response = await axiosInstance.get('/class-templates/disciplines');
+      return response.data;
+    } catch (error) {
+      console.error('Get disciplines error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
   /**
    * Get schedule by location
    * @param {string} location - Location name

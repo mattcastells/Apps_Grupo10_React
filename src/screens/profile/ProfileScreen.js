@@ -73,7 +73,6 @@ const ProfileScreen = ({ navigation }) => {
   };
 
   const selectPhotoFromLibrary = async () => {
-    // Solicitar permisos para acceder a la galería
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (status !== 'granted') {
@@ -84,7 +83,6 @@ const ProfileScreen = ({ navigation }) => {
       return;
     }
 
-    // Abrir selector de galería
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -99,7 +97,6 @@ const ProfileScreen = ({ navigation }) => {
   };
 
   const selectPhotoFromCamera = async () => {
-    // Solicitar permisos para usar la cámara
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
 
     if (status !== 'granted') {
@@ -110,7 +107,6 @@ const ProfileScreen = ({ navigation }) => {
       return;
     }
 
-    // Abrir cámara
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
       aspect: [1, 1],

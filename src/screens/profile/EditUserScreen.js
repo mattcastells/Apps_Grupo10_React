@@ -78,18 +78,16 @@ const EditUserScreen = ({ navigation }) => {
   };
 
   const selectPhotoFromLibrary = async () => {
-    // Solicitar permisos para acceder a la galería
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (status !== 'granted') {
       Alert.alert(
-        'Permiso denegado',
-        'Necesitamos permisos para acceder a tu galería de fotos'
+        'Permission denied',
+        'We need permission to access your photo library'
       );
       return;
     }
 
-    // Abrir selector de galería
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -104,18 +102,16 @@ const EditUserScreen = ({ navigation }) => {
   };
 
   const selectPhotoFromCamera = async () => {
-    // Solicitar permisos para usar la cámara
     const { status} = await ImagePicker.requestCameraPermissionsAsync();
 
     if (status !== 'granted') {
       Alert.alert(
-        'Permiso denegado',
-        'Necesitamos permisos para usar tu cámara'
+        'Permission denied',
+        'We need permission to use your camera'
       );
       return;
     }
 
-    // Abrir cámara
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
       aspect: [1, 1],
@@ -246,7 +242,9 @@ const EditUserScreen = ({ navigation }) => {
           {/* Avatar */}
           <View style={styles.avatarContainer}>
             <Image
-              source={{ uri: user?.photoUrl || 'https://i.pravatar.cc/300?img=12' }}
+              source={{ 
+                uri: user?.photoUrl || 'https://via.placeholder.com/300/CCCCCC/FFFFFF?text=Sin+Foto' 
+              }}
               style={styles.avatar}
             />
           </View>
@@ -429,7 +427,7 @@ const styles = StyleSheet.create({
   },
   picker: {
     height: 48,
-    color: COLORS.WHITE,
+    color: COLORS.DARK,
   },
   saveButton: {
     backgroundColor: COLORS.ORANGE,

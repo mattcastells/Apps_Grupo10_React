@@ -12,8 +12,9 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import Card from '../../components/Card';
 import BiometricPrompt from '../../components/BiometricPrompt';
-import { COLORS, DISCIPLINES, LOCATIONS } from '../../utils/constants';
+import { COLORS } from '../../utils/constants';
 import createScheduleService from '../../services/scheduleService';
+import createLocationService from '../../services/locationService';
 import { useAxios } from '../../hooks/useAxios';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
@@ -23,6 +24,8 @@ const HomeScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
   const { needsBiometricAuth, logout } = useAuth();
   const [classes, setClasses] = useState([]);
+  const [locations, setLocations] = useState([]);
+  const [disciplines, setDisciplines] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedDiscipline, setSelectedDiscipline] = useState('Todos');
@@ -30,31 +33,56 @@ const HomeScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState('Todas');
   const axiosInstance = useAxios();
   const scheduleService = createScheduleService(axiosInstance);
+  const locationService = createLocationService(axiosInstance);
 
-  // 🔐 Estado para controlar si debe mostrar el prompt biométrico
   const [showBiometricPrompt, setShowBiometricPrompt] = useState(false);
 
   useEffect(() => {
-    // 🔐 Verificar si necesita autenticación biométrica al entrar al Home
     if (needsBiometricAuth()) {
-      // Necesita autenticarse, mostrar el prompt
       setShowBiometricPrompt(true);
     } else {
-      // Ya se autenticó en esta sesión, cargar clases normalmente
       loadClasses();
+      loadLocations();
+      loadDisciplines();
+    }
+  }, []);
+
+  const loadLocations = useCallback(async () => {
+    try {
+      console.log('Loading locations from backend...');
+      const data = await locationService.getAllLocations();
+      console.log('Locations loaded:', data);
+      const locationsWithAll = ['Todas', ...data.map(loc => loc.name)];
+      setLocations(locationsWithAll);
+    } catch (error) {
+      console.error('Error loading locations:', error);
+      setLocations(['Todas']);
+    }
+  }, []);
+
+  const loadDisciplines = useCallback(async () => {
+    try {
+      console.log('Loading disciplines from backend...');
+      const data = await scheduleService.getDisciplines();
+      console.log('Disciplines loaded:', data);
+      const disciplinesWithAll = ['Todos', ...data];
+      setDisciplines(disciplinesWithAll);
+    } catch (error) {
+      console.error('Error loading disciplines:', error);
+      setDisciplines(['Todos']);
     }
   }, []);
 
   const loadClasses = useCallback(async () => {
     setLoading(true);
     try {
-      console.log('🔄 Cargando clases desde el backend...');
+      console.log('Loading classes from backend...');
       const data = await scheduleService.getWeeklySchedule();
-      console.log('✅ Clases cargadas:', data);
+      console.log('Classes loaded:', data);
       setClasses(data);
     } catch (error) {
-      console.error('❌ Error loading classes:', error);
-      Alert.alert('Error', 'No se pudieron cargar las clases. Por favor intenta nuevamente.');
+      console.error('Error loading classes:', error);
+      Alert.alert('Error', 'Could not load classes. Please try again.');
       setClasses([]);
     } finally {
       setLoading(false);
@@ -88,24 +116,21 @@ const HomeScreen = ({ navigation }) => {
 
   // 🔐 Callbacks para BiometricPrompt
   const handleBiometricSuccess = () => {
-    // Autenticación exitosa, cargar las clases y continuar con el flujo
-    console.log('[HomeScreen] Autenticación biométrica exitosa');
+    console.log('[HomeScreen] Biometric authentication successful');
     loadClasses();
   };
 
   const handleBiometricFailure = async (reason) => {
-    // Autenticación fallida o sin enrolamiento, desloguear y redirigir a login
-    console.log('[HomeScreen] Autenticación biométrica fallida. Razón:', reason);
+    console.log('[HomeScreen] Biometric authentication failed. Reason:', reason);
 
     Alert.alert(
-      'Autenticación requerida',
-      'No se pudo completar la autenticación. Serás redirigido al login.',
+      'Authentication required',
+      'Could not complete authentication. You will be redirected to login.',
       [
         {
           text: 'OK',
           onPress: async () => {
             await logout();
-            // La navegación al login se hace automáticamente por el AppNavigator
           },
         },
       ]
@@ -113,22 +138,17 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleBiometricCancel = async () => {
-    // Usuario canceló la autenticación, desloguear y redirigir a login
-    console.log('[HomeScreen] Autenticación biométrica cancelada');
-
+    console.log('[HomeScreen] Biometric authentication cancelled');
     await logout();
-    // La navegación al login se hace automáticamente por el AppNavigator
   };
 
   const getFilteredClasses = () => {
     return classes.filter((item) => {
-      // Filtro por disciplina
       const matchDiscipline =
         selectedDiscipline === 'Todos' ||
         item.discipline === selectedDiscipline ||
         item.name?.includes(selectedDiscipline);
 
-      // Filtro por ubicación/sede
       const matchLocation =
         selectedLocation === 'Todas' ||
         item.location === selectedLocation ||
@@ -230,41 +250,50 @@ const HomeScreen = ({ navigation }) => {
             <Text style={[styles.catalogTitle, { color: theme.primary }]}>Catálogo de Clases y Turnos</Text>
 
             <View style={styles.filtersContainer}>
-              <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
-                <Picker
-                  selectedValue={selectedLocation}
-                  onValueChange={setSelectedLocation}
-                  style={[styles.picker, { color: isDarkMode ? COLORS.WHITE : theme.text }]}
-                >
-                  {LOCATIONS.map((location) => (
-                    <Picker.Item key={location} label={location} value={location} />
-                  ))}
-                </Picker>
+              <View style={styles.filterWrapper}>
+                <Text style={[styles.filterLabel, { color: theme.text }]}>Sede</Text>
+                <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
+                  <Picker
+                    selectedValue={selectedLocation}
+                    onValueChange={setSelectedLocation}
+                    style={[styles.picker, { color: isDarkMode ? COLORS.WHITE : theme.text }]}
+                  >
+                    {locations.map((location) => (
+                      <Picker.Item key={location} label={location} value={location} />
+                    ))}
+                  </Picker>
+                </View>
               </View>
 
-              <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
-                <Picker
-                  selectedValue={selectedDiscipline}
-                  onValueChange={setSelectedDiscipline}
-                  style={[styles.picker, { color: isDarkMode ? COLORS.WHITE : theme.text }]}
-                >
-                  {DISCIPLINES.map((discipline) => (
-                    <Picker.Item key={discipline} label={discipline} value={discipline} />
-                  ))}
-                </Picker>
+              <View style={styles.filterWrapper}>
+                <Text style={[styles.filterLabel, { color: theme.text }]}>Disciplina</Text>
+                <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
+                  <Picker
+                    selectedValue={selectedDiscipline}
+                    onValueChange={setSelectedDiscipline}
+                    style={[styles.picker, { color: isDarkMode ? COLORS.WHITE : theme.text }]}
+                  >
+                    {disciplines.map((discipline) => (
+                      <Picker.Item key={discipline} label={discipline} value={discipline} />
+                    ))}
+                  </Picker>
+                </View>
               </View>
 
-              <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
-                <Picker
-                  selectedValue={selectedDate}
-                  onValueChange={setSelectedDate}
-                  style={[styles.picker, { color: isDarkMode ? COLORS.WHITE : theme.text }]}
-                >
-                  <Picker.Item label="Todas" value="Todas" />
-                  <Picker.Item label="Hoy" value="Hoy" />
-                  <Picker.Item label="Mañana" value="Mañana" />
-                  <Picker.Item label="Esta semana" value="Semana" />
-                </Picker>
+              <View style={styles.filterWrapper}>
+                <Text style={[styles.filterLabel, { color: theme.text }]}>Fecha</Text>
+                <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
+                  <Picker
+                    selectedValue={selectedDate}
+                    onValueChange={setSelectedDate}
+                    style={[styles.picker, { color: isDarkMode ? COLORS.WHITE : theme.text }]}
+                  >
+                    <Picker.Item label="Todas" value="Todas" />
+                    <Picker.Item label="Hoy" value="Hoy" />
+                    <Picker.Item label="Mañana" value="Mañana" />
+                    <Picker.Item label="Esta semana" value="Semana" />
+                  </Picker>
+                </View>
               </View>
             </View>
 
@@ -388,13 +417,19 @@ const styles = StyleSheet.create({
     lineHeight: 28,
   },
   filtersContainer: {
-    flexDirection: 'row',
     marginBottom: 16,
-    justifyContent: 'space-between',
-    gap: 8,
+    gap: 12,
+  },
+  filterWrapper: {
+    marginBottom: 8,
+  },
+  filterLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 6,
+    marginLeft: 4,
   },
   filterItem: {
-    flex: 1,
     borderWidth: 1,
     borderRadius: 8,
     height: 56,
