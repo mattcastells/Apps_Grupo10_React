@@ -16,7 +16,7 @@ const createHistoryService = (axiosInstance) => ({
 
   getAttendanceDetail: async (attendanceId) => {
     try {
-      const response = await axiosInstance.get(`/attendance/${attendanceId}`);
+      const response = await axiosInstance.get(`/history/${attendanceId}`);
       return response.data;
     } catch (error) {
       console.error('Get attendance detail error:', error.response?.data || error.message);
