@@ -6,8 +6,9 @@ import {
   SafeAreaView,
   ScrollView,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
-import { COLORS } from '../../utils/constants';
+import { useTheme } from '../../context/ThemeContext';
 import createHistoryService from '../../services/historyService';
 import { formatDate } from '../../utils/helpers';
 import { useAxios } from '../../hooks/useAxios';
@@ -18,6 +19,7 @@ const HistoryDetailScreen = ({ route, navigation }) => {
   const [loading, setLoading] = useState(false);
   const axiosInstance = useAxios();
   const historyService = createHistoryService(axiosInstance);
+  const { theme, isDarkMode } = useTheme();
 
   useEffect(() => {
     loadAttendanceDetail();
@@ -38,11 +40,20 @@ const HistoryDetailScreen = ({ route, navigation }) => {
     }
   };
 
+  const isToday = (someDate) => {
+    const today = new Date();
+    return (
+      someDate.getDate() === today.getDate() &&
+      someDate.getMonth() === today.getMonth() &&
+      someDate.getFullYear() === today.getFullYear()
+    );
+  };
+
   if (loading || !attendance) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Cargando...</Text>
+          <Text style={[styles.loadingText, { color: theme.text }]}>Cargando...</Text>
         </View>
       </SafeAreaView>
     );
@@ -50,53 +61,80 @@ const HistoryDetailScreen = ({ route, navigation }) => {
 
   const date = new Date(attendance.startDateTime);
   const formattedDate = formatDate(attendance.startDateTime);
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const formattedTime = `${hours}:${minutes}`;
-  const endHour = date.getHours() + Math.floor(attendance.durationMinutes / 60);
-  const endMinute = date.getMinutes() + (attendance.durationMinutes % 60);
-  const formattedEndTime = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}`;
+  const formattedTime = `${String(date.getHours()).padStart(2, '0')}:${String(
+    date.getMinutes()
+  ).padStart(2, '0')}`;
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, i) => (i < rating ? '⭐' : '☆')).join(' ');
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Banner */}
-      <View style={styles.banner}>
-        <Text style={styles.bannerText}>Detalle asistencia</Text>
-      </View>
-
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Class Info */}
-        <Text style={styles.boldText}>Sede: {attendance.site}</Text>
-        <Text style={styles.infoText}>Fecha: {formattedDate}</Text>
-        <Text style={styles.infoText}>Hora: {formattedTime} - {formattedEndTime}</Text>
-        <Text style={styles.infoText}>Duración: {attendance.durationMinutes} min</Text>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Text style={[styles.backButtonText, { color: theme.primary }]}>← Volver</Text>
+        </TouchableOpacity>
 
-        <Text style={styles.boldText}>Disciplina: {attendance.discipline}</Text>
-        <Text style={styles.infoText}>Instructor: {attendance.teacher}</Text>
-        <Text style={styles.infoText}>
-          Estado: {attendance.attendanceStatus === 'PRESENT' ? 'Presente' : 'Ausente'}
-        </Text>
-
-        {/* Review Section */}
-        {attendance.userReview ? (
-          <View style={styles.reviewSection}>
-            <Text style={styles.reviewTitle}>Tu reseña</Text>
-            <View style={styles.starsContainer}>
-              <Text style={styles.starsText}>{renderStars(attendance.userReview.rating)}</Text>
-            </View>
-            <Text style={styles.commentText}>{attendance.userReview.comment}</Text>
+        <View style={[styles.headerCard, { backgroundColor: theme.primary }]}>
+          <Text style={[styles.disciplineTitle, { color: theme.textInverted }]}>{attendance.discipline}</Text>
+          <View style={styles.headerInfo}>
+            <Text style={[styles.headerText, { color: theme.textInverted }]}>📍 {attendance.site}</Text>
+            <Text style={[styles.headerText, { color: theme.textInverted }]}>📅 {formattedDate}</Text>
+            <Text style={[styles.headerText, { color: theme.textInverted }]}>🕒 {formattedTime}</Text>
           </View>
-        ) : (
-          <View style={styles.reviewSection}>
-            <Text style={styles.noReviewText}>
-              No realizaste comentarios sobre esta clase
-            </Text>
+        </View>
+
+        {isToday(date) && (
+          <View style={[styles.todayCard, { backgroundColor: theme.container, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
+            <Text style={[styles.todayTitle, { color: theme.primary }]}>¡Recordatorio!</Text>
+            <Text style={[styles.todayText, { color: theme.text }]}>💧 Mantente hidratado.</Text>
+            <Text style={[styles.todayText, { color: theme.text }]}>🧘 Lleva tu toalla.</Text>
+            <Text style={[styles.todayText, { color: theme.text }]}>👍 ¡Disfruta tu clase!</Text>
           </View>
         )}
+
+        <View style={[styles.detailsCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
+          <Text style={[styles.cardTitle, { color: theme.text, borderBottomColor: theme.divider }]}>Detalles de la Asistencia</Text>
+          <View style={styles.infoRow}>
+            <Text style={[styles.infoLabel, { color: theme.textLight }]}>Instructor</Text>
+            <Text style={[styles.infoValue, { color: theme.text }]}>{attendance.teacher}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={[styles.infoLabel, { color: theme.textLight }]}>Duración</Text>
+            <Text style={[styles.infoValue, { color: theme.text }]}>{attendance.durationMinutes} min</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={[styles.infoLabel, { color: theme.textLight }]}>Estado</Text>
+            <View
+              style={[
+                styles.statusBadge,
+                {
+                  backgroundColor:
+                    attendance.attendanceStatus === 'PRESENT'
+                      ? theme.success
+                      : theme.error,
+                },
+              ]}
+            >
+              <Text style={[styles.statusText, { color: theme.textInverted }]}>
+                {attendance.attendanceStatus === 'PRESENT' ? 'Presente' : 'Ausente'}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={[styles.reviewCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
+          <Text style={[styles.cardTitle, { color: theme.text, borderBottomColor: theme.divider }]}>Tu Reseña</Text>
+          {attendance.userReview ? (
+            <>
+              <Text style={[styles.starsText, { color: theme.primary }]}>{renderStars(attendance.userReview.rating)}</Text>
+              <Text style={[styles.commentText, { color: theme.text }]}>{attendance.userReview.comment}</Text>
+            </>
+          ) : (
+            <Text style={[styles.noReviewText, { color: theme.textLight }]}>Aún no has dejado una reseña para esta clase.</Text>
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -105,7 +143,6 @@ const HistoryDetailScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BEIGE,
   },
   loadingContainer: {
     flex: 1,
@@ -113,59 +150,128 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 16,
-    color: COLORS.DARK,
-  },
-  banner: {
-    backgroundColor: COLORS.ORANGE,
-    padding: 16,
-  },
-  bannerText: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: COLORS.WHITE,
+    fontSize: 18,
   },
   scrollContent: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  backButton: {
+    marginBottom: 20,
+    alignSelf: 'flex-start',
+  },
+  backButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  headerCard: {
+    borderRadius: 16,
     padding: 24,
-    paddingBottom: 80,
+    marginBottom: 20,
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
   },
-  boldText: {
-    fontSize: 16,
+  disciplineTitle: {
+    fontSize: 32,
     fontWeight: 'bold',
-    color: COLORS.DARK,
-    marginTop: 8,
+    marginBottom: 16,
   },
-  infoText: {
+  headerInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+  },
+  headerText: {
     fontSize: 16,
-    color: COLORS.DARK,
-    marginTop: 8,
+    fontWeight: '600',
   },
-  reviewSection: {
-    marginTop: 16,
+  todayCard: {
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
-  reviewTitle: {
-    fontSize: 16,
+  todayTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
-    color: COLORS.DARK,
-    marginTop: 16,
+    marginBottom: 12,
   },
-  starsContainer: {
-    marginTop: 8,
+  todayText: {
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  detailsCard: {
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    borderBottomWidth: 1,
+    paddingBottom: 8,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  infoLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  infoValue: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  statusText: {
+    fontWeight: 'bold',
+  },
+  reviewCard: {
+    borderRadius: 12,
+    padding: 20,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   starsText: {
-    fontSize: 24,
-    letterSpacing: 4,
+    fontSize: 28,
+    textAlign: 'center',
+    marginBottom: 12,
   },
   commentText: {
     fontSize: 16,
-    color: COLORS.DARK,
-    marginTop: 8,
     lineHeight: 24,
+    fontStyle: 'italic',
+    textAlign: 'center',
   },
   noReviewText: {
     fontSize: 16,
-    color: COLORS.DARK,
+    textAlign: 'center',
     fontStyle: 'italic',
+    paddingVertical: 20,
   },
 });
 
