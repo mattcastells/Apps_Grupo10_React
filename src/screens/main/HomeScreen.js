@@ -65,7 +65,12 @@ const HomeScreen = ({ navigation }) => {
       console.log('Loading disciplines from backend...');
       const data = await scheduleService.getDisciplines();
       console.log('Disciplines loaded:', data);
-      const disciplinesWithAll = ['Todos', ...data];
+      const mapped = Array.isArray(data)
+        ? data
+            .map((d) => (typeof d === 'string' ? d : d?.discipline ?? d?.name ?? ''))
+            .filter(Boolean)
+        : [];
+      const disciplinesWithAll = ['Todos', ...mapped];
       setDisciplines(disciplinesWithAll);
     } catch (error) {
       console.error('Error loading disciplines:', error);
@@ -418,10 +423,13 @@ const styles = StyleSheet.create({
   },
   filtersContainer: {
     marginBottom: 16,
-    gap: 12,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   filterWrapper: {
-    marginBottom: 8,
+    marginBottom: 12,
+    width: '48%',
   },
   filterLabel: {
     fontSize: 14,
@@ -440,6 +448,7 @@ const styles = StyleSheet.create({
     height: 56,
     fontSize: 14,
     color: COLORS.WHITE,
+    paddingHorizontal: 8,
   },
   classesListTitle: {
     fontSize: 16,
