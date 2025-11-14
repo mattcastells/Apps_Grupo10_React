@@ -59,10 +59,11 @@ const createAuthService = (apiClient) => ({
     }
   },
 
-  resetPassword: async (token, newPassword) => {
+  resetPassword: async (email, otp, newPassword) => {
     try {
       const response = await apiClient.post('/auth/reset-password', {
-        token,
+        email,
+        otp,
         newPassword,
       });
       return response.data;
