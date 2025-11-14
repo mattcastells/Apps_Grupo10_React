@@ -14,6 +14,7 @@ import Card from '../../components/Card';
 import BiometricPrompt from '../../components/BiometricPrompt';
 import { COLORS, DISCIPLINES, LOCATIONS } from '../../utils/constants';
 import createScheduleService from '../../services/scheduleService';
+import createBookingService from '../../services/bookingService';
 import { useAxios } from '../../hooks/useAxios';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
@@ -23,6 +24,7 @@ const HomeScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
   const { needsBiometricAuth, logout } = useAuth();
   const [classes, setClasses] = useState([]);
+  const [bookedClassIds, setBookedClassIds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedDiscipline, setSelectedDiscipline] = useState('Todos');
@@ -30,6 +32,7 @@ const HomeScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState('Todas');
   const axiosInstance = useAxios();
   const scheduleService = createScheduleService(axiosInstance);
+  const bookingService = createBookingService(axiosInstance);
 
   // 🔐 Estado para controlar si debe mostrar el prompt biométrico
   const [showBiometricPrompt, setShowBiometricPrompt] = useState(false);
@@ -52,6 +55,17 @@ const HomeScreen = ({ navigation }) => {
       const data = await scheduleService.getWeeklySchedule();
       console.log('✅ Clases cargadas:', data);
       setClasses(data);
+
+      // Cargar IDs de clases ya reservadas
+      try {
+        const bookedIds = await bookingService.getBookedClassIds();
+        console.log('✅ IDs de clases reservadas:', bookedIds);
+        setBookedClassIds(bookedIds);
+      } catch (error) {
+        console.error('⚠️ Error loading booked class IDs:', error);
+        // No es crítico, continuar sin marcar clases
+        setBookedClassIds([]);
+      }
     } catch (error) {
       console.error('❌ Error loading classes:', error);
       Alert.alert('Error', 'No se pudieron cargar las clases. Por favor intenta nuevamente.');
@@ -138,30 +152,34 @@ const HomeScreen = ({ navigation }) => {
     });
   };
 
-  const renderClassItem = ({ item }) => (
-    <Card onPress={() => handleClassPress(item)} style={[styles.classCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
-      <View style={styles.cardHeader}>
-        <Text style={[styles.className, { color: theme.text }]}>{item.name || item.discipline}</Text>
-        <View style={[styles.badge, { backgroundColor: theme.primary }]}>
-          <Text style={styles.badgeText}>{item.discipline}</Text>
-        </View>
-      </View>
+  const renderClassItem = ({ item }) => {
+    const isBooked = bookedClassIds.includes(item.id);
 
-      <View style={styles.cardContent}>
-        <Text style={[styles.infoText, { color: theme.textSecondary }]}>Instructor: {item.professor || item.teacher || 'N/A'}</Text>
-        <Text style={[styles.infoText, { color: theme.textSecondary }]}>Sede: {item.location || item.site || 'N/A'}</Text>
-        <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-          Fecha: {item.dateTime ? new Date(item.dateTime).toLocaleDateString() : 'N/A'}
-        </Text>
-        <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-          Duración: {item.durationMinutes || 60} min
-        </Text>
-        <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-          Cupos: {item.availableSlots || 0}
-        </Text>
-      </View>
-    </Card>
-  );
+    return (
+      <Card onPress={() => handleClassPress(item)} style={[styles.classCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
+        <View style={styles.cardHeader}>
+          <Text style={[styles.className, { color: theme.text }]}>{item.name || item.discipline}</Text>
+          <View style={[styles.badge, { backgroundColor: isBooked ? theme.success : theme.primary }]}>
+            <Text style={styles.badgeText}>{isBooked ? '✓ Reservada' : item.discipline}</Text>
+          </View>
+        </View>
+
+        <View style={styles.cardContent}>
+          <Text style={[styles.infoText, { color: theme.textSecondary }]}>Instructor: {item.professor || item.teacher || 'N/A'}</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary }]}>Sede: {item.location || item.site || 'N/A'}</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary }]}>
+            Fecha: {item.dateTime ? new Date(item.dateTime).toLocaleDateString() : 'N/A'}
+          </Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary }]}>
+            Duración: {item.durationMinutes || 60} min
+          </Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary }]}>
+            Cupos: {item.availableSlots || 0}
+          </Text>
+        </View>
+      </Card>
+    );
+  };
 
   const filteredClasses = getFilteredClasses();
 

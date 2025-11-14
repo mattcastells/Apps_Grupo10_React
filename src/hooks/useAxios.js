@@ -43,8 +43,10 @@ export const useAxios = () => {
     const responseInterceptor = instance.interceptors.response.use(
       (res) => res,
       async (err) => {
-        if (err.response?.status === 401 || err.response?.status === 403) {
-          console.warn('Error 401/403 detectado por useAxios. Deslogueando...');
+        // Solo desloguear en errores 401 (no autorizado)
+        // Los 403 pueden ser errores de validación de negocio (ej: clase llena, ya reservada)
+        if (err.response?.status === 401) {
+          console.warn('Error 401 detectado por useAxios. Token inválido o expirado. Deslogueando...');
           await logout();
           // The AppNavigator will handle the redirection automatically
         }

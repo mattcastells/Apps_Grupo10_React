@@ -102,6 +102,11 @@ export const AuthProvider = ({ children }) => {
       return response;
     } catch (error) {
       console.error('Login error:', error);
+      // IMPORTANTE: Asegurarse de que el estado de autenticación NO se setee en caso de error
+      setIsAuthenticated(false);
+      setTokenState(null);
+      setUser(null);
+      setHasBiometricAuthenticated(false);
       throw error;
     }
   };
