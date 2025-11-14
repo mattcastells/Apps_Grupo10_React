@@ -130,22 +130,37 @@ const EditUserScreen = ({ navigation }) => {
       return;
     }
 
+    // Debug: ver qué propiedades tiene imageData
+    console.log('🔍 imageData recibido:', imageData);
+    console.log('🔍 imageData keys:', Object.keys(imageData || {}));
+
+    if (!imageData || !imageData.uri) {
+      Alert.alert('Error', 'No se pudo obtener la imagen seleccionada');
+      return;
+    }
+
     setUploadingPhoto(true);
 
     try {
       // Preparar datos de la imagen (Expo format)
       const imagePayload = {
         uri: imageData.uri,
-        type: imageData.mimeType || 'image/jpeg',
+        type: imageData.mimeType || imageData.type || 'image/jpeg',
         fileName: imageData.fileName || `profile_${user.id}_${Date.now()}.jpg`,
       };
 
+      console.log('📦 imagePayload preparado:', imagePayload);
+
       // Subir a Cloudinary y guardar en backend
       const result = await cloudinaryService.uploadAndSaveProfilePhoto(
+        user.id,
         imagePayload
       );
 
       if (result.success) {
+        // Actualizar foto en UI inmediatamente (optimistic update)
+        updateUser({ ...user, photoUrl: result.photoUrl });
+
         Alert.alert('Éxito', 'Foto de perfil actualizada correctamente');
         // Refrescar datos del usuario desde el backend para ver la nueva foto
         await refreshUser();
@@ -323,16 +338,20 @@ const EditUserScreen = ({ navigation }) => {
           />
 
           {/* Gender Picker */}
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={formData.gender}
-              onValueChange={(value) => handleChange('gender', value)}
-              style={styles.picker}
-            >
-              {GENDERS.map((gender) => (
-                <Picker.Item key={gender.value} label={gender.label} value={gender.value} />
-              ))}
-            </Picker>
+          <View style={styles.genderWrapper}>
+            <Text style={styles.genderLabel}>Género</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={formData.gender}
+                onValueChange={(value) => handleChange('gender', value)}
+                style={styles.picker}
+                itemStyle={styles.pickerItem}
+              >
+                {GENDERS.map((gender) => (
+                  <Picker.Item key={gender.value} label={gender.label} value={gender.value} />
+                ))}
+              </Picker>
+            </View>
           </View>
 
           {/* Save Button */}
@@ -434,6 +453,16 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.WHITE,
     marginBottom: 10,
   },
+  genderWrapper: {
+    marginBottom: 10,
+  },
+  genderLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 4,
+    marginLeft: 4,
+    color: COLORS.DARK,
+  },
   pickerContainer: {
     height: 48,
     borderWidth: 1,
@@ -441,11 +470,16 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: COLORS.WHITE,
     justifyContent: 'center',
-    marginBottom: 10,
+    overflow: 'visible',
   },
   picker: {
     height: 48,
+    width: '100%',
     color: COLORS.DARK,
+  },
+  pickerItem: {
+    fontSize: 16,
+    height: 48,
   },
   saveButton: {
     backgroundColor: COLORS.ORANGE,

@@ -313,9 +313,9 @@ const HomeScreen = ({ navigation }) => {
                     itemStyle={styles.pickerItem}
                   >
                     <Picker.Item key="todas" label="Todas" value="Todas" />
-                    {locations.map((location) => {
+                    {Array.isArray(locations) && locations.map((location) => {
                       // Mostrar solo el nombre de la ciudad (ej: "Palermo") en lugar de "Sede Palermo"
-                      const shortLabel = location.name.replace('Sede ', '');
+                      const shortLabel = location?.name?.replace('Sede ', '') || location?.name || 'Sin nombre';
                       return <Picker.Item key={location.id} label={shortLabel} value={location.name} />;
                     })}
                   </Picker>

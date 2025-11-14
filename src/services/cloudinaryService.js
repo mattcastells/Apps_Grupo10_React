@@ -1,9 +1,15 @@
 /**
  * Cloudinary Configuration
+ * IMPORTANTE: Estos son los valores correctos de tu cuenta de Cloudinary
  */
 const CLOUDINARY_CONFIG = {
-  CLOUD_NAME: 'dtjbknm5h',
-  UPLOAD_PRESET: 'ml_default',
+  // Cloud name de tu cuenta Cloudinary
+  CLOUD_NAME: 'do7lo4pkj',
+
+  // Upload preset (debe ser "unsigned" para uploads desde el cliente)
+  UPLOAD_PRESET: 'ritmofit_unisgned',
+
+  // URL base de Cloudinary (no modificar)
   BASE_URL: 'https://api.cloudinary.com/v1_1',
 };
 
@@ -71,14 +77,15 @@ const createCloudinaryService = (axiosInstance) => ({
 
   /**
    * Saves image URL to backend
+   * @param {string} userId - User ID
    * @param {string} imageUrl - Image URL from Cloudinary
    * @returns {Promise<Object>} - Backend response
    */
-  saveImageUrlToBackend: async (imageUrl) => {
+  saveImageUrlToBackend: async (userId, imageUrl) => {
     try {
-      console.log(`Guardando URL en el backend para usuario...`);
+      console.log(`Guardando URL en el backend para usuario ${userId}...`);
 
-      const endpoint = '/users/my-photo';
+      const endpoint = `/users/${userId}/photo`;
 
       const requestBody = {
         photoUrl: imageUrl,
@@ -103,10 +110,11 @@ const createCloudinaryService = (axiosInstance) => ({
 
   /**
    * Complete process: Upload image to Cloudinary and save URL to backend
+   * @param {string} userId - User ID
    * @param {Object} imageData - Image data from react-native-image-picker
    * @returns {Promise<Object>} - Object with image URL and backend response
    */
-  uploadAndSaveProfilePhoto: async function (imageData) {
+  uploadAndSaveProfilePhoto: async function (userId, imageData) {
     try {
       console.log('Iniciando proceso de subida de imagen...');
       const cloudinaryResult = await this.uploadToCloudinary(imageData);
@@ -115,7 +123,7 @@ const createCloudinaryService = (axiosInstance) => ({
         throw new Error('Error al subir imagen a Cloudinary');
       }
 
-      const backendResult = await this.saveImageUrlToBackend(cloudinaryResult.url);
+      const backendResult = await this.saveImageUrlToBackend(userId, cloudinaryResult.url);
 
       return {
         success: true,

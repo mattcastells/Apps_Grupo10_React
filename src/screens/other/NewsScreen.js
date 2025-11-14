@@ -44,17 +44,42 @@ const NewsScreen = () => {
     setRefreshing(false);
   };
 
-  const renderNewsItem = ({ item }) => (
-    <View style={[styles.newsCard, { backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border }]}>
-      <Image source={{ uri: item.image }} style={styles.newsImage} />
-      <View style={[styles.cardDivider, { backgroundColor: theme.divider }]} />
-      <View style={styles.newsContent}>
-        <Text style={[styles.newsDate, { color: theme.textSecondary }]}>{item.date}</Text>
-        <Text style={[styles.newsTitle, { color: theme.text }]}>{item.title}</Text>
-        <Text style={[styles.newsText, { color: theme.text }]}>{item.content}</Text>
+  const renderNewsItem = ({ item }) => {
+    console.log('📰 Renderizando noticia:', item.title);
+    console.log('🖼️ URL de imagen:', item.image);
+    console.log('🔍 Tipo de imagen:', typeof item.image);
+    console.log('🔍 Imagen vacía?:', !item.image);
+
+    return (
+      <View style={[styles.newsCard, { backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border }]}>
+        {item.image ? (
+          <Image
+            key={item.id}
+            source={{ uri: item.image }}
+            style={styles.newsImage}
+            resizeMode="cover"
+            onError={(error) => {
+              console.error('❌ Error cargando imagen:', item.title);
+              console.error('Error details:', error.nativeEvent);
+            }}
+            onLoad={() => console.log('✅ Imagen cargada exitosamente:', item.title)}
+            onLoadStart={() => console.log('🔄 Comenzando a cargar imagen:', item.title)}
+            onLoadEnd={() => console.log('⏹️ Terminó carga de imagen (éxito o error):', item.title)}
+          />
+        ) : (
+          <View style={[styles.newsImage, { backgroundColor: '#E0E0E0', justifyContent: 'center', alignItems: 'center' }]}>
+            <Text style={{ color: '#999' }}>Sin imagen</Text>
+          </View>
+        )}
+        <View style={[styles.cardDivider, { backgroundColor: theme.divider }]} />
+        <View style={styles.newsContent}>
+          <Text style={[styles.newsDate, { color: theme.textSecondary }]}>{item.date}</Text>
+          <Text style={[styles.newsTitle, { color: theme.text }]}>{item.title}</Text>
+          <Text style={[styles.newsText, { color: theme.text }]}>{item.content}</Text>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
