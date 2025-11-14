@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Platform,
   ScrollView,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/Button';
@@ -15,12 +16,102 @@ import Input from '../../components/Input';
 import { COLORS } from '../../utils/constants';
 
 const OtpScreen = ({ navigation, route }) => {
-  const { verifyEmail } = useAuth();
+  const { verifyEmail, resendOtp } = useAuth();
   const email = route.params?.email || '';
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [verified, setVerified] = useState(false);
+  const [canResend, setCanResend] = useState(true);
+  const [resendCountdown, setResendCountdown] = useState(0);
+
+  // Rate limiting: track resend attempts
+  const resendAttemptsRef = useRef([]);
+  const countdownTimerRef = useRef(null);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (countdownTimerRef.current) {
+        clearInterval(countdownTimerRef.current);
+      }
+    };
+  }, []);
+
+  const checkRateLimits = () => {
+    const now = Date.now();
+    const oneMinuteAgo = now - 60 * 1000;
+    const oneHourAgo = now - 60 * 60 * 1000;
+
+    // Filter out old attempts
+    resendAttemptsRef.current = resendAttemptsRef.current.filter(
+      (timestamp) => timestamp > oneHourAgo
+    );
+
+    // Check limits
+    const attemptsInLastMinute = resendAttemptsRef.current.filter(
+      (timestamp) => timestamp > oneMinuteAgo
+    ).length;
+
+    const attemptsInLastHour = resendAttemptsRef.current.length;
+
+    if (attemptsInLastMinute >= 1) {
+      return { allowed: false, reason: 'Debes esperar 1 minuto antes de reenviar el código' };
+    }
+
+    if (attemptsInLastHour >= 5) {
+      return { allowed: false, reason: 'Has alcanzado el límite de 5 reenvíos por hora' };
+    }
+
+    return { allowed: true };
+  };
+
+  const startCountdown = () => {
+    setResendCountdown(60);
+    setCanResend(false);
+
+    if (countdownTimerRef.current) {
+      clearInterval(countdownTimerRef.current);
+    }
+
+    countdownTimerRef.current = setInterval(() => {
+      setResendCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(countdownTimerRef.current);
+          setCanResend(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const handleResendOtp = async () => {
+    const rateLimitCheck = checkRateLimits();
+
+    if (!rateLimitCheck.allowed) {
+      Alert.alert('Límite alcanzado', rateLimitCheck.reason);
+      return;
+    }
+
+    setResendLoading(true);
+    setErrorMessage('');
+
+    try {
+      await resendOtp(email);
+      resendAttemptsRef.current.push(Date.now());
+      startCountdown();
+      Alert.alert('Código reenviado', 'Se ha enviado un nuevo código OTP a tu correo.');
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        error.response?.data?.message || 'No se pudo reenviar el código. Intenta nuevamente.'
+      );
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
   const handleVerify = async () => {
     setErrorMessage('');
@@ -114,6 +205,28 @@ const OtpScreen = ({ navigation, route }) => {
                 style={styles.verifyButton}
                 textStyle={styles.buttonText}
               />
+            )}
+
+            {/* Resend OTP Button */}
+            {!verified && (
+              <TouchableOpacity
+                onPress={handleResendOtp}
+                disabled={!canResend || resendLoading}
+                style={styles.resendContainer}
+              >
+                <Text
+                  style={[
+                    styles.resendText,
+                    (!canResend || resendLoading) && styles.resendTextDisabled,
+                  ]}
+                >
+                  {resendLoading
+                    ? 'Reenviando...'
+                    : canResend
+                    ? '¿No recibiste el código? Reenviar'
+                    : `Reenviar en ${resendCountdown}s`}
+                </Text>
+              </TouchableOpacity>
             )}
 
             {/* Login Button (shown after verification) */}
@@ -216,6 +329,21 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: COLORS.WHITE,
+  },
+  resendContainer: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginBottom: 12,
+  },
+  resendText: {
+    fontSize: 14,
+    color: COLORS.HOLO_BLUE_DARK,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  resendTextDisabled: {
+    color: COLORS.GRAY,
+    textDecorationLine: 'none',
   },
 });
 

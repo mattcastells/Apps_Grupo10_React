@@ -127,6 +127,13 @@ export const AuthProvider = ({ children }) => {
     [authService]
   );
 
+  const resendOtp = useCallback(
+    async (email) => {
+      return await authService.resendOtp(email);
+    },
+    [authService]
+  );
+
   const logout = useCallback(async () => {
     await SessionManager.clear();
     setIsAuthenticated(false);
@@ -161,6 +168,7 @@ export const AuthProvider = ({ children }) => {
       login,
       register,
       verifyEmail,
+      resendOtp,
       logout,
       updateUser,
       refreshUser,
@@ -174,6 +182,7 @@ export const AuthProvider = ({ children }) => {
       login,
       register,
       verifyEmail,
+      resendOtp,
       logout,
       updateUser,
       refreshUser,

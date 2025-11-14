@@ -197,16 +197,20 @@ const CreateUserScreen = ({ navigation }) => {
             />
 
             {/* Gender Picker */}
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={formData.gender}
-                onValueChange={(value) => handleChange('gender', value)}
-                style={styles.picker}
-              >
-                {GENDERS.map((gender) => (
-                  <Picker.Item key={gender.value} label={gender.label} value={gender.value} />
-                ))}
-              </Picker>
+            <View style={styles.genderWrapper}>
+              <Text style={styles.genderLabel}>Género</Text>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={formData.gender}
+                  onValueChange={(value) => handleChange('gender', value)}
+                  style={styles.picker}
+                  itemStyle={styles.pickerItem}
+                >
+                  {GENDERS.map((gender) => (
+                    <Picker.Item key={gender.value} label={gender.label} value={gender.value} />
+                  ))}
+                </Picker>
+              </View>
             </View>
 
             {/* Create User Button */}
@@ -287,18 +291,33 @@ const styles = StyleSheet.create({
     borderColor: COLORS.GRAY,
     borderWidth: 1,
   },
+  genderWrapper: {
+    marginBottom: 10,
+  },
+  genderLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.DARK,
+    marginBottom: 6,
+    marginLeft: 4,
+  },
   pickerContainer: {
     height: 48,
     borderWidth: 1,
     borderColor: COLORS.GRAY,
     borderRadius: 8,
-    marginBottom: 10,
     justifyContent: 'center',
     backgroundColor: COLORS.WHITE,
+    overflow: 'visible',
   },
   picker: {
     height: 48,
+    width: '100%',
     color: COLORS.DARK,
+  },
+  pickerItem: {
+    height: 48,
+    fontSize: 16,
   },
   createButton: {
     backgroundColor: COLORS.ORANGE,

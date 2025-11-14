@@ -45,11 +45,6 @@ const NewsScreen = () => {
   };
 
   const renderNewsItem = ({ item }) => {
-    console.log('📰 Renderizando noticia:', item.title);
-    console.log('🖼️ URL de imagen:', item.image);
-    console.log('🔍 Tipo de imagen:', typeof item.image);
-    console.log('🔍 Imagen vacía?:', !item.image);
-
     return (
       <View style={[styles.newsCard, { backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border }]}>
         {item.image ? (
@@ -58,13 +53,6 @@ const NewsScreen = () => {
             source={{ uri: item.image }}
             style={styles.newsImage}
             resizeMode="cover"
-            onError={(error) => {
-              console.error('❌ Error cargando imagen:', item.title);
-              console.error('Error details:', error.nativeEvent);
-            }}
-            onLoad={() => console.log('✅ Imagen cargada exitosamente:', item.title)}
-            onLoadStart={() => console.log('🔄 Comenzando a cargar imagen:', item.title)}
-            onLoadEnd={() => console.log('⏹️ Terminó carga de imagen (éxito o error):', item.title)}
           />
         ) : (
           <View style={[styles.newsImage, { backgroundColor: '#E0E0E0', justifyContent: 'center', alignItems: 'center' }]}>

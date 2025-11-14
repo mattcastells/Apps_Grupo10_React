@@ -49,6 +49,18 @@ const createAuthService = (apiClient) => ({
     }
   },
 
+  resendOtp: async (email) => {
+    try {
+      console.log('📧 Resending OTP to:', email);
+      const response = await apiClient.post('/auth/resend-otp', { email });
+      console.log('✅ OTP resent successfully');
+      return response.data;
+    } catch (error) {
+      console.error('❌ Resend OTP error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
   requestPasswordReset: async (email) => {
     try {
       const response = await apiClient.post('/auth/forgot-password', { email });

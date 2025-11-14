@@ -14,15 +14,17 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
+import EmailInputModal from '../../components/EmailInputModal';
 import SessionManager from '../../utils/SessionManager';
 
 const LoginScreen = ({ navigation }) => {
-  const { login, logout } = useAuth();
+  const { login, logout, resendOtp } = useAuth();
   const { theme } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
 
   const handleLogin = async () => {
     setErrorMessage('');
@@ -80,6 +82,34 @@ const LoginScreen = ({ navigation }) => {
         },
       ]
     );
+  };
+
+  const handleVerifyAccount = () => {
+    setShowVerifyModal(true);
+  };
+
+  const handleVerifyModalSubmit = async (inputEmail) => {
+    setShowVerifyModal(false);
+
+    try {
+      // Intentar enviar OTP usando el endpoint resend-otp
+      await resendOtp(inputEmail);
+
+      // Si tiene éxito, navegar a OTP screen
+      navigation.navigate('Otp', { email: inputEmail });
+      Alert.alert('Código enviado', 'Se ha enviado un código de verificación a tu email.');
+    } catch (error) {
+      // Si falla, mostrar error específico
+      console.error('Error al enviar OTP desde verificar cuenta:', error);
+      Alert.alert(
+        'Error',
+        error.response?.data?.message || 'No se pudo enviar el código. Verifica que el email esté registrado.'
+      );
+    }
+  };
+
+  const handleVerifyModalClose = () => {
+    setShowVerifyModal(false);
   };
 
   return (
@@ -141,6 +171,12 @@ const LoginScreen = ({ navigation }) => {
               textStyle={styles.buttonText}
             />
 
+            <TouchableOpacity onPress={handleVerifyAccount} style={styles.verifyAccountButton}>
+              <Text style={[styles.verifyAccountText, { color: theme.textSecondary }]}>
+                ¿Cuenta sin verificar? Verificar ahora
+              </Text>
+            </TouchableOpacity>
+
             <TouchableOpacity onPress={handleClearSession} style={styles.clearSessionButton}>
               <Text style={[styles.clearSessionText, { color: theme.textSecondary }]}>
                 ¿Problemas para iniciar sesión? Limpiar sesión
@@ -149,6 +185,14 @@ const LoginScreen = ({ navigation }) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <EmailInputModal
+        visible={showVerifyModal}
+        onClose={handleVerifyModalClose}
+        onSubmit={handleVerifyModalSubmit}
+        title="Verificar cuenta"
+        message="Ingresa el email de tu cuenta para recibir un nuevo código de verificación"
+      />
     </SafeAreaView>
   );
 };
@@ -221,8 +265,17 @@ const styles = StyleSheet.create({
     fontSize: 17,
     color: '#FFFFFF',
   },
+  verifyAccountButton: {
+    marginTop: 12,
+    padding: 12,
+    alignItems: 'center',
+  },
+  verifyAccountText: {
+    fontSize: 14,
+    textDecorationLine: 'underline',
+  },
   clearSessionButton: {
-    marginTop: 24,
+    marginTop: 12,
     padding: 12,
     alignItems: 'center',
   },
