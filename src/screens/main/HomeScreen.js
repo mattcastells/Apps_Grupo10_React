@@ -92,8 +92,8 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleReserveClass = () => {
-    // Navegar a la pantalla de Mis Reservas
-    navigation.navigate('Bookings');
+    // Navegar al tab de Reservas
+    navigation.navigate('Reservations');
   };
 
   const handleMyProfile = () => {
@@ -252,13 +252,11 @@ const HomeScreen = ({ navigation }) => {
               <View style={styles.filterWrapper}>
                 <Text style={[styles.filterLabel, { color: theme.textSecondary }]}>Sede</Text>
                 <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
-                  <Text style={[styles.selectedValue, { color: theme.text }]} numberOfLines={1}>
-                    {selectedLocation}
-                  </Text>
                   <Picker
                     selectedValue={selectedLocation}
                     onValueChange={setSelectedLocation}
-                    style={styles.pickerHidden}
+                    style={[styles.picker, { color: theme.text }]}
+                    itemStyle={styles.pickerItem}
                   >
                     {LOCATIONS.map((location) => (
                       <Picker.Item key={location} label={location} value={location} />
@@ -271,13 +269,11 @@ const HomeScreen = ({ navigation }) => {
               <View style={styles.filterWrapper}>
                 <Text style={[styles.filterLabel, { color: theme.textSecondary }]}>Disciplina</Text>
                 <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
-                  <Text style={[styles.selectedValue, { color: theme.text }]} numberOfLines={1}>
-                    {selectedDiscipline}
-                  </Text>
                   <Picker
                     selectedValue={selectedDiscipline}
                     onValueChange={setSelectedDiscipline}
-                    style={styles.pickerHidden}
+                    style={[styles.picker, { color: theme.text }]}
+                    itemStyle={styles.pickerItem}
                   >
                     {DISCIPLINES.map((discipline) => (
                       <Picker.Item key={discipline} label={discipline} value={discipline} />
@@ -290,13 +286,11 @@ const HomeScreen = ({ navigation }) => {
               <View style={styles.filterWrapper}>
                 <Text style={[styles.filterLabel, { color: theme.textSecondary }]}>Fecha</Text>
                 <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
-                  <Text style={[styles.selectedValue, { color: theme.text }]} numberOfLines={1}>
-                    {selectedDate}
-                  </Text>
                   <Picker
                     selectedValue={selectedDate}
                     onValueChange={setSelectedDate}
-                    style={styles.pickerHidden}
+                    style={[styles.picker, { color: theme.text }]}
+                    itemStyle={styles.pickerItem}
                   >
                     <Picker.Item label="Todas" value="Todas" />
                     <Picker.Item label="Hoy" value="Hoy" />
@@ -446,20 +440,15 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     height: 48,
     justifyContent: 'center',
-    paddingHorizontal: 12,
-    position: 'relative',
+    overflow: 'hidden',
   },
-  selectedValue: {
+  picker: {
+    height: 48,
+    width: '100%',
+  },
+  pickerItem: {
     fontSize: 14,
-    fontWeight: '500',
-  },
-  pickerHidden: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    opacity: 0,
+    height: 48,
   },
   classesListTitle: {
     fontSize: 16,

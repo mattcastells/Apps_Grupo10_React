@@ -21,12 +21,14 @@ const ClassDetailScreen = ({ route, navigation }) => {
   const { classId } = route.params;
   const [classDetail, setClassDetail] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isAlreadyBooked, setIsAlreadyBooked] = useState(false);
   const axiosInstance = useAxios();
   const scheduleService = createScheduleService(axiosInstance);
   const bookingService = createBookingService(axiosInstance);
 
   useEffect(() => {
     loadClassDetail();
+    checkIfBooked();
   }, [classId]);
 
   const loadClassDetail = async () => {
@@ -41,6 +43,17 @@ const ClassDetailScreen = ({ route, navigation }) => {
       ]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkIfBooked = async () => {
+    try {
+      const bookedIds = await bookingService.getBookedClassIds();
+      setIsAlreadyBooked(bookedIds.includes(classId));
+    } catch (error) {
+      console.error('Error checking if booked:', error);
+      // No es crítico, seguir sin bloquear
+      setIsAlreadyBooked(false);
     }
   };
 
@@ -136,15 +149,21 @@ const ClassDetailScreen = ({ route, navigation }) => {
           <Text style={[styles.mapButtonText, { color: theme.primary }]}>Ver Mapa</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.reserveButton, { backgroundColor: theme.primary }]}
-          onPress={handleBookClass}
-          disabled={loading}
-        >
-          <Text style={styles.reserveButtonText}>
-            {loading ? 'Reservando...' : 'Reservar'}
-          </Text>
-        </TouchableOpacity>
+        {isAlreadyBooked ? (
+          <View style={[styles.alreadyBookedContainer, { backgroundColor: theme.success, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
+            <Text style={styles.alreadyBookedText}>✓ Ya tenés esta clase reservada</Text>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={[styles.reserveButton, { backgroundColor: theme.primary }]}
+            onPress={handleBookClass}
+            disabled={loading || classDetail?.availableSlots === 0}
+          >
+            <Text style={styles.reserveButtonText}>
+              {loading ? 'Reservando...' : classDetail?.availableSlots === 0 ? 'Sin cupos disponibles' : 'Reservar'}
+            </Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -275,6 +294,22 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   },
   reserveButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  alreadyBookedContainer: {
+    height: 56,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  alreadyBookedText: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#FFFFFF',

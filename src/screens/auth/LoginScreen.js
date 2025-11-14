@@ -8,14 +8,17 @@ import {
   Platform,
   ScrollView,
   Image,
+  Alert,
+  TouchableOpacity,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
+import SessionManager from '../../utils/SessionManager';
 
 const LoginScreen = ({ navigation }) => {
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const { theme } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -50,6 +53,30 @@ const LoginScreen = ({ navigation }) => {
 
   const handleCreateAccount = () => {
     navigation.navigate('CreateUser');
+  };
+
+  const handleClearSession = () => {
+    Alert.alert(
+      'Limpiar sesión',
+      '¿Estás seguro? Esto eliminará cualquier sesión activa corrupta.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Limpiar',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await SessionManager.clear();
+              await logout();
+              setErrorMessage('');
+              Alert.alert('Éxito', 'Sesión limpiada. Ahora podés iniciar sesión nuevamente.');
+            } catch (error) {
+              Alert.alert('Error', 'No se pudo limpiar la sesión');
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -104,6 +131,12 @@ const LoginScreen = ({ navigation }) => {
               style={[styles.registerButton, { backgroundColor: theme.primary }]}
               textStyle={styles.buttonText}
             />
+
+            <TouchableOpacity onPress={handleClearSession} style={styles.clearSessionButton}>
+              <Text style={[styles.clearSessionText, { color: theme.textSecondary }]}>
+                ¿Problemas para iniciar sesión? Limpiar sesión
+              </Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -171,6 +204,15 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 17,
     color: '#FFFFFF',
+  },
+  clearSessionButton: {
+    marginTop: 24,
+    padding: 12,
+    alignItems: 'center',
+  },
+  clearSessionText: {
+    fontSize: 14,
+    textDecorationLine: 'underline',
   },
 });
 
