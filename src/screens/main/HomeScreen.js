@@ -269,24 +269,6 @@ const HomeScreen = ({ navigation }) => {
               Tu espacio para entrenar, reservar clases y mantenerte informado.
             </Text>
 
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>Accesos rápidos</Text>
-
-            <View style={styles.quickAccessContainer}>
-              <TouchableOpacity
-                style={[styles.quickButton, { backgroundColor: theme.primary }]}
-                onPress={handleReserveClass}
-              >
-                <Text style={styles.quickButtonText}>Ver mis reservas</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.quickButton, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}
-                onPress={handleMyProfile}
-              >
-                <Text style={[styles.quickButtonText, { color: theme.text }]}>Mi perfil</Text>
-              </TouchableOpacity>
-            </View>
-
             <Card style={[styles.featuredCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
               <View style={styles.featuredCardContent}>
                 <View style={styles.featuredIcon}>
@@ -481,32 +463,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 16,
     justifyContent: 'space-between',
-    gap: 6,
+    gap: 8,
+    flexWrap: 'wrap',
   },
   filterWrapper: {
     flex: 1,
-    minWidth: 0,
+    minWidth: 100,
+    maxWidth: '32%',
   },
   filterLabel: {
     fontSize: 12,
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: 6,
     marginLeft: 4,
+    textAlign: 'center',
   },
   filterItem: {
     borderWidth: 1,
     borderRadius: 8,
-    height: 48,
+    height: 50,
     justifyContent: 'center',
-    overflow: 'visible',
+    overflow: 'hidden',
+    paddingHorizontal: 4,
   },
   picker: {
-    height: 48,
+    height: 50,
     width: '100%',
   },
   pickerItem: {
-    fontSize: 13,
-    height: 48,
+    fontSize: 14,
+    height: 50,
   },
   classesListTitle: {
     fontSize: 16,
