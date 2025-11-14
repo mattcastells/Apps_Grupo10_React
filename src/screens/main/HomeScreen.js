@@ -12,9 +12,10 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import Card from '../../components/Card';
 import BiometricPrompt from '../../components/BiometricPrompt';
-import { COLORS, DISCIPLINES, LOCATIONS } from '../../utils/constants';
+import { COLORS, DISCIPLINES } from '../../utils/constants';
 import createScheduleService from '../../services/scheduleService';
 import createBookingService from '../../services/bookingService';
+import createLocationService from '../../services/locationService';
 import { useAxios } from '../../hooks/useAxios';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
@@ -25,6 +26,7 @@ const HomeScreen = ({ navigation }) => {
   const { needsBiometricAuth, logout } = useAuth();
   const [classes, setClasses] = useState([]);
   const [bookedClassIds, setBookedClassIds] = useState([]);
+  const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedDiscipline, setSelectedDiscipline] = useState('Todos');
@@ -33,11 +35,15 @@ const HomeScreen = ({ navigation }) => {
   const axiosInstance = useAxios();
   const scheduleService = createScheduleService(axiosInstance);
   const bookingService = createBookingService(axiosInstance);
+  const locationService = createLocationService(axiosInstance);
 
   // 🔐 Estado para controlar si debe mostrar el prompt biométrico
   const [showBiometricPrompt, setShowBiometricPrompt] = useState(false);
 
   useEffect(() => {
+    // Cargar ubicaciones al montar el componente
+    loadLocations();
+
     // 🔐 Verificar si necesita autenticación biométrica al entrar al Home
     if (needsBiometricAuth()) {
       // Necesita autenticarse, mostrar el prompt
@@ -47,6 +53,19 @@ const HomeScreen = ({ navigation }) => {
       loadClasses();
     }
   }, []);
+
+  const loadLocations = async () => {
+    try {
+      console.log('📍 Cargando ubicaciones desde el backend...');
+      const data = await locationService.getAllLocations();
+      console.log('✅ Ubicaciones cargadas:', data);
+      setLocations(data);
+    } catch (error) {
+      console.error('⚠️ Error loading locations:', error);
+      // No es crítico, continuar sin ubicaciones dinámicas
+      setLocations([]);
+    }
+  };
 
   const loadClasses = useCallback(async () => {
     setLoading(true);
@@ -293,10 +312,11 @@ const HomeScreen = ({ navigation }) => {
                     style={[styles.picker, { color: theme.text }]}
                     itemStyle={styles.pickerItem}
                   >
-                    {LOCATIONS.map((location) => {
-                      // Mostrar nombres cortos en el picker para iOS
-                      const shortLabel = location === 'Todas' ? 'Todas' : location.replace('Sede ', '');
-                      return <Picker.Item key={location} label={shortLabel} value={location} />;
+                    <Picker.Item key="todas" label="Todas" value="Todas" />
+                    {locations.map((location) => {
+                      // Mostrar solo el nombre de la ciudad (ej: "Palermo") en lugar de "Sede Palermo"
+                      const shortLabel = location.name.replace('Sede ', '');
+                      return <Picker.Item key={location.id} label={shortLabel} value={location.name} />;
                     })}
                   </Picker>
                 </View>
