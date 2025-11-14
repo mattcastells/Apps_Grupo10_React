@@ -3,6 +3,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from '../screens/auth/LoginScreen';
 import CreateUserScreen from '../screens/auth/CreateUserScreen';
 import OtpScreen from '../screens/auth/OtpScreen';
+import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
+import ResetPasswordScreen from '../screens/auth/ResetPasswordScreen';
 import { COLORS } from '../utils/constants';
 
 const Stack = createNativeStackNavigator();
@@ -40,6 +42,20 @@ const AuthStack = () => {
         component={OtpScreen}
         options={{
           title: 'Verificar Email',
+        }}
+      />
+      <Stack.Screen
+        name="ForgotPassword"
+        component={ForgotPasswordScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="ResetPassword"
+        component={ResetPasswordScreen}
+        options={{
+          headerShown: false,
         }}
       />
     </Stack.Navigator>

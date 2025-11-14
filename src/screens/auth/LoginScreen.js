@@ -7,7 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Image,
+  TouchableOpacity,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -52,6 +52,10 @@ const LoginScreen = ({ navigation }) => {
     navigation.navigate('CreateUser');
   };
 
+  const handleForgotPassword = () => {
+    navigation.navigate('ForgotPassword');
+  };
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
       <KeyboardAvoidingView
@@ -85,6 +89,12 @@ const LoginScreen = ({ navigation }) => {
               inputStyle={styles.input}
               style={styles.inputContainer}
             />
+
+            <TouchableOpacity onPress={handleForgotPassword} style={styles.forgotPasswordButton}>
+              <Text style={[styles.forgotPasswordText, { color: theme.textSecondary }]}>
+                ¿Olvidaste tu contraseña?
+              </Text>
+            </TouchableOpacity>
 
             {errorMessage ? (
               <Text style={[styles.errorText, { color: theme.error }]}>{errorMessage}</Text>
@@ -154,6 +164,13 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 18,
     minHeight: 48,
+  },
+  forgotPasswordButton: {
+    alignSelf: 'flex-end',
+    marginBottom: 16,
+  },
+  forgotPasswordText: {
+    fontSize: 14,
   },
   errorText: {
     fontSize: 15,
