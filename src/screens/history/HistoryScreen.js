@@ -6,15 +6,13 @@ import {
   SafeAreaView,
   FlatList,
   RefreshControl,
-  TouchableOpacity,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { COLORS } from '../../utils/constants';
 import createHistoryService from '../../services/historyService';
 import { useTheme } from '../../context/ThemeContext';
-import { formatDate } from '../../utils/helpers';
 import { useAxios } from '../../hooks/useAxios';
 import { AuthContext } from '../../context/AuthContext';
+import BookingCard from '../../components/BookingCard';
 
 const HistoryScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
@@ -53,40 +51,12 @@ const HistoryScreen = ({ navigation }) => {
     navigation.navigate('HistoryDetail', { attendanceId: item.id });
   };
 
-  const renderHistoryItem = ({ item }) => {
-    const date = new Date(item.startDateTime);
-    const formattedDate = formatDate(item.startDateTime);
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const formattedTime = `${hours}:${minutes}`;
-
-    return (
-      <TouchableOpacity
-        style={[styles.historyCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}
-        onPress={() => handleHistoryItemPress(item)}
-      >
-        <View style={[styles.cardHeader, { borderBottomColor: theme.border }]}>
-          <Text style={[styles.disciplineText, { color: theme.text }]}>{item.discipline}</Text>
-          <Text style={[styles.timeText, { backgroundColor: theme.primary }]}>{formattedTime}</Text>
-        </View>
-        <View style={[styles.cardDivider, { backgroundColor: theme.border }]} />
-        <View style={styles.cardBody}>
-          <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Profesor:</Text>
-            <Text style={[styles.infoValue, { color: theme.text }]}>{item.teacher}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Sede:</Text>
-            <Text style={[styles.infoValue, { color: theme.text }]}>{item.site}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Fecha:</Text>
-            <Text style={[styles.infoValue, { color: theme.text }]}>{formattedDate}</Text>
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
+  const renderHistoryItem = ({ item }) => (
+    <BookingCard 
+      item={item} 
+      onPress={handleHistoryItemPress}
+    />
+  );
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
@@ -156,58 +126,6 @@ const styles = StyleSheet.create({
   listContent: {
     padding: 20,
     paddingBottom: 100,
-  },
-  historyCard: {
-    borderRadius: 12,
-    padding: 18,
-    marginBottom: 14,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.5,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-  },
-  disciplineText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    flex: 1,
-  },
-  timeText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 10,
-  },
-  cardDivider: {
-    height: 1,
-    marginBottom: 12,
-  },
-  cardBody: {
-    gap: 10,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  infoLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    width: 85,
-  },
-  infoValue: {
-    fontSize: 14,
-    flex: 1,
-    fontWeight: '500',
   },
   emptyContainer: {
     padding: 40,

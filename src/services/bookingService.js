@@ -59,6 +59,20 @@ const createBookingService = (axiosInstance) => ({
     }
   },
 
+  /**
+   * Get booking history (past, cancelled, expired)
+   * @returns {Promise} List of booking history
+   */
+  getBookingHistory: async () => {
+    try {
+      const response = await axiosInstance.get('/booking/history');
+      return response.data;
+    } catch (error) {
+      console.error('Get booking history error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
   getPastBookings: async () => {
     try {
       const response = await axiosInstance.get('/booking/my-bookings', {

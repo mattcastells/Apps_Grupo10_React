@@ -15,6 +15,7 @@ import BiometricPrompt from '../../components/BiometricPrompt';
 import { COLORS } from '../../utils/constants';
 import createScheduleService from '../../services/scheduleService';
 import createLocationService from '../../services/locationService';
+import createBookingService from '../../services/bookingService';
 import { useAxios } from '../../hooks/useAxios';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
@@ -24,6 +25,7 @@ const HomeScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
   const { needsBiometricAuth, logout } = useAuth();
   const [classes, setClasses] = useState([]);
+  const [userBookings, setUserBookings] = useState([]);
   const [locations, setLocations] = useState([]);
   const [disciplines, setDisciplines] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -34,6 +36,7 @@ const HomeScreen = ({ navigation }) => {
   const axiosInstance = useAxios();
   const scheduleService = createScheduleService(axiosInstance);
   const locationService = createLocationService(axiosInstance);
+  const bookingService = createBookingService(axiosInstance);
 
   const [showBiometricPrompt, setShowBiometricPrompt] = useState(false);
 
@@ -85,12 +88,28 @@ const HomeScreen = ({ navigation }) => {
       const data = await scheduleService.getWeeklySchedule();
       console.log('Classes loaded:', data);
       setClasses(data);
+      
+      // Load user bookings to check which classes are already booked
+      await loadUserBookings();
     } catch (error) {
       console.error('Error loading classes:', error);
       Alert.alert('Error', 'Could not load classes. Please try again.');
       setClasses([]);
     } finally {
       setLoading(false);
+    }
+  }, []);
+
+  const loadUserBookings = useCallback(async () => {
+    try {
+      console.log('Loading user bookings...');
+      const bookings = await bookingService.getMyBookings();
+      console.log('User bookings loaded:', bookings);
+      setUserBookings(bookings);
+    } catch (error) {
+      console.error('Error loading user bookings:', error);
+      // No mostrar error al usuario, solo no marcar clases como reservadas
+      setUserBookings([]);
     }
   }, []);
 
@@ -163,30 +182,50 @@ const HomeScreen = ({ navigation }) => {
     });
   };
 
-  const renderClassItem = ({ item }) => (
-    <Card onPress={() => handleClassPress(item)} style={[styles.classCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
-      <View style={styles.cardHeader}>
-        <Text style={[styles.className, { color: theme.text }]}>{item.name || item.discipline}</Text>
-        <View style={[styles.badge, { backgroundColor: theme.primary }]}>
-          <Text style={styles.badgeText}>{item.discipline}</Text>
-        </View>
-      </View>
+  // Check if a class is already booked by the user
+  const isClassBooked = (classId) => {
+    return userBookings.some(booking => 
+      booking.scheduledClassId === classId || 
+      // Also check by matching class details in case scheduledClassId is not exposed
+      (booking.className === classId || booking.bookingId === classId)
+    );
+  };
 
-      <View style={styles.cardContent}>
-        <Text style={[styles.infoText, { color: theme.textSecondary }]}>Instructor: {item.professor || item.teacher || 'N/A'}</Text>
-        <Text style={[styles.infoText, { color: theme.textSecondary }]}>Sede: {item.location || item.site || 'N/A'}</Text>
-        <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-          Fecha: {item.dateTime ? new Date(item.dateTime).toLocaleDateString() : 'N/A'}
-        </Text>
-        <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-          Duración: {item.durationMinutes || 60} min
-        </Text>
-        <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-          Cupos: {item.availableSlots || 0}
-        </Text>
-      </View>
-    </Card>
-  );
+  const renderClassItem = ({ item }) => {
+    const isBooked = isClassBooked(item.id);
+    
+    return (
+      <Card onPress={() => handleClassPress(item)} style={[styles.classCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
+        <View style={styles.cardHeader}>
+          <Text style={[styles.className, { color: theme.text }]}>{item.name || item.discipline}</Text>
+          <View style={styles.badgeContainer}>
+            {isBooked && (
+              <View style={[styles.bookedBadge, { backgroundColor: theme.success, marginRight: 8 }]}>
+                <Text style={styles.badgeText}>✓ Reservada</Text>
+              </View>
+            )}
+            <View style={[styles.badge, { backgroundColor: theme.primary }]}>
+              <Text style={styles.badgeText}>{item.discipline}</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.cardContent}>
+          <Text style={[styles.infoText, { color: theme.textSecondary }]}>Instructor: {item.professor || item.teacher || 'N/A'}</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary }]}>Sede: {item.location || item.site || 'N/A'}</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary }]}>
+            Fecha: {item.dateTime ? new Date(item.dateTime).toLocaleDateString() : 'N/A'}
+          </Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary }]}>
+            Duración: {item.durationMinutes || 60} min
+          </Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary }]}>
+            Cupos: {item.availableSlots || 0}
+          </Text>
+        </View>
+      </Card>
+    );
+  };
 
   const filteredClasses = getFilteredClasses();
 
@@ -470,7 +509,16 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     flex: 1,
   },
+  badgeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   badge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  bookedBadge: {
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,

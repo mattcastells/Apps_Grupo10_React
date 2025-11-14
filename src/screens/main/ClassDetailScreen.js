@@ -20,6 +20,7 @@ const ClassDetailScreen = ({ route, navigation }) => {
   const { theme, isDarkMode } = useTheme();
   const { classId } = route.params;
   const [classDetail, setClassDetail] = useState(null);
+  const [isBooked, setIsBooked] = useState(false);
   const [loading, setLoading] = useState(false);
   const axiosInstance = useAxios();
   const scheduleService = createScheduleService(axiosInstance);
@@ -27,6 +28,7 @@ const ClassDetailScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     loadClassDetail();
+    checkIfBooked();
   }, [classId]);
 
   const loadClassDetail = async () => {
@@ -44,7 +46,24 @@ const ClassDetailScreen = ({ route, navigation }) => {
     }
   };
 
+  const checkIfBooked = async () => {
+    try {
+      const bookings = await bookingService.getMyBookings();
+      const alreadyBooked = bookings.some(booking => booking.scheduledClassId === classId);
+      setIsBooked(alreadyBooked);
+    } catch (error) {
+      console.error('Error checking bookings:', error);
+      // If there's an error, assume not booked to allow user to try
+      setIsBooked(false);
+    }
+  };
+
   const handleBookClass = async () => {
+    // Si ya está reservada, no hacer nada
+    if (isBooked) {
+      return;
+    }
+
     Alert.alert(
       'Confirmar Reserva',
       '¿Estás seguro de que querés reservar esta clase?',
@@ -56,11 +75,20 @@ const ClassDetailScreen = ({ route, navigation }) => {
             setLoading(true);
             try {
               await bookingService.createBooking(classId);
+              setIsBooked(true); // Update local state
               Alert.alert('Éxito', 'Clase reservada correctamente', [
-                { text: 'OK', onPress: () => navigation.goBack() },
+                { 
+                  text: 'OK', 
+                  onPress: () => {
+                    // Navigate to reservations screen to see the new booking
+                    navigation.navigate('Reservations');
+                  } 
+                },
               ]);
             } catch (error) {
-              Alert.alert('Error', 'No se pudo reservar la clase');
+              console.error('Error booking class:', error);
+              const errorMessage = error.response?.data?.message || 'No se pudo reservar la clase';
+              Alert.alert('Error', errorMessage);
             } finally {
               setLoading(false);
             }
@@ -97,13 +125,6 @@ const ClassDetailScreen = ({ route, navigation }) => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <TouchableOpacity style={[styles.backButton, { backgroundColor: theme.primary }]} onPress={() => navigation.goBack()}>
-            <Text style={styles.backButtonText}>←</Text>
-          </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: theme.text }]}>Detalle de Clase</Text>
-        </View>
-
         <View style={[styles.mainCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
           <Text style={[styles.classTitle, { color: theme.primary }]}>{classDetail.name}</Text>
 
@@ -137,12 +158,17 @@ const ClassDetailScreen = ({ route, navigation }) => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.reserveButton, { backgroundColor: theme.primary }]}
+          style={[
+            styles.reserveButton, 
+            { backgroundColor: isBooked ? theme.success : theme.primary },
+            isBooked && styles.bookedButton
+          ]}
           onPress={handleBookClass}
-          disabled={loading}
+          disabled={loading || isBooked}
+          activeOpacity={isBooked ? 1 : 0.7}
         >
           <Text style={styles.reserveButtonText}>
-            {loading ? 'Reservando...' : 'Reservar'}
+            {loading ? 'Reservando...' : isBooked ? '✓ Clase reservada' : 'Reservar'}
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -165,30 +191,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 24,
     paddingBottom: 80,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  backButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  backButtonText: {
-    fontSize: 20,
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    flex: 1,
-    textAlign: 'center',
   },
   mainCard: {
     borderRadius: 12,
@@ -273,6 +275,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
+  },
+  bookedButton: {
+    opacity: 0.9,
   },
   reserveButtonText: {
     fontSize: 18,

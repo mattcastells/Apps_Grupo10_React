@@ -6,14 +6,13 @@ import {
   SafeAreaView,
   FlatList,
   RefreshControl,
-  TouchableOpacity,
   Alert,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import createBookingService from '../../services/bookingService';
 import { useTheme } from '../../context/ThemeContext';
-import { formatDate } from '../../utils/helpers';
 import { useAxios } from '../../hooks/useAxios';
+import BookingCard from '../../components/BookingCard';
 
 const ReservationsScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
@@ -72,49 +71,12 @@ const ReservationsScreen = ({ navigation }) => {
     );
   };
 
-  const renderBookingItem = ({ item }) => {
-    const date = new Date(item.classDateTime);
-    const formattedDate = formatDate(item.classDateTime);
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const formattedTime = `${hours}:${minutes}`;
-
-    return (
-      <View style={[styles.bookingCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
-        <View style={[styles.cardHeader, { borderBottomColor: theme.border }]}>
-          <Text style={[styles.className, { color: theme.text }]}>{item.className}</Text>
-          <Text style={[styles.timeText, { backgroundColor: theme.primary }]}>{formattedTime}</Text>
-        </View>
-        <View style={[styles.cardDivider, { backgroundColor: theme.border }]} />
-        <View style={styles.cardBody}>
-          <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Profesor:</Text>
-            <Text style={[styles.infoValue, { color: theme.text }]}>{item.professor}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Sede:</Text>
-            <Text style={[styles.infoValue, { color: theme.text }]}>{item.location}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Fecha:</Text>
-            <Text style={[styles.infoValue, { color: theme.text }]}>{formattedDate}</Text>
-          </View>
-          {item.status === 'CONFIRMED' && (
-            <View style={[styles.statusBadge, { backgroundColor: theme.success }]}>
-              <Text style={styles.statusText}>✓ Confirmada</Text>
-            </View>
-          )}
-        </View>
-
-        <TouchableOpacity
-          style={[styles.cancelButton, { backgroundColor: theme.error }]}
-          onPress={() => handleCancelBooking(item.bookingId)}
-        >
-          <Text style={styles.cancelButtonText}>Cancelar Reserva</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  };
+  const renderBookingItem = ({ item }) => (
+    <BookingCard 
+      item={item} 
+      onCancel={handleCancelBooking}
+    />
+  );
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
@@ -184,82 +146,6 @@ const styles = StyleSheet.create({
   listContent: {
     padding: 20,
     paddingBottom: 100,
-  },
-  bookingCard: {
-    borderRadius: 12,
-    padding: 18,
-    marginBottom: 14,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.5,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-  },
-  className: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    flex: 1,
-  },
-  timeText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 10,
-  },
-  cardDivider: {
-    height: 1,
-    marginBottom: 12,
-  },
-  cardBody: {
-    gap: 10,
-    marginBottom: 12,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  infoLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    width: 85,
-  },
-  infoValue: {
-    fontSize: 14,
-    flex: 1,
-    fontWeight: '500',
-  },
-  statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-    marginTop: 4,
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  cancelButton: {
-    borderRadius: 10,
-    paddingVertical: 12,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  cancelButtonText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
   },
   emptyContainer: {
     padding: 40,
