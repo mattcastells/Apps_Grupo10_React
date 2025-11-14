@@ -10,12 +10,16 @@ import {
   Alert,
 } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
+import { useAxios } from '../../hooks/useAxios';
+import createNewsService from '../../services/newsService';
 
 const NewsScreen = () => {
   const { theme } = useTheme();
   const [news, setNews] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const axiosInstance = useAxios();
+  const newsService = createNewsService(axiosInstance);
 
   useEffect(() => {
     loadNews();
@@ -24,8 +28,8 @@ const NewsScreen = () => {
   const loadNews = async () => {
     setLoading(true);
     try {
-      // TODO: Implement news endpoint in backend
-      setNews([]);
+      const data = await newsService.getAllNews();
+      setNews(data);
     } catch (error) {
       console.error('Error loading news:', error);
       Alert.alert('Error', 'No se pudieron cargar las noticias');

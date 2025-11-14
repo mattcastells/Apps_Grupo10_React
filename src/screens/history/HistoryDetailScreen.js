@@ -72,10 +72,6 @@ const HistoryDetailScreen = ({ route, navigation }) => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Text style={[styles.backButtonText, { color: theme.primary }]}>← Volver</Text>
-        </TouchableOpacity>
-
         <View style={[styles.headerCard, { backgroundColor: theme.primary }]}>
           <Text style={[styles.disciplineTitle, { color: theme.textInverted }]}>{attendance.discipline}</Text>
           <View style={styles.headerInfo}>
@@ -155,14 +151,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 20,
     paddingBottom: 40,
-  },
-  backButton: {
-    marginBottom: 20,
-    alignSelf: 'flex-start',
-  },
-  backButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
   },
   headerCard: {
     borderRadius: 16,

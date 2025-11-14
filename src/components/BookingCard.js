@@ -38,6 +38,10 @@ const BookingCard = ({ item, onPress, onCancel }) => {
         return { text: '✗ Cancelada', color: theme.error };
       case 'EXPIRED':
         return { text: '◷ Expirada', color: theme.textSecondary };
+      case 'ATTENDED':
+        return { text: '✓ Presente', color: theme.success };
+      case 'ABSENT':
+        return { text: '✗ Ausente', color: theme.error };
       default:
         return null;
     }

@@ -129,15 +129,6 @@ const HomeScreen = ({ navigation }) => {
     navigation.navigate('ClassDetail', { classId: classItem.id });
   };
 
-  const handleReserveClass = () => {
-    // Navigate to filtered classes or bookings
-    Alert.alert('Reservar clase', 'Navegar a reservas');
-  };
-
-  const handleMyProfile = () => {
-    navigation.navigate('Profile');
-  };
-
   // 🔐 Callbacks para BiometricPrompt
   const handleBiometricSuccess = () => {
     console.log('[HomeScreen] Biometric authentication successful');
@@ -178,7 +169,31 @@ const HomeScreen = ({ navigation }) => {
         item.location === selectedLocation ||
         item.site === selectedLocation;
 
-      return matchDiscipline && matchLocation;
+      // Filter by date
+      let matchDate = selectedDate === 'Todas';
+      if (selectedDate !== 'Todas' && item.dateTime) {
+        const classDate = new Date(item.dateTime);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (selectedDate === 'Hoy') {
+          const todayEnd = new Date(today);
+          todayEnd.setHours(23, 59, 59, 999);
+          matchDate = classDate >= today && classDate <= todayEnd;
+        } else if (selectedDate === 'Mañana') {
+          const tomorrow = new Date(today);
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          const tomorrowEnd = new Date(tomorrow);
+          tomorrowEnd.setHours(23, 59, 59, 999);
+          matchDate = classDate >= tomorrow && classDate <= tomorrowEnd;
+        } else if (selectedDate === 'Semana') {
+          const weekEnd = new Date(today);
+          weekEnd.setDate(weekEnd.getDate() + 7);
+          matchDate = classDate >= today && classDate <= weekEnd;
+        }
+      }
+
+      return matchDiscipline && matchLocation && matchDate;
     });
   };
 
@@ -260,36 +275,6 @@ const HomeScreen = ({ navigation }) => {
             <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
               Tu espacio para entrenar, reservar clases y mantenerte informado.
             </Text>
-
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>Accesos rápidos</Text>
-
-            <View style={styles.quickAccessContainer}>
-              <TouchableOpacity
-                style={[styles.quickButton, { backgroundColor: theme.primary }]}
-                onPress={handleReserveClass}
-              >
-                <Text style={styles.quickButtonText}>Reservar clase</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.quickButton, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}
-                onPress={handleMyProfile}
-              >
-                <Text style={[styles.quickButtonText, { color: theme.text }]}>Mi perfil</Text>
-              </TouchableOpacity>
-            </View>
-
-            <Card style={[styles.featuredCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
-              <View style={styles.featuredCardContent}>
-                <View style={styles.featuredIcon}>
-                  <Text style={styles.featuredIconText}>📅</Text>
-                </View>
-                <View style={styles.featuredTextContainer}>
-                  <Text style={[styles.featuredTitle, { color: theme.primary }]}>Próxima clase: Yoga - 10:00</Text>
-                  <Text style={[styles.featuredSubtitle, { color: theme.textSecondary }]}>¡No olvides tu clase!</Text>
-                </View>
-              </View>
-            </Card>
 
             <Text style={[styles.catalogTitle, { color: theme.primary }]}>Catálogo de Clases y Turnos</Text>
 
@@ -391,67 +376,6 @@ const styles = StyleSheet.create({
     fontSize: 17,
     textAlign: 'center',
     marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
-  quickAccessContainer: {
-    flexDirection: 'row',
-    marginBottom: 20,
-    justifyContent: 'space-between',
-  },
-  quickButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 50,
-    marginHorizontal: 4,
-  },
-  quickButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  featuredCard: {
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    padding: 20,
-    marginTop: 20,
-    marginBottom: 20,
-    minHeight: 80,
-  },
-  featuredCardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  featuredIcon: {
-    width: 40,
-    height: 40,
-    marginRight: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  featuredIconText: {
-    fontSize: 32,
-  },
-  featuredTextContainer: {
-    flex: 1,
-  },
-  featuredTitle: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    marginBottom: 6,
-    lineHeight: 22,
-  },
-  featuredSubtitle: {
-    fontSize: 14,
   },
   catalogTitle: {
     fontSize: 22,
