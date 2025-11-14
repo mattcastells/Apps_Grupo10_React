@@ -43,7 +43,8 @@ const ProfileScreen = ({ navigation }) => {
       };
 
       loadData();
-    }, [refreshUser])
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
   );
 
   const handleEditProfile = () => {
