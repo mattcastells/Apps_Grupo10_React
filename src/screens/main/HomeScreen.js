@@ -92,8 +92,8 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleReserveClass = () => {
-    // Navigate to filtered classes or bookings
-    Alert.alert('Reservar clase', 'Navegar a reservas');
+    // Navegar a la pantalla de Mis Reservas
+    navigation.navigate('Bookings');
   };
 
   const handleMyProfile = () => {
@@ -248,41 +248,62 @@ const HomeScreen = ({ navigation }) => {
             <Text style={[styles.catalogTitle, { color: theme.primary }]}>Catálogo de Clases y Turnos</Text>
 
             <View style={styles.filtersContainer}>
-              <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
-                <Picker
-                  selectedValue={selectedLocation}
-                  onValueChange={setSelectedLocation}
-                  style={[styles.picker, { color: isDarkMode ? COLORS.WHITE : theme.text }]}
-                >
-                  {LOCATIONS.map((location) => (
-                    <Picker.Item key={location} label={location} value={location} />
-                  ))}
-                </Picker>
+              {/* Filtro de Sede */}
+              <View style={styles.filterWrapper}>
+                <Text style={[styles.filterLabel, { color: theme.textSecondary }]}>Sede</Text>
+                <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
+                  <Text style={[styles.selectedValue, { color: theme.text }]} numberOfLines={1}>
+                    {selectedLocation}
+                  </Text>
+                  <Picker
+                    selectedValue={selectedLocation}
+                    onValueChange={setSelectedLocation}
+                    style={styles.pickerHidden}
+                  >
+                    {LOCATIONS.map((location) => (
+                      <Picker.Item key={location} label={location} value={location} />
+                    ))}
+                  </Picker>
+                </View>
               </View>
 
-              <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
-                <Picker
-                  selectedValue={selectedDiscipline}
-                  onValueChange={setSelectedDiscipline}
-                  style={[styles.picker, { color: isDarkMode ? COLORS.WHITE : theme.text }]}
-                >
-                  {DISCIPLINES.map((discipline) => (
-                    <Picker.Item key={discipline} label={discipline} value={discipline} />
-                  ))}
-                </Picker>
+              {/* Filtro de Disciplina */}
+              <View style={styles.filterWrapper}>
+                <Text style={[styles.filterLabel, { color: theme.textSecondary }]}>Disciplina</Text>
+                <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
+                  <Text style={[styles.selectedValue, { color: theme.text }]} numberOfLines={1}>
+                    {selectedDiscipline}
+                  </Text>
+                  <Picker
+                    selectedValue={selectedDiscipline}
+                    onValueChange={setSelectedDiscipline}
+                    style={styles.pickerHidden}
+                  >
+                    {DISCIPLINES.map((discipline) => (
+                      <Picker.Item key={discipline} label={discipline} value={discipline} />
+                    ))}
+                  </Picker>
+                </View>
               </View>
 
-              <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
-                <Picker
-                  selectedValue={selectedDate}
-                  onValueChange={setSelectedDate}
-                  style={[styles.picker, { color: isDarkMode ? COLORS.WHITE : theme.text }]}
-                >
-                  <Picker.Item label="Todas" value="Todas" />
-                  <Picker.Item label="Hoy" value="Hoy" />
-                  <Picker.Item label="Mañana" value="Mañana" />
-                  <Picker.Item label="Esta semana" value="Semana" />
-                </Picker>
+              {/* Filtro de Fecha */}
+              <View style={styles.filterWrapper}>
+                <Text style={[styles.filterLabel, { color: theme.textSecondary }]}>Fecha</Text>
+                <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
+                  <Text style={[styles.selectedValue, { color: theme.text }]} numberOfLines={1}>
+                    {selectedDate}
+                  </Text>
+                  <Picker
+                    selectedValue={selectedDate}
+                    onValueChange={setSelectedDate}
+                    style={styles.pickerHidden}
+                  >
+                    <Picker.Item label="Todas" value="Todas" />
+                    <Picker.Item label="Hoy" value="Hoy" />
+                    <Picker.Item label="Mañana" value="Mañana" />
+                    <Picker.Item label="Esta semana" value="Semana" />
+                  </Picker>
+                </View>
               </View>
             </View>
 
@@ -411,18 +432,34 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 8,
   },
-  filterItem: {
+  filterWrapper: {
     flex: 1,
+  },
+  filterLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 4,
+    marginLeft: 4,
+  },
+  filterItem: {
     borderWidth: 1,
     borderRadius: 8,
-    height: 56,
+    height: 48,
     justifyContent: 'center',
-    overflow: 'hidden',
+    paddingHorizontal: 12,
+    position: 'relative',
   },
-  picker: {
-    height: 56,
+  selectedValue: {
     fontSize: 14,
-    color: COLORS.WHITE,
+    fontWeight: '500',
+  },
+  pickerHidden: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0,
   },
   classesListTitle: {
     fontSize: 16,
