@@ -12,10 +12,10 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import Card from '../../components/Card';
 import BiometricPrompt from '../../components/BiometricPrompt';
-import { COLORS } from '../../utils/constants';
+import { COLORS, DISCIPLINES } from '../../utils/constants';
 import createScheduleService from '../../services/scheduleService';
-import createLocationService from '../../services/locationService';
 import createBookingService from '../../services/bookingService';
+import createLocationService from '../../services/locationService';
 import { useAxios } from '../../hooks/useAxios';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
@@ -25,9 +25,8 @@ const HomeScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
   const { needsBiometricAuth, logout } = useAuth();
   const [classes, setClasses] = useState([]);
-  const [userBookings, setUserBookings] = useState([]);
+  const [bookedClassIds, setBookedClassIds] = useState([]);
   const [locations, setLocations] = useState([]);
-  const [disciplines, setDisciplines] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedDiscipline, setSelectedDiscipline] = useState('Todos');
@@ -35,81 +34,68 @@ const HomeScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState('Todas');
   const axiosInstance = useAxios();
   const scheduleService = createScheduleService(axiosInstance);
-  const locationService = createLocationService(axiosInstance);
   const bookingService = createBookingService(axiosInstance);
+  const locationService = createLocationService(axiosInstance);
 
+  // 🔐 Estado para controlar si debe mostrar el prompt biométrico
   const [showBiometricPrompt, setShowBiometricPrompt] = useState(false);
 
   useEffect(() => {
+    // Cargar ubicaciones al montar el componente
+    loadLocations();
+
+    // 🔐 Verificar si necesita autenticación biométrica al entrar al Home
     if (needsBiometricAuth()) {
+      // Necesita autenticarse, mostrar el prompt
       setShowBiometricPrompt(true);
     } else {
+      // Ya se autenticó en esta sesión, cargar clases normalmente
       loadClasses();
-      loadLocations();
-      loadDisciplines();
     }
   }, []);
 
-  const loadLocations = useCallback(async () => {
+  const loadLocations = async () => {
     try {
-      console.log('Loading locations from backend...');
+      console.log('📍 Cargando ubicaciones desde el backend...');
       const data = await locationService.getAllLocations();
-      console.log('Locations loaded:', data);
-      const locationsWithAll = ['Todas', ...data.map(loc => loc.name)];
-      setLocations(locationsWithAll);
+      console.log('✅ Ubicaciones cargadas:', data);
+      setLocations(data);
     } catch (error) {
-      console.error('Error loading locations:', error);
-      setLocations(['Todas']);
+      console.error('⚠️ Error loading locations:', error);
+      // No es crítico, continuar sin ubicaciones dinámicas
+      setLocations([]);
     }
-  }, []);
-
-  const loadDisciplines = useCallback(async () => {
-    try {
-      console.log('Loading disciplines from backend...');
-      const data = await scheduleService.getDisciplines();
-      console.log('Disciplines loaded:', data);
-      const mapped = Array.isArray(data)
-        ? data
-            .map((d) => (typeof d === 'string' ? d : d?.discipline ?? d?.name ?? ''))
-            .filter(Boolean)
-        : [];
-      const disciplinesWithAll = ['Todos', ...mapped];
-      setDisciplines(disciplinesWithAll);
-    } catch (error) {
-      console.error('Error loading disciplines:', error);
-      setDisciplines(['Todos']);
-    }
-  }, []);
+  };
 
   const loadClasses = useCallback(async () => {
     setLoading(true);
     try {
-      console.log('Loading classes from backend...');
+      console.log('🔄 Cargando clases desde el backend...');
       const data = await scheduleService.getWeeklySchedule();
-      console.log('Classes loaded:', data);
+      console.log('✅ Clases cargadas:', data);
+
+      // Debug: Verificar qué valores de location vienen del backend
+      const uniqueLocations = [...new Set(data.map(item => item.location || item.site))];
+      console.log('📍 Ubicaciones únicas en los datos:', uniqueLocations);
+
       setClasses(data);
-      
-      // Load user bookings to check which classes are already booked
-      await loadUserBookings();
+
+      // Cargar IDs de clases ya reservadas
+      try {
+        const bookedIds = await bookingService.getBookedClassIds();
+        console.log('✅ IDs de clases reservadas:', bookedIds);
+        setBookedClassIds(bookedIds);
+      } catch (error) {
+        console.error('⚠️ Error loading booked class IDs:', error);
+        // No es crítico, continuar sin marcar clases
+        setBookedClassIds([]);
+      }
     } catch (error) {
-      console.error('Error loading classes:', error);
-      Alert.alert('Error', 'Could not load classes. Please try again.');
+      console.error('❌ Error loading classes:', error);
+      Alert.alert('Error', 'No se pudieron cargar las clases. Por favor intenta nuevamente.');
       setClasses([]);
     } finally {
       setLoading(false);
-    }
-  }, []);
-
-  const loadUserBookings = useCallback(async () => {
-    try {
-      console.log('Loading user bookings...');
-      const bookings = await bookingService.getMyBookings();
-      console.log('User bookings loaded:', bookings);
-      setUserBookings(bookings);
-    } catch (error) {
-      console.error('Error loading user bookings:', error);
-      // No mostrar error al usuario, solo no marcar clases como reservadas
-      setUserBookings([]);
     }
   }, []);
 
@@ -129,23 +115,35 @@ const HomeScreen = ({ navigation }) => {
     navigation.navigate('ClassDetail', { classId: classItem.id });
   };
 
+  const handleReserveClass = () => {
+    // Navegar al tab de Reservas
+    navigation.navigate('Reservations');
+  };
+
+  const handleMyProfile = () => {
+    navigation.navigate('Profile');
+  };
+
   // 🔐 Callbacks para BiometricPrompt
   const handleBiometricSuccess = () => {
-    console.log('[HomeScreen] Biometric authentication successful');
+    // Autenticación exitosa, cargar las clases y continuar con el flujo
+    console.log('[HomeScreen] Autenticación biométrica exitosa');
     loadClasses();
   };
 
   const handleBiometricFailure = async (reason) => {
-    console.log('[HomeScreen] Biometric authentication failed. Reason:', reason);
+    // Autenticación fallida o sin enrolamiento, desloguear y redirigir a login
+    console.log('[HomeScreen] Autenticación biométrica fallida. Razón:', reason);
 
     Alert.alert(
-      'Authentication required',
-      'Could not complete authentication. You will be redirected to login.',
+      'Autenticación requerida',
+      'No se pudo completar la autenticación. Serás redirigido al login.',
       [
         {
           text: 'OK',
           onPress: async () => {
             await logout();
+            // La navegación al login se hace automáticamente por el AppNavigator
           },
         },
       ]
@@ -153,75 +151,70 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleBiometricCancel = async () => {
-    console.log('[HomeScreen] Biometric authentication cancelled');
+    // Usuario canceló la autenticación, desloguear y redirigir a login
+    console.log('[HomeScreen] Autenticación biométrica cancelada');
+
     await logout();
+    // La navegación al login se hace automáticamente por el AppNavigator
   };
 
   const getFilteredClasses = () => {
     return classes.filter((item) => {
+      // Filtro por disciplina
       const matchDiscipline =
         selectedDiscipline === 'Todos' ||
         item.discipline === selectedDiscipline ||
         item.name?.includes(selectedDiscipline);
 
+      // Filtro por ubicación/sede
       const matchLocation =
         selectedLocation === 'Todas' ||
         item.location === selectedLocation ||
         item.site === selectedLocation;
 
-      // Filter by date
-      let matchDate = selectedDate === 'Todas';
-      if (selectedDate !== 'Todas' && item.dateTime) {
+      // Filtro por fecha
+      const matchDate = (() => {
+        if (selectedDate === 'Todas') return true;
+
+        if (!item.dateTime) return false;
+
         const classDate = new Date(item.dateTime);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
+
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const endOfWeek = new Date(today);
+        endOfWeek.setDate(endOfWeek.getDate() + 7);
+
+        const classDayStart = new Date(classDate);
+        classDayStart.setHours(0, 0, 0, 0);
+
         if (selectedDate === 'Hoy') {
-          const todayEnd = new Date(today);
-          todayEnd.setHours(23, 59, 59, 999);
-          matchDate = classDate >= today && classDate <= todayEnd;
+          return classDayStart.getTime() === today.getTime();
         } else if (selectedDate === 'Mañana') {
-          const tomorrow = new Date(today);
-          tomorrow.setDate(tomorrow.getDate() + 1);
-          const tomorrowEnd = new Date(tomorrow);
-          tomorrowEnd.setHours(23, 59, 59, 999);
-          matchDate = classDate >= tomorrow && classDate <= tomorrowEnd;
+          return classDayStart.getTime() === tomorrow.getTime();
         } else if (selectedDate === 'Semana') {
-          const weekEnd = new Date(today);
-          weekEnd.setDate(weekEnd.getDate() + 7);
-          matchDate = classDate >= today && classDate <= weekEnd;
+          return classDate >= today && classDate < endOfWeek;
         }
-      }
+
+        return true;
+      })();
 
       return matchDiscipline && matchLocation && matchDate;
     });
   };
 
-  // Check if a class is already booked by the user
-  const isClassBooked = (classId) => {
-    return userBookings.some(booking => 
-      booking.scheduledClassId === classId || 
-      // Also check by matching class details in case scheduledClassId is not exposed
-      (booking.className === classId || booking.bookingId === classId)
-    );
-  };
-
   const renderClassItem = ({ item }) => {
-    const isBooked = isClassBooked(item.id);
-    
+    const isBooked = bookedClassIds.includes(item.id);
+
     return (
       <Card onPress={() => handleClassPress(item)} style={[styles.classCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
         <View style={styles.cardHeader}>
           <Text style={[styles.className, { color: theme.text }]}>{item.name || item.discipline}</Text>
-          <View style={styles.badgeContainer}>
-            {isBooked && (
-              <View style={[styles.bookedBadge, { backgroundColor: theme.success, marginRight: 8 }]}>
-                <Text style={styles.badgeText}>✓ Reservada</Text>
-              </View>
-            )}
-            <View style={[styles.badge, { backgroundColor: theme.primary }]}>
-              <Text style={styles.badgeText}>{item.discipline}</Text>
-            </View>
+          <View style={[styles.badge, { backgroundColor: isBooked ? theme.success : theme.primary }]}>
+            <Text style={styles.badgeText}>{isBooked ? '✓ Reservada' : item.discipline}</Text>
           </View>
         </View>
 
@@ -276,46 +269,85 @@ const HomeScreen = ({ navigation }) => {
               Tu espacio para entrenar, reservar clases y mantenerte informado.
             </Text>
 
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Accesos rápidos</Text>
+
+            <View style={styles.quickAccessContainer}>
+              <TouchableOpacity
+                style={[styles.quickButton, { backgroundColor: theme.primary }]}
+                onPress={handleReserveClass}
+              >
+                <Text style={styles.quickButtonText}>Ver mis reservas</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.quickButton, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}
+                onPress={handleMyProfile}
+              >
+                <Text style={[styles.quickButtonText, { color: theme.text }]}>Mi perfil</Text>
+              </TouchableOpacity>
+            </View>
+
+            <Card style={[styles.featuredCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
+              <View style={styles.featuredCardContent}>
+                <View style={styles.featuredIcon}>
+                  <Text style={styles.featuredIconText}>📅</Text>
+                </View>
+                <View style={styles.featuredTextContainer}>
+                  <Text style={[styles.featuredTitle, { color: theme.primary }]}>Próxima clase: Yoga - 10:00</Text>
+                  <Text style={[styles.featuredSubtitle, { color: theme.textSecondary }]}>¡No olvides tu clase!</Text>
+                </View>
+              </View>
+            </Card>
+
             <Text style={[styles.catalogTitle, { color: theme.primary }]}>Catálogo de Clases y Turnos</Text>
 
             <View style={styles.filtersContainer}>
+              {/* Filtro de Sede */}
               <View style={styles.filterWrapper}>
-                <Text style={[styles.filterLabel, { color: theme.text }]}>Sede</Text>
+                <Text style={[styles.filterLabel, { color: theme.textSecondary }]}>Sede</Text>
                 <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
                   <Picker
                     selectedValue={selectedLocation}
                     onValueChange={setSelectedLocation}
-                    style={[styles.picker, { color: isDarkMode ? COLORS.WHITE : theme.text }]}
+                    style={[styles.picker, { color: theme.text }]}
+                    itemStyle={styles.pickerItem}
                   >
-                    {locations.map((location) => (
-                      <Picker.Item key={location} label={location} value={location} />
-                    ))}
+                    <Picker.Item key="todas" label="Todas" value="Todas" />
+                    {locations.map((location) => {
+                      // Mostrar solo el nombre de la ciudad (ej: "Palermo") en lugar de "Sede Palermo"
+                      const shortLabel = location.name.replace('Sede ', '');
+                      return <Picker.Item key={location.id} label={shortLabel} value={location.name} />;
+                    })}
                   </Picker>
                 </View>
               </View>
 
+              {/* Filtro de Disciplina */}
               <View style={styles.filterWrapper}>
-                <Text style={[styles.filterLabel, { color: theme.text }]}>Disciplina</Text>
+                <Text style={[styles.filterLabel, { color: theme.textSecondary }]}>Disciplina</Text>
                 <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
                   <Picker
                     selectedValue={selectedDiscipline}
                     onValueChange={setSelectedDiscipline}
-                    style={[styles.picker, { color: isDarkMode ? COLORS.WHITE : theme.text }]}
+                    style={[styles.picker, { color: theme.text }]}
+                    itemStyle={styles.pickerItem}
                   >
-                    {disciplines.map((discipline) => (
+                    {DISCIPLINES.map((discipline) => (
                       <Picker.Item key={discipline} label={discipline} value={discipline} />
                     ))}
                   </Picker>
                 </View>
               </View>
 
+              {/* Filtro de Fecha */}
               <View style={styles.filterWrapper}>
-                <Text style={[styles.filterLabel, { color: theme.text }]}>Fecha</Text>
+                <Text style={[styles.filterLabel, { color: theme.textSecondary }]}>Fecha</Text>
                 <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
                   <Picker
                     selectedValue={selectedDate}
                     onValueChange={setSelectedDate}
-                    style={[styles.picker, { color: isDarkMode ? COLORS.WHITE : theme.text }]}
+                    style={[styles.picker, { color: theme.text }]}
+                    itemStyle={styles.pickerItem}
                   >
                     <Picker.Item label="Todas" value="Todas" />
                     <Picker.Item label="Hoy" value="Hoy" />
@@ -377,6 +409,67 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 24,
   },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  quickAccessContainer: {
+    flexDirection: 'row',
+    marginBottom: 20,
+    justifyContent: 'space-between',
+  },
+  quickButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 50,
+    marginHorizontal: 4,
+  },
+  quickButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  featuredCard: {
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    padding: 20,
+    marginTop: 20,
+    marginBottom: 20,
+    minHeight: 80,
+  },
+  featuredCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  featuredIcon: {
+    width: 40,
+    height: 40,
+    marginRight: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  featuredIconText: {
+    fontSize: 32,
+  },
+  featuredTextContainer: {
+    flex: 1,
+  },
+  featuredTitle: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    marginBottom: 6,
+    lineHeight: 22,
+  },
+  featuredSubtitle: {
+    fontSize: 14,
+  },
   catalogTitle: {
     fontSize: 22,
     fontWeight: 'bold',
@@ -385,33 +478,35 @@ const styles = StyleSheet.create({
     lineHeight: 28,
   },
   filtersContainer: {
-    marginBottom: 16,
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    marginBottom: 16,
     justifyContent: 'space-between',
+    gap: 6,
   },
   filterWrapper: {
-    marginBottom: 12,
-    width: '48%',
+    flex: 1,
+    minWidth: 0,
   },
   filterLabel: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
-    marginBottom: 6,
+    marginBottom: 4,
     marginLeft: 4,
   },
   filterItem: {
     borderWidth: 1,
     borderRadius: 8,
-    height: 56,
+    height: 48,
     justifyContent: 'center',
-    overflow: 'hidden',
+    overflow: 'visible',
   },
   picker: {
-    height: 56,
-    fontSize: 14,
-    color: COLORS.WHITE,
-    paddingHorizontal: 8,
+    height: 48,
+    width: '100%',
+  },
+  pickerItem: {
+    fontSize: 13,
+    height: 48,
   },
   classesListTitle: {
     fontSize: 16,
@@ -433,16 +528,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     flex: 1,
   },
-  badgeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   badge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  bookedBadge: {
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,

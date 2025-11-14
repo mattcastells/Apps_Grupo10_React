@@ -72,10 +72,31 @@ export const THEME_COLORS = {
 
 // API Configuration
 export const API_CONFIG = {
-  // Use localhost for web, 10.0.2.2 for Android emulator, or your IP for physical devices
-  // BASE_URL: 'http://192.168.0.191:8080/api/v1', // Para celu por wifi
-  BASE_URL: 'http://10.0.2.2:8080/api/v1', // Para emulador
-  // BASE_URL: 'http://localhost:8080/api/v1', // Para web
+  // Configuración por defecto para Android emulator
+  BASE_URL: 'http://10.0.2.2:8080/api/v1',
+
+  // Opciones alternativas de BASE_URL:
+  //
+  // Para usar tu red local con un dispositivo físico o emulador en la misma red:
+  // BASE_URL: 'http://192.168.0.164:8080/api/v1',
+  //
+  // ¿Cómo obtener tu IPv4 local?
+  //
+  // En Windows:
+  //   1. Abrí CMD o PowerShell
+  //   2. Ejecutá: ipconfig
+  //   3. Buscá "Adaptador de LAN inalámbrica Wi-Fi" o "Adaptador de Ethernet"
+  //   4. Copiá el valor de "Dirección IPv4" (ej: 192.168.0.164)
+  //
+  // En macOS:
+  //   1. Abrí Terminal
+  //   2. Ejecutá: ifconfig | grep "inet " | grep -v 127.0.0.1
+  //   3. Buscá la IP que empiece con 192.168.x.x o 10.x.x.x
+  //   Alternativa: Preferencias del Sistema → Red → Tu conexión activa → verás la IP
+  //
+  // Para localhost (web o Metro Bundler en la misma máquina):
+  // BASE_URL: 'http://localhost:8080/api/v1',
+
   TIMEOUT: 30000,
 };
 

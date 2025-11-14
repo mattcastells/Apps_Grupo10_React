@@ -93,13 +93,22 @@ export const AuthProvider = ({ children }) => {
 
   const login = useCallback(
     async (email, password) => {
-      const response = await authService.login(email, password);
-      const { token } = response.data;
-      await SessionManager.setToken(token);
-      await loadUserData(token);
-      setIsAuthenticated(true);
-      setHasBiometricAuthenticated(true);
-      return response;
+      try {
+        const response = await authService.login(email, password);
+        const { token } = response.data;
+        await SessionManager.setToken(token);
+        await loadUserData(token);
+        setIsAuthenticated(true);
+        setHasBiometricAuthenticated(true);
+        return response;
+      } catch (error) {
+        console.error('Login error:', error);
+        // IMPORTANTE: Asegurarse de que el estado de autenticación NO se setee en caso de error
+        setIsAuthenticated(false);
+        setUser(null);
+        setHasBiometricAuthenticated(false);
+        throw error;
+      }
     },
     [authService, loadUserData]
   );

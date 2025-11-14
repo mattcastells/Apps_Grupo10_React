@@ -240,12 +240,18 @@ const EditUserScreen = ({ navigation }) => {
 
           {/* Avatar */}
           <View style={styles.avatarContainer}>
-            <Image
-              source={{ 
-                uri: user?.photoUrl || 'https://via.placeholder.com/300/CCCCCC/FFFFFF?text=Sin+Foto' 
-              }}
-              style={styles.avatar}
-            />
+            {user?.photoUrl ? (
+              <Image
+                source={{ uri: user.photoUrl }}
+                style={styles.avatar}
+              />
+            ) : (
+              <View style={styles.avatarPlaceholder}>
+                <Text style={styles.avatarText}>
+                  {user?.name?.charAt(0).toUpperCase() || 'U'}
+                </Text>
+              </View>
+            )}
           </View>
 
           {/* Change Photo Button */}
@@ -378,6 +384,19 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     backgroundColor: COLORS.LIGHTGRAY,
+  },
+  avatarPlaceholder: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: COLORS.ORANGE,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarText: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: COLORS.WHITE,
   },
   photoButton: {
     backgroundColor: COLORS.ORANGE,

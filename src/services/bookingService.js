@@ -96,6 +96,20 @@ const createBookingService = (axiosInstance) => ({
       throw error;
     }
   },
+
+  /**
+   * Get IDs of classes that the user has already booked (confirmed and future)
+   * @returns {Promise<string[]>} List of scheduled class IDs
+   */
+  getBookedClassIds: async () => {
+    try {
+      const response = await axiosInstance.get('/booking/booked-class-ids');
+      return response.data;
+    } catch (error) {
+      console.error('Get booked class IDs error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
 });
 
 export default createBookingService;

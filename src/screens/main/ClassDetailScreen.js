@@ -48,11 +48,10 @@ const ClassDetailScreen = ({ route, navigation }) => {
 
   const checkIfBooked = async () => {
     try {
-      const bookings = await bookingService.getMyBookings();
-      const alreadyBooked = bookings.some(booking => booking.scheduledClassId === classId);
-      setIsBooked(alreadyBooked);
+      const bookedIds = await bookingService.getBookedClassIds();
+      setIsBooked(bookedIds.includes(classId));
     } catch (error) {
-      console.error('Error checking bookings:', error);
+      console.error('Error checking if booked:', error);
       // If there's an error, assume not booked to allow user to try
       setIsBooked(false);
     }
@@ -159,16 +158,16 @@ const ClassDetailScreen = ({ route, navigation }) => {
 
         <TouchableOpacity
           style={[
-            styles.reserveButton, 
+            styles.reserveButton,
             { backgroundColor: isBooked ? theme.success : theme.primary },
             isBooked && styles.bookedButton
           ]}
           onPress={handleBookClass}
-          disabled={loading || isBooked}
+          disabled={loading || isBooked || classDetail?.availableSlots === 0}
           activeOpacity={isBooked ? 1 : 0.7}
         >
           <Text style={styles.reserveButtonText}>
-            {loading ? 'Reservando...' : isBooked ? '✓ Clase reservada' : 'Reservar'}
+            {loading ? 'Reservando...' : isBooked ? '✓ Clase reservada' : classDetail?.availableSlots === 0 ? 'Sin cupos disponibles' : 'Reservar'}
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -280,6 +279,22 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   reserveButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  alreadyBookedContainer: {
+    height: 56,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  alreadyBookedText: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#FFFFFF',
