@@ -1,19 +1,10 @@
-import { API_CONFIG } from '../utils/constants';
-
 /**
  * Cloudinary Configuration
  */
 const CLOUDINARY_CONFIG = {
-  CLOUD_NAME: 'do7lo4pkj',
-  UPLOAD_PRESET: 'ritmofit_unisgned',
+  CLOUD_NAME: 'dtjbknm5h',
+  UPLOAD_PRESET: 'ml_default',
   BASE_URL: 'https://api.cloudinary.com/v1_1',
-};
-
-/**
- * Backend Endpoints Configuration
- */
-const BACKEND_ENDPOINTS = {
-  SAVE_PHOTO_URL: (userId) => `/users/${userId}/photo`,
 };
 
 /**
@@ -44,7 +35,7 @@ const createCloudinaryService = (axiosInstance) => ({
 
       const cloudinaryUrl = `${CLOUDINARY_CONFIG.BASE_URL}/${CLOUDINARY_CONFIG.CLOUD_NAME}/image/upload`;
 
-      console.log('Subiendo imagen a Cloudinary...');
+      console.log('Subiendo imagen a Cloudinary con url ' + cloudinaryUrl)
 
       const response = await fetch(cloudinaryUrl, {
         method: 'POST',
@@ -54,11 +45,12 @@ const createCloudinaryService = (axiosInstance) => ({
         },
       });
 
-      if (!response.ok) {
-        throw new Error('Error al subir imagen a Cloudinary');
-      }
-
       const data = await response.json();
+      if (!response.ok) {
+        // Log the detailed error from Cloudinary
+        console.error('Error response from Cloudinary:', data);
+        throw new Error(data.error?.message || 'Error al subir imagen a Cloudinary');
+      }
 
       console.log('Imagen subida exitosamente a Cloudinary');
 
@@ -79,28 +71,23 @@ const createCloudinaryService = (axiosInstance) => ({
 
   /**
    * Saves image URL to backend
-   * @param {string} userId - User ID (path param)
    * @param {string} imageUrl - Image URL from Cloudinary
    * @returns {Promise<Object>} - Backend response
    */
-  saveImageUrlToBackend: async (userId, imageUrl) => {
+  saveImageUrlToBackend: async (imageUrl) => {
     try {
-      console.log(`Guardando URL en el backend para usuario ${userId}...`);
+      console.log(`Guardando URL en el backend para usuario...`);
 
-      const endpoint = BACKEND_ENDPOINTS.SAVE_PHOTO_URL(userId);
+      const endpoint = '/users/my-photo';
 
       const requestBody = {
         photoUrl: imageUrl,
       };
 
       await axiosInstance.put(endpoint, requestBody);
-
       console.log('URL guardada en el backend exitosamente');
 
-      return {
-        success: true,
-        photoUrl: imageUrl,
-      };
+      return { success: true, photoUrl: imageUrl };
     } catch (error) {
       console.error('Error saving image URL to backend:', error.response?.data || error.message);
 
@@ -116,21 +103,19 @@ const createCloudinaryService = (axiosInstance) => ({
 
   /**
    * Complete process: Upload image to Cloudinary and save URL to backend
-   * @param {number} userId - User ID
    * @param {Object} imageData - Image data from react-native-image-picker
    * @returns {Promise<Object>} - Object with image URL and backend response
    */
-  uploadAndSaveProfilePhoto: async (userId, imageData) => {
+  uploadAndSaveProfilePhoto: async function (imageData) {
     try {
       console.log('Iniciando proceso de subida de imagen...');
-      const service = createCloudinaryService(axiosInstance);
-      const cloudinaryResult = await service.uploadToCloudinary(imageData);
+      const cloudinaryResult = await this.uploadToCloudinary(imageData);
 
       if (!cloudinaryResult.success) {
         throw new Error('Error al subir imagen a Cloudinary');
       }
 
-      const backendResult = await service.saveImageUrlToBackend(userId, cloudinaryResult.url);
+      const backendResult = await this.saveImageUrlToBackend(cloudinaryResult.url);
 
       return {
         success: true,
@@ -146,16 +131,14 @@ const createCloudinaryService = (axiosInstance) => ({
 
   /**
    * Deletes an image from Cloudinary (optional)
-   * Requires additional configuration with API Key and API Secret in backend
    * @param {string} publicId - Public ID of image in Cloudinary
    * @returns {Promise<Object>} - Backend response
    */
   deleteFromCloudinary: async (publicId) => {
     try {
       const response = await axiosInstance.delete('/eliminarFotoCloudinary', {
-        data: { publicId }
+        data: { publicId },
       });
-
       return response.data;
     } catch (error) {
       console.error('Error deleting from Cloudinary:', error.response?.data || error.message);
@@ -165,4 +148,4 @@ const createCloudinaryService = (axiosInstance) => ({
 });
 
 export default createCloudinaryService;
-export { CLOUDINARY_CONFIG, BACKEND_ENDPOINTS };
+export { CLOUDINARY_CONFIG };
