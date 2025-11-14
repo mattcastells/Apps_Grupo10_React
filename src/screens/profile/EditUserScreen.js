@@ -142,7 +142,6 @@ const EditUserScreen = ({ navigation }) => {
 
       // Subir a Cloudinary y guardar en backend
       const result = await cloudinaryService.uploadAndSaveProfilePhoto(
-        user.id,
         imagePayload
       );
 
