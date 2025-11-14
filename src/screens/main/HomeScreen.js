@@ -54,6 +54,11 @@ const HomeScreen = ({ navigation }) => {
       console.log('🔄 Cargando clases desde el backend...');
       const data = await scheduleService.getWeeklySchedule();
       console.log('✅ Clases cargadas:', data);
+
+      // Debug: Verificar qué valores de location vienen del backend
+      const uniqueLocations = [...new Set(data.map(item => item.location || item.site))];
+      console.log('📍 Ubicaciones únicas en los datos:', uniqueLocations);
+
       setClasses(data);
 
       // Cargar IDs de clases ya reservadas
@@ -148,7 +153,37 @@ const HomeScreen = ({ navigation }) => {
         item.location === selectedLocation ||
         item.site === selectedLocation;
 
-      return matchDiscipline && matchLocation;
+      // Filtro por fecha
+      const matchDate = (() => {
+        if (selectedDate === 'Todas') return true;
+
+        if (!item.dateTime) return false;
+
+        const classDate = new Date(item.dateTime);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const endOfWeek = new Date(today);
+        endOfWeek.setDate(endOfWeek.getDate() + 7);
+
+        const classDayStart = new Date(classDate);
+        classDayStart.setHours(0, 0, 0, 0);
+
+        if (selectedDate === 'Hoy') {
+          return classDayStart.getTime() === today.getTime();
+        } else if (selectedDate === 'Mañana') {
+          return classDayStart.getTime() === tomorrow.getTime();
+        } else if (selectedDate === 'Semana') {
+          return classDate >= today && classDate < endOfWeek;
+        }
+
+        return true;
+      })();
+
+      return matchDiscipline && matchLocation && matchDate;
     });
   };
 
@@ -222,7 +257,7 @@ const HomeScreen = ({ navigation }) => {
                 style={[styles.quickButton, { backgroundColor: theme.primary }]}
                 onPress={handleReserveClass}
               >
-                <Text style={styles.quickButtonText}>Reservar clase</Text>
+                <Text style={styles.quickButtonText}>Ver mis reservas</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -258,9 +293,11 @@ const HomeScreen = ({ navigation }) => {
                     style={[styles.picker, { color: theme.text }]}
                     itemStyle={styles.pickerItem}
                   >
-                    {LOCATIONS.map((location) => (
-                      <Picker.Item key={location} label={location} value={location} />
-                    ))}
+                    {LOCATIONS.map((location) => {
+                      // Mostrar nombres cortos en el picker para iOS
+                      const shortLabel = location === 'Todas' ? 'Todas' : location.replace('Sede ', '');
+                      return <Picker.Item key={location} label={shortLabel} value={location} />;
+                    })}
                   </Picker>
                 </View>
               </View>
@@ -424,10 +461,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 16,
     justifyContent: 'space-between',
-    gap: 8,
+    gap: 6,
   },
   filterWrapper: {
     flex: 1,
+    minWidth: 0,
   },
   filterLabel: {
     fontSize: 12,
@@ -440,14 +478,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     height: 48,
     justifyContent: 'center',
-    overflow: 'hidden',
+    overflow: 'visible',
   },
   picker: {
     height: 48,
     width: '100%',
   },
   pickerItem: {
-    fontSize: 14,
+    fontSize: 13,
     height: 48,
   },
   classesListTitle: {
