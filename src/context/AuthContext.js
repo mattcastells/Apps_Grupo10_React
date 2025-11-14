@@ -1,4 +1,11 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  useMemo,
+  useCallback,
+} from 'react';
 import SessionManager from '../utils/SessionManager';
 import createAuthService from '../services/authService';
 import createUserService from '../services/userService';
@@ -20,45 +27,52 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [token, setTokenState] = useState(null);
   const [user, setUser] = useState(null);
-
   const [hasBiometricAuthenticated, setHasBiometricAuthenticated] = useState(false);
 
-  const apiClient = createApiClient();
-  const authService = createAuthService(apiClient);
+  const { apiClient, authService, userService } = useMemo(() => {
+    const client = createApiClient();
+    const auth = createAuthService(client);
+    const userAxios = axios.create({
+      baseURL: API_CONFIG.BASE_URL,
+      timeout: API_CONFIG.TIMEOUT,
+      headers: { 'Content-Type': 'application/json' },
+    });
 
-  const axiosInstance = axios.create({
-    baseURL: API_CONFIG.BASE_URL,
-    timeout: API_CONFIG.TIMEOUT,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+    userAxios.interceptors.request.use(
+      async (config) => {
+        const token = await SessionManager.getToken();
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
 
-  axiosInstance.interceptors.request.use(
-    async (config) => {
-      const token = await SessionManager.getToken();
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      return config;
-    },
-    (error) => Promise.reject(error)
-  );
+    const user = createUserService(userAxios);
 
-  const userService = createUserService(axiosInstance);
-
-  useEffect(() => {
-    checkAuth();
+    return { apiClient: client, authService: auth, userService: user };
   }, []);
 
-  const checkAuth = async () => {
+  const loadUserData = useCallback(
+    async (token) => {
+      try {
+        const userId = extractUserIdFromToken(token);
+        const userData = await userService.getUser(userId);
+        setUser(userData);
+      } catch (error) {
+        console.error('Load user data error:', error);
+      }
+    },
+    [userService]
+  );
+
+  const checkAuth = useCallback(async () => {
     try {
       setIsLoading(true);
       const authenticated = await SessionManager.isAuthenticated();
       setIsAuthenticated(authenticated);
-
       if (authenticated) {
         const token = await SessionManager.getToken();
         if (token) {
@@ -68,115 +82,96 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Auth check error:', error);
       setIsAuthenticated(false);
-      setTokenState(null);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [loadUserData]);
 
-  const loadUserData = async (token) => {
-    try {
-      const userId = extractUserIdFromToken(token);
-      const user = await userService.getUser(userId);
-      setUser(user);
-    } catch (error) {
-      console.error('Load user data error:', error);
-    }
-  };
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
-  const login = async (email, password) => {
-    try {
+  const login = useCallback(
+    async (email, password) => {
       const response = await authService.login(email, password);
       const { token } = response.data;
-
       await SessionManager.setToken(token);
       await loadUserData(token);
-
       setIsAuthenticated(true);
-      setTokenState(token);
-
       setHasBiometricAuthenticated(true);
-
       return response;
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    }
-  };
+    },
+    [authService, loadUserData]
+  );
 
-  const register = async (userRequest) => {
-    try {
-      const response = await authService.register(userRequest);
-      return response;
-    } catch (error) {
-      console.error('Register error:', error);
-      throw error;
-    }
-  };
+  const register = useCallback(
+    async (userRequest) => {
+      return await authService.register(userRequest);
+    },
+    [authService]
+  );
 
-  const verifyEmail = async (email, otp) => {
-    try {
-      const response = await authService.verifyEmail(email, otp);
-      return response;
-    } catch (error) {
-      console.error('Verify email error:', error);
-      throw error;
-    }
-  };
+  const verifyEmail = useCallback(
+    async (email, otp) => {
+      return await authService.verifyEmail(email, otp);
+    },
+    [authService]
+  );
 
-  const logout = async () => {
-    try {
-      await SessionManager.clear();
-      setIsAuthenticated(false);
-      setTokenState(null);
-      setUser(null);
-      setHasBiometricAuthenticated(false);
-    } catch (error) {
-      console.error('Logout error:', error);
-      throw error;
-    }
-  };
+  const logout = useCallback(async () => {
+    await SessionManager.clear();
+    setIsAuthenticated(false);
+    setUser(null);
+    setHasBiometricAuthenticated(false);
+  }, []);
 
-  const markBiometricAuthenticated = () => {
+  const markBiometricAuthenticated = useCallback(() => {
     setHasBiometricAuthenticated(true);
-  };
+  }, []);
 
-  const needsBiometricAuth = () => {
+  const needsBiometricAuth = useCallback(() => {
     return !hasBiometricAuthenticated;
-  };
+  }, [hasBiometricAuthenticated]);
 
-  const updateUser = async (userData) => {
-    try {
-      setUser(userData);
-    } catch (error) {
-      console.error('Update user context error:', error);
+  const updateUser = useCallback((userData) => {
+    setUser(userData);
+  }, []);
+
+  const refreshUser = useCallback(async () => {
+    const token = await SessionManager.getToken();
+    if (token) {
+      await loadUserData(token);
     }
-  };
+  }, [loadUserData]);
 
-  const refreshUser = async () => {
-    try {
-      const token = await SessionManager.getToken();
-      if (token) {
-        await loadUserData(token);
-      }
-    } catch (error) {
-      console.error('Refresh user error:', error);
-    }
-  };
-
-  const value = {
-    isAuthenticated,
-    user,
-    isLoading,
-    login,
-    register,
-    verifyEmail,
-    logout,
-    updateUser,
-    refreshUser,
-    markBiometricAuthenticated,
-    needsBiometricAuth,
-  };
+  const value = useMemo(
+    () => ({
+      isAuthenticated,
+      user,
+      isLoading,
+      login,
+      register,
+      verifyEmail,
+      logout,
+      updateUser,
+      refreshUser,
+      markBiometricAuthenticated,
+      needsBiometricAuth,
+    }),
+    [
+      isAuthenticated,
+      user,
+      isLoading,
+      login,
+      register,
+      verifyEmail,
+      logout,
+      updateUser,
+      refreshUser,
+      markBiometricAuthenticated,
+      needsBiometricAuth,
+    ]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
