@@ -68,9 +68,10 @@ const ScanQRScreen = ({ navigation }) => {
   };
 
   const handleBarCodeScanned = async ({ type, data }) => {
-    if (scanned) return;
+    if (scanned || processing) return;
 
     setScanned(true);
+    setProcessing(true);
     setShowCamera(false);
 
     try {
@@ -81,15 +82,17 @@ const ScanQRScreen = ({ navigation }) => {
       if (qrData.type !== 'class_checkin' || !qrData.scheduledClassId) {
         Alert.alert('Error', 'Código QR inválido');
         setScanned(false);
+        setProcessing(false);
         return;
       }
 
-      // Call check-in API
+      // Verify booking (without performing check-in)
       const checkInService = createCheckInService(axiosInstance);
-      const response = await checkInService.checkIn(qrData.scheduledClassId);
+      const response = await checkInService.verifyBooking(qrData.scheduledClassId);
 
-      // Show check-in data
+      // Show booking details for confirmation
       setCheckInData({
+        scheduledClassId: qrData.scheduledClassId,
         className: response.data.className,
         schedule: formatDateTime(response.data.classDateTime),
         location: response.data.location,
@@ -110,8 +113,8 @@ const ScanQRScreen = ({ navigation }) => {
         case 'ALREADY_CHECKED_IN':
           errorMessage = 'Ya registraste tu asistencia a esta clase.';
           break;
-        case 'INVALID_CHECKIN_TIME':
-          errorMessage = 'Solo podés hacer check-in 15 minutos antes hasta 5 minutos después del inicio.';
+        case 'CLASS_EXPIRED':
+          errorMessage = 'Error, la clase ya venció.';
           break;
         default:
           errorMessage = error.response?.data?.message || errorMessage;
@@ -119,27 +122,44 @@ const ScanQRScreen = ({ navigation }) => {
 
       Alert.alert('Error', errorMessage);
       setScanned(false);
+      setProcessing(false);
+    } finally {
+      setProcessing(false);
     }
   };
 
   const handleCloseCamera = () => {
     setShowCamera(false);
     setScanned(false);
+    setProcessing(false);
   };
 
   const handleConfirmCheckIn = async () => {
+    if (!checkInData?.scheduledClassId) return;
+
     try {
+      setProcessing(true);
+      const checkInService = createCheckInService(axiosInstance);
+      await checkInService.checkIn(checkInData.scheduledClassId);
+
       Alert.alert('Check-in exitoso', 'Tu asistencia ha sido registrada correctamente', [
         {
           text: 'OK',
           onPress: () => {
             setCheckInData(null);
+            setScanned(false);
+            setProcessing(false);
             navigation.navigate('History');
           },
         },
       ]);
     } catch (error) {
-      Alert.alert('Error', 'No se pudo registrar el check-in');
+      console.error('Error during check-in:', error);
+      const errorMessage = error.response?.data?.message || 'No se pudo registrar el check-in';
+      Alert.alert('Error', errorMessage);
+      setCheckInData(null);
+      setScanned(false);
+      setProcessing(false);
     }
   };
 
