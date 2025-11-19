@@ -17,7 +17,8 @@
       "infoPlist": {
         "NSCameraUsageDescription": "Necesitamos acceso a tu cámara para tomar fotos de perfil",
         "NSPhotoLibraryUsageDescription": "Necesitamos acceso a tu galería para seleccionar fotos de perfil"
-      }
+      },
+      "bundleIdentifier": "com.anonymous.ritmofit-react"
     },
     "android": {
       "adaptiveIcon": {
@@ -26,10 +27,6 @@
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.RECORD_AUDIO",
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",

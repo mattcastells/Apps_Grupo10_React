@@ -23,6 +23,7 @@ const ScanQRScreen = ({ navigation }) => {
   const [showCamera, setShowCamera] = useState(false);
   const [checkInData, setCheckInData] = useState(null);
   const [scanned, setScanned] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const axiosInstance = useAxios();
   const historyService = createHistoryService(axiosInstance);
 
