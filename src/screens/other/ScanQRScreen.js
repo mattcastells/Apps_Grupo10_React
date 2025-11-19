@@ -12,6 +12,7 @@ import {
 import { CameraView, Camera } from 'expo-camera';
 import { COLORS } from '../../utils/constants';
 import createHistoryService from '../../services/historyService';
+import createCheckInService from '../../services/checkInService';
 import { useAxios } from '../../hooks/useAxios';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -53,29 +54,69 @@ const ScanQRScreen = ({ navigation }) => {
     setScanned(false);
   };
 
+  const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString) return 'Horario no disponible';
+    const date = new Date(dateTimeString);
+    return date.toLocaleString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
   const handleBarCodeScanned = async ({ type, data }) => {
     if (scanned) return;
-    
+
     setScanned(true);
     setShowCamera(false);
-    
+
     try {
-      // Parse QR code data (expecting JSON with bookingId or classId)
+      // Parse QR code data (expecting JSON with scheduledClassId)
       const qrData = JSON.parse(data);
-      
-      // TODO: Call backend check-in API
-      // const response = await bookingService.checkIn(qrData.bookingId);
-      // setCheckInData(response);
-      
-      // For now, show the scanned data
+
+      // Validate QR format
+      if (qrData.type !== 'class_checkin' || !qrData.scheduledClassId) {
+        Alert.alert('Error', 'Código QR inválido');
+        setScanned(false);
+        return;
+      }
+
+      // Call check-in API
+      const checkInService = createCheckInService(axiosInstance);
+      const response = await checkInService.checkIn(qrData.scheduledClassId);
+
+      // Show check-in data
       setCheckInData({
-        className: qrData.className || 'Clase',
-        schedule: qrData.schedule || 'Horario no disponible',
-        location: qrData.location || 'Ubicación no disponible',
+        className: response.data.className,
+        schedule: formatDateTime(response.data.classDateTime),
+        location: response.data.location,
+        professor: response.data.professor,
+        status: response.data.status,
       });
     } catch (error) {
       console.error('Error processing QR code:', error);
-      Alert.alert('Error', 'No se pudo procesar el código QR');
+
+      // Handle specific error types
+      const errorType = error.response?.data?.error;
+      let errorMessage = 'No se pudo procesar el código QR';
+
+      switch (errorType) {
+        case 'NO_BOOKING_FOUND':
+          errorMessage = 'No tenés una reserva para esta clase.';
+          break;
+        case 'ALREADY_CHECKED_IN':
+          errorMessage = 'Ya registraste tu asistencia a esta clase.';
+          break;
+        case 'INVALID_CHECKIN_TIME':
+          errorMessage = 'Solo podés hacer check-in 15 minutos antes hasta 5 minutos después del inicio.';
+          break;
+        default:
+          errorMessage = error.response?.data?.message || errorMessage;
+      }
+
+      Alert.alert('Error', errorMessage);
       setScanned(false);
     }
   };
@@ -142,6 +183,12 @@ const ScanQRScreen = ({ navigation }) => {
               <Text style={styles.infoLabel}>Sede:</Text>
               <Text style={[styles.infoValue, { color: theme.text }]}>{checkInData.location}</Text>
             </View>
+            {checkInData.professor && (
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Profesor:</Text>
+                <Text style={[styles.infoValue, { color: theme.text }]}>{checkInData.professor}</Text>
+              </View>
+            )}
 
             <TouchableOpacity
               style={[styles.confirmButton, { backgroundColor: theme.primary }]}
