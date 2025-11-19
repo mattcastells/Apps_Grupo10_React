@@ -13,13 +13,7 @@ export const createApiClient = () => {
 
   apiClient.interceptors.request.use(
     (config) => {
-        method: config.method,
-        url: config.url,
-        baseURL: config.baseURL,
-        fullURL: `${config.baseURL}${config.url}`,
-        headers: config.headers,
-        data: config.data,
-      });
+
       return config;
     },
     (error) => {
@@ -29,22 +23,11 @@ export const createApiClient = () => {
 
   apiClient.interceptors.response.use(
     (response) => {
-        status: response.status,
-        data: response.data,
-        headers: response.headers,
-      });
+
       return response;
     },
     (error) => {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-        config: {
-          method: error.config?.method,
-          url: error.config?.url,
-          baseURL: error.config?.baseURL,
-        },
-      });
+
       return Promise.reject(error);
     }
   );

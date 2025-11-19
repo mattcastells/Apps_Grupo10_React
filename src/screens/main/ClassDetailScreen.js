@@ -95,7 +95,7 @@ const ClassDetailScreen = ({ route, navigation }) => {
   };
 
   const handleViewMap = () => {
-    const locationQuery = classDetail?.location || 'RitmoFit';
+    const locationQuery = classDetail?.locationAddress || classDetail?.location || 'RitmoFit';
     const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
       locationQuery
     )}`;

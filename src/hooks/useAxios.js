@@ -29,10 +29,7 @@ export const useAxios = () => {
           config.headers.Authorization = `Bearer ${token}`;
         }
 
-          url: config.url,
-          headers: config.headers,
-          params: config.params,
-        });
+
 
         return config;
       },
