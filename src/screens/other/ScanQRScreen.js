@@ -100,7 +100,6 @@ const ScanQRScreen = ({ navigation }) => {
         status: response.data.status,
       });
     } catch (error) {
-      console.error('Error processing QR code:', error);
 
       // Handle specific error types
       const errorType = error.response?.data?.error;
@@ -154,7 +153,6 @@ const ScanQRScreen = ({ navigation }) => {
         },
       ]);
     } catch (error) {
-      console.error('Error during check-in:', error);
       const errorMessage = error.response?.data?.message || 'No se pudo registrar el check-in';
       Alert.alert('Error', errorMessage);
       setCheckInData(null);

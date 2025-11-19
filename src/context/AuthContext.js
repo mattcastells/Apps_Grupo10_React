@@ -62,7 +62,6 @@ export const AuthProvider = ({ children }) => {
         const userData = await userService.getUser(userId);
         setUser(userData);
       } catch (error) {
-        console.error('Load user data error:', error);
       }
     },
     [userService]
@@ -80,7 +79,6 @@ export const AuthProvider = ({ children }) => {
         }
       }
     } catch (error) {
-      console.error('Auth check error:', error);
       setIsAuthenticated(false);
     } finally {
       setIsLoading(false);
@@ -102,7 +100,6 @@ export const AuthProvider = ({ children }) => {
         setHasBiometricAuthenticated(true);
         return response;
       } catch (error) {
-        console.error('Login error:', error);
         // IMPORTANTE: Asegurarse de que el estado de autenticación NO se setee en caso de error
         setIsAuthenticated(false);
         setUser(null);

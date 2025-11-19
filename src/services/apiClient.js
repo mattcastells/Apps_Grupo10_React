@@ -13,7 +13,6 @@ export const createApiClient = () => {
 
   apiClient.interceptors.request.use(
     (config) => {
-      console.log('🌐 API Request (No Auth):', {
         method: config.method,
         url: config.url,
         baseURL: config.baseURL,
@@ -24,14 +23,12 @@ export const createApiClient = () => {
       return config;
     },
     (error) => {
-      console.error('❌ Request Error (No Auth):', error);
       return Promise.reject(error);
     }
   );
 
   apiClient.interceptors.response.use(
     (response) => {
-      console.log('✅ API Response (No Auth):', {
         status: response.status,
         data: response.data,
         headers: response.headers,
@@ -39,7 +36,6 @@ export const createApiClient = () => {
       return response;
     },
     (error) => {
-      console.error('❌ API Response Error (No Auth):', {
         message: error.message,
         status: error.response?.status,
         data: error.response?.data,

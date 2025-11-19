@@ -13,19 +13,15 @@ const createAuthService = (apiClient) => ({
 
       return response;
     } catch (error) {
-      console.error('Login error:', error.response?.data || error.message);
       throw error;
     }
   },
 
   register: async (userRequest) => {
     try {
-      console.log('🚀 Registering user:', userRequest);
       const response = await apiClient.post('/auth/register', userRequest);
-      console.log('✅ Registration successful:', response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ Registration error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -44,7 +40,6 @@ const createAuthService = (apiClient) => ({
 
       return response.data;
     } catch (error) {
-      console.error('Email verification error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -54,7 +49,6 @@ const createAuthService = (apiClient) => ({
       const response = await apiClient.post('/auth/forgot-password', { email });
       return response.data;
     } catch (error) {
-      console.error('Password reset request error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -68,7 +62,6 @@ const createAuthService = (apiClient) => ({
       });
       return response.data;
     } catch (error) {
-      console.error('Password reset error:', error.response?.data || error.message);
       throw error;
     }
   },

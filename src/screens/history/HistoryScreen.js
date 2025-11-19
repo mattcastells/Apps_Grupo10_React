@@ -28,7 +28,6 @@ const HistoryScreen = ({ navigation }) => {
       const data = await historyService.getMyHistory();
       setHistory(data);
     } catch (error) {
-      console.error('Error loading history:', error);
       setHistory([]);
     } finally {
       setLoading(false);

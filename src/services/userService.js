@@ -11,7 +11,6 @@ const createUserService = (axiosInstance) => ({
 
       return userData;
     } catch (error) {
-      console.error('Get user error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -21,7 +20,6 @@ const createUserService = (axiosInstance) => ({
       const response = await axiosInstance.put(`/users/${id}`, data);
       return response.data;
     } catch (error) {
-      console.error('Update user error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -33,7 +31,6 @@ const createUserService = (axiosInstance) => ({
       });
       return response.data;
     } catch (error) {
-      console.error('Update photo error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -47,7 +44,6 @@ const createUserService = (axiosInstance) => ({
       });
       return response.data;
     } catch (error) {
-      console.error('Upload photo error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -57,7 +53,6 @@ const createUserService = (axiosInstance) => ({
       const response = await axiosInstance.delete(`/users/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Delete user error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -70,7 +65,6 @@ const createUserService = (axiosInstance) => ({
       });
       return response.data;
     } catch (error) {
-      console.error('Change password error:', error.response?.data || error.message);
       throw error;
     }
   },

@@ -8,7 +8,6 @@ const createNewsService = (axiosInstance) => ({
       const response = await axiosInstance.get('/news');
       return response.data;
     } catch (error) {
-      console.error('Get news error:', error.response?.data || error.message);
       throw error;
     }
   },

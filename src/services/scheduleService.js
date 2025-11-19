@@ -4,7 +4,6 @@ const createScheduleService = (axiosInstance) => ({
       const response = await axiosInstance.get('/schedule/weekly');
       return response.data;
     } catch (error) {
-      console.error('Get weekly schedule error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -19,7 +18,6 @@ const createScheduleService = (axiosInstance) => ({
       });
       return response.data;
     } catch (error) {
-      console.error('Get schedule by date range error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -29,7 +27,6 @@ const createScheduleService = (axiosInstance) => ({
       const response = await axiosInstance.get(`/schedule/${classId}`);
       return response.data;
     } catch (error) {
-      console.error('Get class detail error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -43,7 +40,6 @@ const createScheduleService = (axiosInstance) => ({
       });
       return response.data;
     } catch (error) {
-      console.error('Get schedule by discipline error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -53,7 +49,6 @@ const createScheduleService = (axiosInstance) => ({
       const response = await axiosInstance.get('/class-templates/disciplines');
       return response.data;
     } catch (error) {
-      console.error('Get disciplines error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -72,7 +67,6 @@ const createScheduleService = (axiosInstance) => ({
       });
       return response.data;
     } catch (error) {
-      console.error('Get schedule by location error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -84,7 +78,6 @@ const createScheduleService = (axiosInstance) => ({
       });
       return response.data;
     } catch (error) {
-      console.error('Search schedule error:', error.response?.data || error.message);
       throw error;
     }
   },

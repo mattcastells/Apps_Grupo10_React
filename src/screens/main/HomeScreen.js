@@ -56,12 +56,9 @@ const HomeScreen = ({ navigation }) => {
 
   const loadLocations = async () => {
     try {
-      console.log('📍 Cargando ubicaciones desde el backend...');
       const data = await locationService.getAllLocations();
-      console.log('✅ Ubicaciones cargadas:', data);
       setLocations(data);
     } catch (error) {
-      console.error('⚠️ Error loading locations:', error);
       // No es crítico, continuar sin ubicaciones dinámicas
       setLocations([]);
     }
@@ -70,28 +67,22 @@ const HomeScreen = ({ navigation }) => {
   const loadClasses = useCallback(async () => {
     setLoading(true);
     try {
-      console.log('🔄 Cargando clases desde el backend...');
       const data = await scheduleService.getWeeklySchedule();
-      console.log('✅ Clases cargadas:', data);
 
       // Debug: Verificar qué valores de location vienen del backend
       const uniqueLocations = [...new Set(data.map(item => item.location || item.site))];
-      console.log('📍 Ubicaciones únicas en los datos:', uniqueLocations);
 
       setClasses(data);
 
       // Cargar IDs de clases ya reservadas
       try {
         const bookedIds = await bookingService.getBookedClassIds();
-        console.log('✅ IDs de clases reservadas:', bookedIds);
         setBookedClassIds(bookedIds);
       } catch (error) {
-        console.error('⚠️ Error loading booked class IDs:', error);
         // No es crítico, continuar sin marcar clases
         setBookedClassIds([]);
       }
     } catch (error) {
-      console.error('❌ Error loading classes:', error);
       Alert.alert('Error', 'No se pudieron cargar las clases. Por favor intenta nuevamente.');
       setClasses([]);
     } finally {
@@ -127,13 +118,11 @@ const HomeScreen = ({ navigation }) => {
   // 🔐 Callbacks para BiometricPrompt
   const handleBiometricSuccess = () => {
     // Autenticación exitosa, cargar las clases y continuar con el flujo
-    console.log('[HomeScreen] Autenticación biométrica exitosa');
     loadClasses();
   };
 
   const handleBiometricFailure = async (reason) => {
     // Autenticación fallida o sin enrolamiento, desloguear y redirigir a login
-    console.log('[HomeScreen] Autenticación biométrica fallida. Razón:', reason);
 
     Alert.alert(
       'Autenticación requerida',
@@ -152,7 +141,6 @@ const HomeScreen = ({ navigation }) => {
 
   const handleBiometricCancel = async () => {
     // Usuario canceló la autenticación, desloguear y redirigir a login
-    console.log('[HomeScreen] Autenticación biométrica cancelada');
 
     await logout();
     // La navegación al login se hace automáticamente por el AppNavigator

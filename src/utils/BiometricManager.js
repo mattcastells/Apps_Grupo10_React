@@ -19,7 +19,6 @@ class BiometricManager {
       const compatible = await LocalAuthentication.hasHardwareAsync();
       return compatible;
     } catch (error) {
-      console.error('[BiometricManager] Error checking hardware:', error);
       return false;
     }
   }
@@ -38,7 +37,6 @@ class BiometricManager {
       const enrolled = await LocalAuthentication.isEnrolledAsync();
       return enrolled;
     } catch (error) {
-      console.error('[BiometricManager] Error checking enrollment:', error);
       return false;
     }
   }
@@ -52,7 +50,6 @@ class BiometricManager {
       const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
       return types;
     } catch (error) {
-      console.error('[BiometricManager] Error getting auth types:', error);
       return [];
     }
   }
@@ -121,7 +118,6 @@ class BiometricManager {
         };
       }
     } catch (error) {
-      console.error('[BiometricManager] Authentication error:', error);
       return {
         success: false,
         error: error.message || 'Error durante la autenticación'
@@ -144,7 +140,6 @@ class BiometricManager {
       }
       return true;
     } catch (error) {
-      console.error('[BiometricManager] Error opening settings:', error);
       Alert.alert(
         'Error',
         'No se pudo abrir la configuración del dispositivo. Por favor, abre la configuración manualmente y configura un método de bloqueo.'
@@ -190,11 +185,9 @@ class BiometricManager {
    */
   async authenticateWithWorkaround() {
     try {
-      console.log('[BiometricManager] USING WORKAROUND FOR isEnrolledAsync BUG');
 
       const enrolled = await this.isEnrolled();
 
-      console.log(`[BiometricManager] isEnrolledAsync returned: ${enrolled}`);
 
       if (!enrolled) {
         Alert.alert(
@@ -203,7 +196,7 @@ class BiometricManager {
           [
             {
               text: 'OK, entendido',
-              onPress: () => console.log('[BiometricManager] Usuario pasó con workaround'),
+              onPress: () => {},
             },
           ]
         );
@@ -216,7 +209,6 @@ class BiometricManager {
       });
 
     } catch (error) {
-      console.error('[BiometricManager] Error en workaround:', error);
       return { success: true, workaround: true };
     }
   }
@@ -273,7 +265,6 @@ class BiometricManager {
       return authResult;
 
     } catch (error) {
-      console.error('[BiometricManager] Error en flujo biométrico:', error);
       return {
         success: false,
         reason: 'error',

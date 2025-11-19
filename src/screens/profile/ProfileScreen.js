@@ -31,12 +31,10 @@ const ProfileScreen = ({ navigation }) => {
       const loadData = async () => {
         if (loading) return;
 
-        console.log('ProfileScreen focused. Reloading user data...');
         setLoading(true);
         try {
           await refreshUser();
         } catch (error) {
-          console.error('Error loading user data:', error);
         } finally {
           setLoading(false);
         }
@@ -126,8 +124,6 @@ const ProfileScreen = ({ navigation }) => {
     }
 
     // Debug: ver qué propiedades tiene imageData
-    console.log('🔍 ProfileScreen - imageData recibido:', imageData);
-    console.log('🔍 ProfileScreen - imageData keys:', Object.keys(imageData || {}));
 
     if (!imageData || !imageData.uri) {
       Alert.alert('Error', 'No se pudo obtener la imagen seleccionada');
@@ -144,7 +140,6 @@ const ProfileScreen = ({ navigation }) => {
         fileName: imageData.fileName || `profile_${user.id}_${Date.now()}.jpg`,
       };
 
-      console.log('📦 ProfileScreen - imagePayload preparado:', imagePayload);
 
       // Subir a Cloudinary y guardar en backend (IMPORTANTE: userId como primer parámetro)
       const result = await cloudinaryService.uploadAndSaveProfilePhoto(
@@ -161,7 +156,6 @@ const ProfileScreen = ({ navigation }) => {
         await refreshUser();
       }
     } catch (error) {
-      console.error('Error al subir foto:', error);
       Alert.alert(
         'Error',
         error.message || 'No se pudo actualizar la foto de perfil'

@@ -28,7 +28,6 @@ const ReservationsScreen = ({ navigation }) => {
       const data = await bookingService.getMyBookings();
       setBookings(data);
     } catch (error) {
-      console.error('Error loading bookings:', error);
       Alert.alert('Error', 'No se pudieron cargar las reservas.');
       setBookings([]);
     } finally {

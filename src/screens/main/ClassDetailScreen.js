@@ -37,7 +37,6 @@ const ClassDetailScreen = ({ route, navigation }) => {
       const data = await scheduleService.getClassDetail(classId);
       setClassDetail(data);
     } catch (error) {
-      console.error('Error loading class detail:', error);
       Alert.alert('Error', 'No se pudo cargar la información de la clase', [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
@@ -51,7 +50,6 @@ const ClassDetailScreen = ({ route, navigation }) => {
       const bookedIds = await bookingService.getBookedClassIds();
       setIsBooked(bookedIds.includes(classId));
     } catch (error) {
-      console.error('Error checking if booked:', error);
       // If there's an error, assume not booked to allow user to try
       setIsBooked(false);
     }
@@ -85,7 +83,6 @@ const ClassDetailScreen = ({ route, navigation }) => {
                 },
               ]);
             } catch (error) {
-              console.error('Error booking class:', error);
               const errorMessage = error.response?.data?.message || 'No se pudo reservar la clase';
               Alert.alert('Error', errorMessage);
             } finally {

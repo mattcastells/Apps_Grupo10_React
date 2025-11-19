@@ -11,7 +11,6 @@ const createCheckInService = (axiosInstance) => ({
       });
       return response.data;
     } catch (error) {
-      console.error('Verify booking error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -28,7 +27,6 @@ const createCheckInService = (axiosInstance) => ({
       });
       return response.data;
     } catch (error) {
-      console.error('Check-in error:', error.response?.data || error.message);
       throw error;
     }
   },
