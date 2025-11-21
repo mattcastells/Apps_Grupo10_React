@@ -10,15 +10,20 @@ import {
 } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import createHistoryService from '../../services/historyService';
+import createRatingService from '../../services/ratingService';
 import { formatDate } from '../../utils/helpers';
 import { useAxios } from '../../hooks/useAxios';
+import RatingModal from '../../components/RatingModal';
 
 const HistoryDetailScreen = ({ route, navigation }) => {
   const { attendanceId } = route.params;
   const [attendance, setAttendance] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [ratingModalVisible, setRatingModalVisible] = useState(false);
+  const [submittingRating, setSubmittingRating] = useState(false);
   const axiosInstance = useAxios();
   const historyService = createHistoryService(axiosInstance);
+  const ratingService = createRatingService(axiosInstance);
   const { theme, isDarkMode } = useTheme();
 
   useEffect(() => {
@@ -67,6 +72,43 @@ const HistoryDetailScreen = ({ route, navigation }) => {
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, i) => (i < rating ? '⭐' : '☆')).join(' ');
+  };
+
+  const canRate = () => {
+    if (!attendance) return false;
+    
+    // Si ya tiene calificación, no puede calificar de nuevo
+    if (attendance.userReview) return false;
+    
+    // Calcular el tiempo de finalización de la clase
+    const classStartTime = new Date(attendance.startDateTime);
+    const classEndTime = new Date(classStartTime.getTime() + attendance.durationMinutes * 60000);
+    
+    // Calcular el límite de 24 horas después del final de la clase
+    const ratingDeadline = new Date(classEndTime.getTime() + 24 * 60 * 60 * 1000);
+    const now = new Date();
+    
+    // Solo puede calificar si la clase ya terminó y no pasaron más de 24 horas
+    return now >= classEndTime && now <= ratingDeadline;
+  };
+
+  const handleSubmitRating = async (rating, comment) => {
+    setSubmittingRating(true);
+    try {
+      await ratingService.createRating(attendanceId, rating, comment);
+      setRatingModalVisible(false);
+      
+      // Recargar los datos para mostrar la nueva calificación
+      await loadAttendanceDetail();
+      
+      Alert.alert('¡Gracias!', 'Tu calificación ha sido guardada exitosamente.');
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'No se pudo guardar la calificación';
+      Alert.alert('Error', errorMessage);
+    } finally {
+      setSubmittingRating(false);
+    }
   };
 
   return (
@@ -125,13 +167,39 @@ const HistoryDetailScreen = ({ route, navigation }) => {
           {attendance.userReview ? (
             <>
               <Text style={[styles.starsText, { color: theme.primary }]}>{renderStars(attendance.userReview.rating)}</Text>
-              <Text style={[styles.commentText, { color: theme.text }]}>{attendance.userReview.comment}</Text>
+              {attendance.userReview.comment && (
+                <Text style={[styles.commentText, { color: theme.text }]}>{attendance.userReview.comment}</Text>
+              )}
             </>
           ) : (
-            <Text style={[styles.noReviewText, { color: theme.textLight }]}>Aún no has dejado una reseña para esta clase.</Text>
+            <>
+              <Text style={[styles.noReviewText, { color: theme.textLight }]}>Aún no has dejado una reseña para esta clase.</Text>
+              {canRate() && (
+                <TouchableOpacity
+                  style={[styles.rateButton, { backgroundColor: theme.primary }]}
+                  onPress={() => setRatingModalVisible(true)}
+                >
+                  <Text style={[styles.rateButtonText, { color: theme.textInverted }]}>
+                    Calificar Clase
+                  </Text>
+                </TouchableOpacity>
+              )}
+              {!canRate() && (
+                <Text style={[styles.expiredText, { color: theme.textLight }]}>
+                  El plazo para calificar esta clase ha expirado (24 horas después del final de la clase).
+                </Text>
+              )}
+            </>
           )}
         </View>
       </ScrollView>
+      
+      <RatingModal
+        visible={ratingModalVisible}
+        onClose={() => setRatingModalVisible(false)}
+        onSubmit={handleSubmitRating}
+        loading={submittingRating}
+      />
     </SafeAreaView>
   );
 };
@@ -260,6 +328,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontStyle: 'italic',
     paddingVertical: 20,
+  },
+  rateButton: {
+    marginTop: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  rateButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  expiredText: {
+    fontSize: 14,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginTop: 12,
   },
 });
 
