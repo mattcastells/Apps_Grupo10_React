@@ -13,7 +13,6 @@ const createLocationService = (axiosInstance) => ({
       const response = await axiosInstance.get('/locations');
       return response.data;
     } catch (error) {
-      console.error('Get locations error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -28,7 +27,6 @@ const createLocationService = (axiosInstance) => ({
       const response = await axiosInstance.get(`/locations/${locationId}`);
       return response.data;
     } catch (error) {
-      console.error('Get location by ID error:', error.response?.data || error.message);
       throw error;
     }
   },

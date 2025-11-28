@@ -36,7 +36,6 @@ const HistoryDetailScreen = ({ route, navigation }) => {
       const data = await historyService.getAttendanceDetail(attendanceId);
       setAttendance(data);
     } catch (error) {
-      console.error('Error loading attendance detail:', error);
       Alert.alert('Error', 'No se pudo cargar el detalle', [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);

@@ -59,7 +59,6 @@ export const extractUserIdFromToken = (token) => {
     const payload = JSON.parse(jsonPayload);
     return payload.userId || payload.sub || null;
   } catch (error) {
-    console.error('Error extracting user ID from token:', error);
     return null;
   }
 };
@@ -70,7 +69,6 @@ export const parseQRData = (qrData) => {
     const data = JSON.parse(qrData);
     return data;
   } catch (error) {
-    console.error('Error parsing QR data:', error);
     return null;
   }
 };

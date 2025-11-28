@@ -4,7 +4,7 @@
     "slug": "ritmofit_react",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -17,20 +17,23 @@
       "infoPlist": {
         "NSCameraUsageDescription": "Necesitamos acceso a tu cámara para tomar fotos de perfil",
         "NSPhotoLibraryUsageDescription": "Necesitamos acceso a tu galería para seleccionar fotos de perfil"
-      }
+      },
+      "bundleIdentifier": "com.anonymous.ritmofit-react"
     },
     "android": {
       "package": "com.ritmofit.app",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./logo.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
-      ]
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.anonymous.ritmofit_react"
     },
     "plugins": [
       [

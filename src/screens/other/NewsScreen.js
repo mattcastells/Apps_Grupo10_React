@@ -31,7 +31,6 @@ const NewsScreen = () => {
       const data = await newsService.getAllNews();
       setNews(data);
     } catch (error) {
-      console.error('Error loading news:', error);
       Alert.alert('Error', 'No se pudieron cargar las noticias');
     } finally {
       setLoading(false);
@@ -45,6 +44,7 @@ const NewsScreen = () => {
   };
 
   const renderNewsItem = ({ item }) => {
+
     return (
       <View style={[styles.newsCard, { backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border }]}>
         {item.image ? (
@@ -53,6 +53,10 @@ const NewsScreen = () => {
             source={{ uri: item.image }}
             style={styles.newsImage}
             resizeMode="cover"
+            onError={(error) => {}}
+            onLoad={() => {}}
+            onLoadStart={() => {}}
+            onLoadEnd={() => {}}
           />
         ) : (
           <View style={[styles.newsImage, { backgroundColor: '#E0E0E0', justifyContent: 'center', alignItems: 'center' }]}>

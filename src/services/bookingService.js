@@ -4,7 +4,6 @@ const createBookingService = (axiosInstance) => ({
       const response = await axiosInstance.get('/booking/my-bookings');
       return response.data;
     } catch (error) {
-      console.error('Get bookings error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -14,7 +13,6 @@ const createBookingService = (axiosInstance) => ({
       const response = await axiosInstance.get(`/booking/${bookingId}`);
       return response.data;
     } catch (error) {
-      console.error('Get booking error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -26,7 +24,6 @@ const createBookingService = (axiosInstance) => ({
       });
       return response.data;
     } catch (error) {
-      console.error('Create booking error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -36,7 +33,6 @@ const createBookingService = (axiosInstance) => ({
       const response = await axiosInstance.delete(`/booking/${bookingId}`);
       return response.data;
     } catch (error) {
-      console.error('Cancel booking error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -54,7 +50,6 @@ const createBookingService = (axiosInstance) => ({
       });
       return response.data;
     } catch (error) {
-      console.error('Get upcoming bookings error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -68,7 +63,6 @@ const createBookingService = (axiosInstance) => ({
       const response = await axiosInstance.get('/booking/history');
       return response.data;
     } catch (error) {
-      console.error('Get booking history error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -82,7 +76,6 @@ const createBookingService = (axiosInstance) => ({
       });
       return response.data;
     } catch (error) {
-      console.error('Get past bookings error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -92,7 +85,6 @@ const createBookingService = (axiosInstance) => ({
       const response = await axiosInstance.get(`/booking/check-availability/${scheduledClassId}`);
       return response.data;
     } catch (error) {
-      console.error('Check availability error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -106,7 +98,6 @@ const createBookingService = (axiosInstance) => ({
       const response = await axiosInstance.get('/booking/booked-class-ids');
       return response.data;
     } catch (error) {
-      console.error('Get booked class IDs error:', error.response?.data || error.message);
       throw error;
     }
   },

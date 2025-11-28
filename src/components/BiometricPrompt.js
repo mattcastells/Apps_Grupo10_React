@@ -62,7 +62,6 @@ const BiometricPrompt = ({
       }
 
     } catch (error) {
-      console.error('[BiometricPrompt] Error en autenticación:', error);
       setMessage('Error al autenticar');
       handleAuthenticationFailure({ reason: 'error', error: error.message }, attemptCountRef.current);
     } finally {
