@@ -1,4 +1,35 @@
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
+
+// Get possible API URLs to try in order
+const getPossibleApiUrls = () => {
+  const urls = [];
+
+  // 1. Try Expo dev server IP (for physical devices on same network)
+  if (__DEV__ && Constants.expoConfig?.hostUri) {
+    const host = Constants.expoConfig.hostUri.split(':')[0];
+    urls.push(`http://${host}:8080/api/v1`);
+  }
+
+  // 2. Try localhost (for web or simulator on same machine)
+  urls.push('http://localhost:8080/api/v1');
+
+  // 3. Try Android emulator special IP
+  if (Platform.OS === 'android') {
+    urls.push('http://10.0.2.2:8080/api/v1');
+  }
+
+  // 4. Fallback to hardcoded IP
+  urls.push('http://192.168.100.5:8080/api/v1');
+
+  return urls;
+};
+
+// Default to first option
+const getApiUrl = () => {
+  const urls = getPossibleApiUrls();
+  return urls[0];
+};
 
 export const COLORS = {
   ORANGE: '#F26A3E',
@@ -71,35 +102,11 @@ export const THEME_COLORS = {
 };
 
 // API Configuration
+// Detecta automáticamente la mejor URL para el backend
+// Prioridad: 1) IP de Expo dev server, 2) localhost, 3) Android emulator IP, 4) IP fija
 export const API_CONFIG = {
-  // Configuración para dispositivo físico en la misma red
-  BASE_URL: 'http://192.168.100.5:8080/api/v1',
-
-  // Para Android emulator usar:
-  // BASE_URL: 'http://10.0.2.2:8080/api/v1',
-
-  // Opciones alternativas de BASE_URL:
-  //
-  // Para usar tu red local con un dispositivo físico o emulador en la misma red:
-  //BASE_URL: 'http://192.168.0.164:8080/api/v1',
-  //
-  // ¿Cómo obtener tu IPv4 local?
-  //
-  // En Windows:
-  //   1. Abrí CMD o PowerShell
-  //   2. Ejecutá: ipconfig
-  //   3. Buscá "Adaptador de LAN inalámbrica Wi-Fi" o "Adaptador de Ethernet"
-  //   4. Copiá el valor de "Dirección IPv4" (ej: 192.168.0.164)
-  //
-  // En macOS:
-  //   1. Abrí Terminal
-  //   2. Ejecutá: ifconfig | grep "inet " | grep -v 127.0.0.1
-  //   3. Buscá la IP que empiece con 192.168.x.x o 10.x.x.x
-  //   Alternativa: Preferencias del Sistema → Red → Tu conexión activa → verás la IP
-  //
-  // Para localhost (web o Metro Bundler en la misma máquina):
-  // BASE_URL: 'http://localhost:8080/api/v1',
-
+  BASE_URL: getApiUrl(),
+  POSSIBLE_URLS: getPossibleApiUrls(), // Para retry automático
   TIMEOUT: 30000,
 };
 

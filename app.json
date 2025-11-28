@@ -16,12 +16,15 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "Necesitamos acceso a tu cámara para tomar fotos de perfil",
-        "NSPhotoLibraryUsageDescription": "Necesitamos acceso a tu galería para seleccionar fotos de perfil"
+        "NSPhotoLibraryUsageDescription": "Necesitamos acceso a tu galería para seleccionar fotos de perfil",
+        "UIBackgroundModes": [
+          "fetch"
+        ]
       },
       "bundleIdentifier": "com.anonymous.ritmofit-react"
     },
     "android": {
-      "package": "com.ritmofit.app",
+      "package": "com.anonymous.ritmofit_react",
       "adaptiveIcon": {
         "foregroundImage": "./logo.png",
         "backgroundColor": "#ffffff"
@@ -31,9 +34,11 @@
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.RECORD_AUDIO"
-      ],
-      "package": "com.anonymous.ritmofit_react"
+        "android.permission.RECORD_AUDIO",
+        "RECEIVE_BOOT_COMPLETED",
+        "SCHEDULE_EXACT_ALARM",
+        "POST_NOTIFICATIONS"
+      ]
     },
     "plugins": [
       [
@@ -42,7 +47,15 @@
           "photosPermission": "La aplicación necesita acceso a tus fotos para que puedas cambiar tu foto de perfil",
           "cameraPermission": "La aplicación necesita acceso a tu cámara para tomar fotos de perfil"
         }
-      ]
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./logo.png",
+          "color": "#ffffff"
+        }
+      ],
+      "expo-background-task"
     ],
     "web": {
       "favicon": "./assets/favicon.png"

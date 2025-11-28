@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,31 +13,51 @@ import HistoryDetailScreen from '../screens/history/HistoryDetailScreen';
 import NewsScreen from '../screens/other/NewsScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import EditUserScreen from '../screens/profile/EditUserScreen';
+import NotificationBell from '../components/NotificationBell';
+import NotificationDrawer from '../components/NotificationDrawer';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 // Home Stack
 const HomeStack = () => {
+  const [showNotifications, setShowNotifications] = useState(false);
+
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerStyle: {
-          backgroundColor: '#F26A3E',
-        },
-        headerTintColor: '#FFFFFF',
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
-      }}
-    >
-      <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ title: 'Clases' }} />
-      <Stack.Screen
-        name="ClassDetail"
-        component={ClassDetailScreen}
-        options={{ title: 'Detalle de Clase' }}
+    <>
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: '#F26A3E',
+          },
+          headerTintColor: '#FFFFFF',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      >
+        <Stack.Screen
+          name="HomeScreen"
+          component={HomeScreen}
+          options={{
+            title: 'Clases',
+            headerRight: () => (
+              <NotificationBell onPress={() => setShowNotifications(true)} />
+            ),
+          }}
+        />
+        <Stack.Screen
+          name="ClassDetail"
+          component={ClassDetailScreen}
+          options={{ title: 'Detalle de Clase' }}
+        />
+      </Stack.Navigator>
+
+      <NotificationDrawer
+        visible={showNotifications}
+        onClose={() => setShowNotifications(false)}
       />
-    </Stack.Navigator>
+    </>
   );
 };
 

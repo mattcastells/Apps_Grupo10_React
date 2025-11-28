@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import createBookingService from '../../services/bookingService';
+import notificationService from '../../services/notificationService';
 import { useTheme } from '../../context/ThemeContext';
 import { useAxios } from '../../hooks/useAxios';
 import BookingCard from '../../components/BookingCard';
@@ -58,7 +59,16 @@ const ReservationsScreen = ({ navigation }) => {
           style: 'destructive',
           onPress: async () => {
             try {
+              // Find the booking to send cancellation notification
+              const booking = bookings.find(b => b.bookingId === bookingId);
+
               await bookingService.cancelBooking(bookingId);
+
+              // Send cancellation notification
+              if (booking) {
+                await notificationService.scheduleBookingCancellation(booking);
+              }
+
               Alert.alert('Éxito', 'Reserva cancelada correctamente');
               loadBookings();
             } catch (error) {

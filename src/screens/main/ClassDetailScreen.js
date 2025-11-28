@@ -12,6 +12,7 @@ import {
 import { COLORS } from '../../utils/constants';
 import createScheduleService from '../../services/scheduleService';
 import createBookingService from '../../services/bookingService';
+import notificationService from '../../services/notificationService';
 import { useAxios } from '../../hooks/useAxios';
 import { useTheme } from '../../context/ThemeContext';
 import { formatDate, formatTime } from '../../utils/helpers';
@@ -71,15 +72,22 @@ const ClassDetailScreen = ({ route, navigation }) => {
           onPress: async () => {
             setLoading(true);
             try {
-              await bookingService.createBooking(classId);
+              const booking = await bookingService.createBooking(classId);
               setIsBooked(true); // Update local state
-              Alert.alert('Éxito', 'Clase reservada correctamente', [
-                { 
-                  text: 'OK', 
+
+              // Schedule notification 1 hour before the class
+              const notificationId = await notificationService.scheduleBookingReminder(booking);
+              if (notificationId) {
+                console.log('✅ Notification scheduled for booking:', booking._id);
+              }
+
+              Alert.alert('Éxito', 'Clase reservada correctamente. Recibirás una notificación 1 hora antes.', [
+                {
+                  text: 'OK',
                   onPress: () => {
                     // Navigate to reservations screen to see the new booking
                     navigation.navigate('Reservations');
-                  } 
+                  }
                 },
               ]);
             } catch (error) {
