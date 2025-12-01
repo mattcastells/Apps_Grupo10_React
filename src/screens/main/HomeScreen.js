@@ -172,17 +172,31 @@ const HomeScreen = ({ navigation }) => {
 
   const getFilteredClasses = () => {
     return classes.filter((item) => {
-      // Filtro por disciplina
-      const matchDiscipline =
-        selectedDiscipline === 'Todos' ||
-        item.discipline === selectedDiscipline ||
-        item.name?.includes(selectedDiscipline);
+      // Filtro por disciplina - mejorado
+      const matchDiscipline = (() => {
+        if (selectedDiscipline === 'Todos') return true;
+        
+        const itemDiscipline = item.discipline || item.name || item.className || '';
+        
+        // Comparar case-insensitive
+        return itemDiscipline.toLowerCase().includes(selectedDiscipline.toLowerCase());
+      })();
 
-      // Filtro por ubicación/sede
-      const matchLocation =
-        selectedLocation === 'Todas' ||
-        item.location === selectedLocation ||
-        item.site === selectedLocation;
+      // Filtro por ubicación/sede - mejorado para manejar diferentes formatos
+      const matchLocation = (() => {
+        if (selectedLocation === 'Todas') return true;
+        
+        const itemLocation = item.location || item.site || '';
+        
+        // Comparar directamente (case-insensitive)
+        if (itemLocation.toLowerCase() === selectedLocation.toLowerCase()) return true;
+        
+        // Comparar sin "Sede " en ambos lados (case-insensitive)
+        const normalizedSelected = selectedLocation.replace(/Sede /i, '').toLowerCase();
+        const normalizedItem = itemLocation.replace(/Sede /i, '').toLowerCase();
+        
+        return normalizedSelected === normalizedItem;
+      })();
 
       // Filtro por fecha
       const matchDate = (() => {

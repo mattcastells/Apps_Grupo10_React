@@ -73,17 +73,31 @@ const ReservationsScreen = ({ navigation }) => {
 
   const getFilteredBookings = () => {
     return bookings.filter((item) => {
-      // Filtro por disciplina
-      const matchDiscipline =
-        selectedDiscipline === 'Todos' ||
-        item.className === selectedDiscipline ||
-        item.discipline === selectedDiscipline;
+      // Filtro por disciplina - mejorado
+      const matchDiscipline = (() => {
+        if (selectedDiscipline === 'Todos') return true;
+        
+        const itemDiscipline = item.className || item.discipline || item.name || '';
+        
+        // Comparar case-insensitive
+        return itemDiscipline.toLowerCase().includes(selectedDiscipline.toLowerCase());
+      })();
 
-      // Filtro por sede
-      const matchLocation =
-        selectedLocation === 'Todas' ||
-        item.location === selectedLocation ||
-        item.site === selectedLocation;
+      // Filtro por sede - mejorado para manejar diferentes formatos
+      const matchLocation = (() => {
+        if (selectedLocation === 'Todas') return true;
+        
+        const itemLocation = item.location || item.site || '';
+        
+        // Comparar directamente (case-insensitive)
+        if (itemLocation.toLowerCase() === selectedLocation.toLowerCase()) return true;
+        
+        // Comparar sin "Sede " en ambos lados (case-insensitive)
+        const normalizedSelected = selectedLocation.replace(/Sede /i, '').toLowerCase();
+        const normalizedItem = itemLocation.replace(/Sede /i, '').toLowerCase();
+        
+        return normalizedSelected === normalizedItem;
+      })();
 
       // Filtro por fecha
       const matchDate = (() => {
@@ -182,16 +196,19 @@ const ReservationsScreen = ({ navigation }) => {
 
   const locationOptions = [
     { label: 'Todas', value: 'Todas' },
-    ...locations.map((location) => ({
-      label: location?.name?.replace('Sede ', '') || location?.name || 'Sin nombre',
-      value: location.name,
-    })),
+    ...locations.map((location) => {
+      const shortName = location?.name?.replace('Sede ', '') || location?.name || 'Sin nombre';
+      return {
+        label: shortName,
+        value: location.name, // Guardamos el nombre completo como value
+      };
+    }),
   ];
 
   const getLocationLabel = () => {
     if (selectedLocation === 'Todas') return 'Todas';
     const location = locations.find(loc => loc.name === selectedLocation);
-    return location?.name?.replace('Sede ', '') || selectedLocation;
+    return location?.name?.replace('Sede ', '') || selectedLocation.replace('Sede ', '');
   };
 
 
