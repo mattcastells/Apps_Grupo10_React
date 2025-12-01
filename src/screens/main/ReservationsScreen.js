@@ -8,7 +8,6 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import { useFocusEffect } from '@react-navigation/native';
 import createBookingService from '../../services/bookingService';
 import createCheckInService from '../../services/checkInService';
@@ -17,6 +16,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useAxios } from '../../hooks/useAxios';
 import { DISCIPLINES } from '../../utils/constants';
 import BookingCard from '../../components/BookingCard';
+import FilterSelector from '../../components/FilterSelector';
 
 const ReservationsScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
@@ -170,6 +170,31 @@ const ReservationsScreen = ({ navigation }) => {
     navigation.navigate('ClassDetail', { classId: item.scheduledClassId });
   };
 
+  // Opciones para los filtros
+  const dateOptions = [
+    { label: 'Todas', value: 'Todas' },
+    { label: 'Hoy', value: 'Hoy' },
+    { label: 'Mañana', value: 'Mañana' },
+    { label: 'Esta semana', value: 'Semana' },
+  ];
+
+  const disciplineOptions = DISCIPLINES.map(d => ({ label: d, value: d }));
+
+  const locationOptions = [
+    { label: 'Todas', value: 'Todas' },
+    ...locations.map((location) => ({
+      label: location?.name?.replace('Sede ', '') || location?.name || 'Sin nombre',
+      value: location.name,
+    })),
+  ];
+
+  const getLocationLabel = () => {
+    if (selectedLocation === 'Todas') return 'Todas';
+    const location = locations.find(loc => loc.name === selectedLocation);
+    return location?.name?.replace('Sede ', '') || selectedLocation;
+  };
+
+
   const renderBookingItem = ({ item }) => (
     <BookingCard
       item={item}
@@ -188,56 +213,24 @@ const ReservationsScreen = ({ navigation }) => {
           data={filteredBookings}
           ListHeaderComponent={
             <View style={styles.filtersContainer}>
-              {/* Filtro de Sede */}
-              <View style={styles.filterWrapper}>
-                <Text style={[styles.filterLabel, { color: theme.textSecondary }]}>Sede</Text>
-                <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 }]}>
-                  <Picker
-                    selectedValue={selectedLocation}
-                    onValueChange={setSelectedLocation}
-                    style={[styles.picker, { color: theme.text }]}
-                  >
-                    <Picker.Item label="Todas" value="Todas" />
-                    {Array.isArray(locations) && locations.map((location) => {
-                      const shortLabel = location?.name?.replace('Sede ', '') || location?.name || 'Sin nombre';
-                      return <Picker.Item key={location.id} label={shortLabel} value={location.name} />;
-                    })}
-                  </Picker>
-                </View>
-              </View>
-
-              {/* Filtro de Disciplina */}
-              <View style={styles.filterWrapper}>
-                <Text style={[styles.filterLabel, { color: theme.textSecondary }]}>Disciplina</Text>
-                <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 }]}>
-                  <Picker
-                    selectedValue={selectedDiscipline}
-                    onValueChange={setSelectedDiscipline}
-                    style={[styles.picker, { color: theme.text }]}
-                  >
-                    {DISCIPLINES.map((discipline) => (
-                      <Picker.Item key={discipline} label={discipline} value={discipline} />
-                    ))}
-                  </Picker>
-                </View>
-              </View>
-
-              {/* Filtro de Fecha */}
-              <View style={styles.filterWrapper}>
-                <Text style={[styles.filterLabel, { color: theme.textSecondary }]}>Fecha</Text>
-                <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 }]}>
-                  <Picker
-                    selectedValue={selectedDate}
-                    onValueChange={setSelectedDate}
-                    style={[styles.picker, { color: theme.text }]}
-                  >
-                    <Picker.Item label="Todas" value="Todas" />
-                    <Picker.Item label="Hoy" value="Hoy" />
-                    <Picker.Item label="Mañana" value="Mañana" />
-                    <Picker.Item label="Esta semana" value="Semana" />
-                  </Picker>
-                </View>
-              </View>
+              <FilterSelector
+                label="Fecha"
+                value={selectedDate}
+                options={dateOptions}
+                onSelect={setSelectedDate}
+              />
+              <FilterSelector
+                label="Disciplina"
+                value={selectedDiscipline}
+                options={disciplineOptions}
+                onSelect={setSelectedDiscipline}
+              />
+              <FilterSelector
+                label="Sede"
+                value={getLocationLabel()}
+                options={locationOptions}
+                onSelect={setSelectedLocation}
+              />
             </View>
           }
           renderItem={renderBookingItem}
@@ -279,28 +272,9 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   filtersContainer: {
+    flexDirection: 'row',
     marginBottom: 20,
-  },
-  filterWrapper: {
-    marginBottom: 12,
-  },
-  filterLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 6,
-    paddingHorizontal: 4,
-  },
-  filterItem: {
-    borderRadius: 10,
-    overflow: 'hidden',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  picker: {
-    height: 50,
+    gap: 10,
   },
   emptyContainer: {
     padding: 40,
