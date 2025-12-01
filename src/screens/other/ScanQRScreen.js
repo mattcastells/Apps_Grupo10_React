@@ -164,12 +164,6 @@ const ScanQRScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={[styles.title, { color: theme.primary }]}>Escanear QR</Text>
-
-        <Text style={[styles.subtitle, { color: theme.text }]}>
-          Usá el escáner para ingresar a tu clase registrando tu asistencia
-        </Text>
-
         {/* QR Icon Placeholder */}
         <View style={styles.qrIconContainer}>
           <View style={[styles.qrIcon, { backgroundColor: theme.card, borderColor: theme.primary }]}>
@@ -280,22 +274,9 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingBottom: 100,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 20,
-    marginBottom: 12,
-  },
-  subtitle: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 32,
-    lineHeight: 24,
-    paddingHorizontal: 8,
-  },
   qrIconContainer: {
     alignItems: 'center',
+    marginTop: 40,
     marginBottom: 32,
   },
   qrIcon: {

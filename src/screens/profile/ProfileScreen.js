@@ -198,8 +198,6 @@ const ProfileScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={[styles.title, { color: theme.primary }]}>Mi Perfil</Text>
-
         <View style={[styles.avatarCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
           <View style={styles.avatarContainer}>
             {user?.photoUrl ? (

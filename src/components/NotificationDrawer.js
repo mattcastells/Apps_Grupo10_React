@@ -60,14 +60,14 @@ const NotificationDrawer = ({ visible, onClose }) => {
   };
 
   const handleNotificationPress = async (notification) => {
-    // Marcar como recibida si está en estado ENVIADA
+    // Marcar como leída si está en estado ENVIADA
     if (notification.status === 'ENVIADA') {
       try {
-        await notificationService.markAsReceived(notification.id);
+        await notificationService.markAsRead(notification.id);
         // Recargar lista
         loadNotifications();
       } catch (error) {
-        console.error('Error marking notification as received:', error);
+        console.error('Error marking notification as read:', error);
       }
     }
   };
@@ -135,7 +135,7 @@ const NotificationDrawer = ({ visible, onClose }) => {
           style={[
             styles.drawer,
             {
-              backgroundColor: theme.container,
+              backgroundColor: theme.background,
               transform: [{ translateY: slideAnim }],
             },
           ]}
@@ -161,11 +161,8 @@ const NotificationDrawer = ({ visible, onClose }) => {
               contentContainerStyle={styles.listContent}
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
-                  {!loading && (
-                    <Text style={styles.emptyIcon}>🔔</Text>
-                  )}
                   <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
-                    {loading ? 'Cargando...' : 'No tienes notificaciones nuevas'}
+                    {loading ? 'Cargando...' : 'No tienes notificaciones'}
                   </Text>
                 </View>
               }
@@ -254,16 +251,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   emptyContainer: {
-    padding: 40,
+    padding: 60,
     alignItems: 'center',
-  },
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: 16,
-    opacity: 0.3,
+    justifyContent: 'center',
+    minHeight: 180,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 17,
+    fontWeight: '500',
   },
 });
 

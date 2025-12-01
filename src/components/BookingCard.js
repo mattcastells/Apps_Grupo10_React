@@ -5,7 +5,7 @@ import { formatDate } from '../utils/helpers';
 
 /**
  * Componente unificado para mostrar cards de reservas tanto en "Mis Reservas" como en "Historial"
- * 
+ *
  * @param {Object} item - Objeto con la información de la reserva/asistencia
  * @param {string} item.className - Nombre de la clase
  * @param {string} item.classDateTime - Fecha y hora de la clase (ISO string)
@@ -15,8 +15,9 @@ import { formatDate } from '../utils/helpers';
  * @param {string} item.bookingId - ID de la reserva - opcional
  * @param {Function} onPress - Función a ejecutar al tocar la card (opcional)
  * @param {Function} onCancel - Función a ejecutar al cancelar (solo si tiene bookingId y status=CONFIRMED)
+ * @param {Function} onCheckIn - Función a ejecutar al hacer check-in
  */
-const BookingCard = ({ item, onPress, onCancel }) => {
+const BookingCard = ({ item, onPress, onCancel, onCheckIn }) => {
   const { theme, isDarkMode } = useTheme();
 
   const date = new Date(item.classDateTime || item.startDateTime);
@@ -26,7 +27,18 @@ const BookingCard = ({ item, onPress, onCancel }) => {
   const formattedTime = `${hours}:${minutes}`;
 
   const showCancelButton = item.bookingId && item.status === 'CONFIRMED' && onCancel;
-  
+
+  // Determinar si el check-in está disponible (1h antes hasta fin de clase)
+  const now = new Date();
+  const classStart = new Date(item.classDateTime);
+  const classEnd = new Date(classStart.getTime() + (item.durationMinutes || 60) * 60000);
+  const checkInOpenTime = new Date(classStart.getTime() - 60 * 60000); // 1h antes
+
+  const canCheckIn = item.status === 'CONFIRMED' &&
+                     now >= checkInOpenTime &&
+                     now <= classEnd &&
+                     onCheckIn;
+
   // Determinar el badge a mostrar según el estado
   const getStatusBadge = () => {
     if (!item.status) return null;
@@ -96,13 +108,22 @@ const BookingCard = ({ item, onPress, onCancel }) => {
           <Text style={styles.cancelButtonText}>Cancelar Reserva</Text>
         </TouchableOpacity>
       )}
+
+      {canCheckIn && (
+        <TouchableOpacity
+          style={[styles.checkInButton, { backgroundColor: theme.success }]}
+          onPress={() => onCheckIn(item)}
+        >
+          <Text style={styles.checkInButtonText}>Confirmar Asistencia</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 
-  // Si hay onPress (para historial), envolver en TouchableOpacity
-  if (onPress && !showCancelButton) {
+  // Si hay onPress (para navegar a detalle), envolver en TouchableOpacity
+  if (onPress) {
     return (
-      <TouchableOpacity onPress={() => onPress(item)}>
+      <TouchableOpacity onPress={() => onPress(item)} activeOpacity={0.7}>
         {CardContent}
       </TouchableOpacity>
     );
@@ -178,6 +199,17 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   cancelButtonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  checkInButton: {
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  checkInButtonText: {
     fontSize: 14,
     fontWeight: 'bold',
     color: '#FFFFFF',

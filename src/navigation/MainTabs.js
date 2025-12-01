@@ -29,10 +29,12 @@ const HomeStack = () => {
         screenOptions={{
           headerStyle: {
             backgroundColor: '#F26A3E',
+            height: 100,
           },
           headerTintColor: '#FFFFFF',
           headerTitleStyle: {
             fontWeight: 'bold',
+            fontSize: 20,
           },
         }}
       >
@@ -68,10 +70,12 @@ const ReservationsStack = () => {
       screenOptions={{
         headerStyle: {
           backgroundColor: '#F26A3E',
+          height: 100,
         },
         headerTintColor: '#FFFFFF',
         headerTitleStyle: {
           fontWeight: 'bold',
+          fontSize: 20,
         },
       }}
     >
@@ -79,6 +83,11 @@ const ReservationsStack = () => {
         name="ReservationsScreen"
         component={ReservationsScreen}
         options={{ title: 'Mis Reservas' }}
+      />
+      <Stack.Screen
+        name="ClassDetail"
+        component={ClassDetailScreen}
+        options={{ title: 'Detalle de Clase' }}
       />
     </Stack.Navigator>
   );
@@ -91,10 +100,12 @@ const HistoryStack = () => {
       screenOptions={{
         headerStyle: {
           backgroundColor: '#F26A3E',
+          height: 100,
         },
         headerTintColor: '#FFFFFF',
         headerTitleStyle: {
           fontWeight: 'bold',
+          fontSize: 20,
         },
       }}
     >
@@ -119,10 +130,12 @@ const NewsStack = () => {
       screenOptions={{
         headerStyle: {
           backgroundColor: '#F26A3E',
+          height: 100,
         },
         headerTintColor: '#FFFFFF',
         headerTitleStyle: {
           fontWeight: 'bold',
+          fontSize: 20,
         },
       }}
     >
@@ -138,10 +151,12 @@ const ProfileStack = () => {
       screenOptions={{
         headerStyle: {
           backgroundColor: '#F26A3E',
+          height: 100,
         },
         headerTintColor: '#FFFFFF',
         headerTitleStyle: {
           fontWeight: 'bold',
+          fontSize: 20,
         },
       }}
     >
@@ -166,10 +181,12 @@ const ScanStack = () => {
       screenOptions={{
         headerStyle: {
           backgroundColor: '#F26A3E',
+          height: 100,
         },
         headerTintColor: '#FFFFFF',
         headerTitleStyle: {
           fontWeight: 'bold',
+          fontSize: 20,
         },
       }}
     >

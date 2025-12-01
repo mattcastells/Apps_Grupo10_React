@@ -59,13 +59,6 @@ const HistoryScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
-      <View style={[styles.header, { backgroundColor: theme.backgroundSecondary }]}>
-        <Text style={[styles.title, { color: theme.primary }]}>Mi Historial</Text>
-        <Text style={[styles.subtitle, { color: theme.text }]}>Último mes</Text>
-        <Text style={[styles.description, { color: theme.textSecondary }]}>
-          Tus clases asistidas en los últimos 30 días
-        </Text>
-      </View>
       <View style={[styles.contentContainer, { backgroundColor: theme.container, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
         <FlatList
           data={history}
@@ -89,25 +82,6 @@ const HistoryScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 16,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
-  subtitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  description: {
-    fontSize: 14,
-    lineHeight: 20,
   },
   contentContainer: {
     flex: 1,

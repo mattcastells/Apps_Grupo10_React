@@ -47,14 +47,14 @@ const createNotificationService = (axiosInstance) => ({
   },
 
   /**
-   * Marcar notificación como recibida/leída
+   * Marcar notificación como leída
    */
-  markAsReceived: async (notificationId) => {
+  markAsRead: async (notificationId) => {
     try {
-      const response = await axiosInstance.put(`/notifications/${notificationId}/received`);
+      const response = await axiosInstance.put(`/notifications/${notificationId}/read`);
       return response.data;
     } catch (error) {
-      console.error('Error marking notification as received:', error);
+      console.error('Error marking notification as read:', error);
       throw error;
     }
   },

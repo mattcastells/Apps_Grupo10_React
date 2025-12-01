@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { useAxios } from '../hooks/useAxios';
 import createNotificationService from '../services/notificationService';
@@ -35,12 +36,12 @@ const NotificationBell = ({ onPress }) => {
 
   return (
     <TouchableOpacity onPress={onPress} style={styles.container}>
-      {/* Icono de campanita (usando texto Unicode) */}
-      <Text style={[styles.bellIcon, { color: theme.text }]}>🔔</Text>
+      {/* Icono de campanita blanca */}
+      <Ionicons name="notifications-outline" size={26} color="#FFFFFF" />
 
-      {/* Badge contador */}
+      {/* Badge contador ROJO */}
       {unreadCount > 0 && (
-        <View style={[styles.badge, { backgroundColor: theme.primary }]}>
+        <View style={styles.badge}>
           <Text style={styles.badgeText}>
             {unreadCount > 99 ? '99+' : unreadCount}
           </Text>
@@ -57,24 +58,25 @@ const styles = StyleSheet.create({
     height: 44,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  bellIcon: {
-    fontSize: 24,
+    marginRight: 4,
   },
   badge: {
     position: 'absolute',
-    top: 4,
-    right: 4,
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
+    top: 2,
+    right: 2,
+    backgroundColor: '#FF3B30', // Rojo iOS
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: 5,
+    borderWidth: 2,
+    borderColor: '#F26A3E', // Borde color header para mejor contraste
   },
   badgeText: {
     color: '#FFFFFF',
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: 'bold',
   },
 });

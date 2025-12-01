@@ -75,14 +75,6 @@ const NewsScreen = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
-      <View style={[styles.header, { backgroundColor: theme.backgroundSecondary }]}>
-        <Text style={[styles.title, { color: theme.primary }]}>Noticias</Text>
-        <Text style={[styles.subtitle, { color: theme.text }]}>Mantente informado</Text>
-        <Text style={[styles.description, { color: theme.textSecondary }]}>
-          Últimas noticias y novedades del gimnasio
-        </Text>
-      </View>
-      
       <View style={[styles.contentContainer, { backgroundColor: theme.container, borderWidth: 1, borderColor: theme.border }]}>
         <FlatList
           data={news}
