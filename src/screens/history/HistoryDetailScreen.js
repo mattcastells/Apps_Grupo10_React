@@ -75,18 +75,23 @@ const HistoryDetailScreen = ({ route, navigation }) => {
 
   const canRate = () => {
     if (!attendance) return false;
-    
+
     // Si ya tiene calificación, no puede calificar de nuevo
     if (attendance.userReview) return false;
-    
+
+    // Solo puede calificar si el estado es ATTENDED (asistió a la clase)
+    if (attendance.status !== 'ATTENDED' && attendance.attendanceStatus !== 'PRESENT') {
+      return false;
+    }
+
     // Calcular el tiempo de finalización de la clase
     const classStartTime = new Date(attendance.startDateTime);
     const classEndTime = new Date(classStartTime.getTime() + attendance.durationMinutes * 60000);
-    
+
     // Calcular el límite de 24 horas después del final de la clase
     const ratingDeadline = new Date(classEndTime.getTime() + 24 * 60 * 60 * 1000);
     const now = new Date();
-    
+
     // Solo puede calificar si la clase ya terminó y no pasaron más de 24 horas
     return now >= classEndTime && now <= ratingDeadline;
   };
@@ -183,9 +188,11 @@ const HistoryDetailScreen = ({ route, navigation }) => {
                   </Text>
                 </TouchableOpacity>
               )}
-              {!canRate() && (
+              {!canRate() && !attendance.userReview && (
                 <Text style={[styles.expiredText, { color: theme.textLight }]}>
-                  El plazo para calificar esta clase ha expirado (24 horas después del final de la clase).
+                  {attendance.status !== 'ATTENDED' && attendance.attendanceStatus !== 'PRESENT'
+                    ? 'Solo puedes calificar clases a las que asististe. Debes hacer check-in para poder calificar.'
+                    : 'El plazo para calificar esta clase ha expirado (24 horas después del final de la clase).'}
                 </Text>
               )}
             </>

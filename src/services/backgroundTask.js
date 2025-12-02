@@ -31,41 +31,62 @@ const fetchWithFallback = async (endpoint, token) => {
 // Define the background task - Poll backend for notifications
 TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async () => {
   try {
-    console.log('[BACKGROUND TASK] Polling for notifications...');
+    console.log('[BACKGROUND TASK] 🔄 Polling for pending notifications...');
 
     // Get auth token from AsyncStorage
     const token = await AsyncStorage.getItem('authToken');
     if (!token) {
-      console.log('[BACKGROUND TASK] No auth token found');
+      console.log('[BACKGROUND TASK] ⚠️ No auth token found');
       return BackgroundTask.BackgroundTaskResult.Success;
     }
 
-    // Fetch notifications from backend with fallback URLs
-    const response = await fetchWithFallback('/notifications/sent', token);
+    // Fetch PENDING notifications that are ready to be sent from backend
+    // El backend debe devolver solo las que tienen:
+    // - status: "PENDING"
+    // - scheduledFor <= now
+    const response = await fetchWithFallback('/notifications/pending', token);
 
     const notifications = response.data;
-    console.log(`[BACKGROUND TASK] Found ${notifications.length} notifications`);
+    console.log(`[BACKGROUND TASK] 📬 Found ${notifications.length} pending notifications`);
 
-    // Show each notification locally
+    // Show each notification locally and mark as RECEIVED
     for (const notification of notifications) {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: notification.title,
-          body: notification.message,
-          data: {
-            notificationId: notification.id,
-            bookingId: notification.bookingId,
+      try {
+        // Mostrar notificación local
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: notification.title,
+            body: notification.message,
+            data: {
+              notificationId: notification.id,
+              bookingId: notification.bookingId,
+              type: notification.type,
+            },
+            sound: 'default',
           },
-          sound: 'default',
-        },
-        trigger: null, // Show immediately
-      });
+          trigger: null, // Show immediately
+        });
+
+        // Marcar como RECEIVED en el backend
+        await axios.put(
+          `${response.config.baseURL}/notifications/${notification.id}/received`,
+          {},
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            timeout: 5000,
+          }
+        );
+
+        console.log(`[BACKGROUND TASK] ✅ Notification ${notification.id} displayed and marked as RECEIVED`);
+      } catch (notifError) {
+        console.error(`[BACKGROUND TASK] ❌ Error processing notification ${notification.id}:`, notifError.message);
+      }
     }
 
-    console.log('[BACKGROUND TASK] Notifications sent successfully');
+    console.log('[BACKGROUND TASK] ✅ Task completed successfully');
     return BackgroundTask.BackgroundTaskResult.Success;
   } catch (error) {
-    console.error('[BACKGROUND TASK] Error:', error.message);
+    console.error('[BACKGROUND TASK] ❌ Error:', error.message);
     return BackgroundTask.BackgroundTaskResult.Failed;
   }
 });

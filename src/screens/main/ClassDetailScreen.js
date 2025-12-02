@@ -12,7 +12,6 @@ import {
 import { COLORS } from '../../utils/constants';
 import createScheduleService from '../../services/scheduleService';
 import createBookingService from '../../services/bookingService';
-import notificationService from '../../services/notificationService';
 import { useAxios } from '../../hooks/useAxios';
 import { useTheme } from '../../context/ThemeContext';
 import { formatDate, formatTime } from '../../utils/helpers';
@@ -72,13 +71,20 @@ const ClassDetailScreen = ({ route, navigation }) => {
           onPress: async () => {
             setLoading(true);
             try {
+              console.log('📝 Intentando reservar clase:', classId);
               const booking = await bookingService.createBooking(classId);
+              console.log('✅ Respuesta del booking:', booking);
+              
               setIsBooked(true); // Update local state
 
-              // Schedule notification 1 hour before the class
-              const notificationId = await notificationService.scheduleBookingReminder(booking);
-              if (notificationId) {
-                console.log('✅ Notification scheduled for booking:', booking._id);
+              // Crear notificación en el backend
+              try {
+                const notificationService = require('../../services/notificationService').default(axiosInstance);
+                await notificationService.createBookingNotification(booking);
+                console.log('✅ Notificación programada para 1 hora antes de la clase');
+              } catch (notifError) {
+                console.log('⚠️ Error creando notificación (no crítico):', notifError);
+                // No mostrar error al usuario, la reserva se hizo correctamente
               }
 
               Alert.alert('Éxito', 'Clase reservada correctamente. Recibirás una notificación 1 hora antes.', [
@@ -91,6 +97,8 @@ const ClassDetailScreen = ({ route, navigation }) => {
                 },
               ]);
             } catch (error) {
+              console.error('❌ Error al reservar:', error);
+              console.error('❌ Error response:', error.response?.data);
               const errorMessage = error.response?.data?.message || 'No se pudo reservar la clase';
               Alert.alert('Error', errorMessage);
             } finally {

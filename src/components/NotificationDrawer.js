@@ -54,6 +54,13 @@ const NotificationDrawer = ({ visible, onClose }) => {
       setNotifications(data);
     } catch (error) {
       console.error('Error loading notifications:', error);
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+      });
     } finally {
       setLoading(false);
     }

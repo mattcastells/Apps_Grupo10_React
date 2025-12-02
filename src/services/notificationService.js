@@ -47,11 +47,11 @@ const createNotificationService = (axiosInstance) => ({
   },
 
   /**
-   * Marcar notificación como leída
+   * Marcar notificación como leída (recibida)
    */
   markAsRead: async (notificationId) => {
     try {
-      const response = await axiosInstance.put(`/notifications/${notificationId}/read`);
+      const response = await axiosInstance.put(`/notifications/${notificationId}/received`);
       return response.data;
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -115,6 +115,34 @@ const createNotificationService = (axiosInstance) => ({
       });
     } catch (error) {
       console.error('Error showing local notification:', error);
+    }
+  },
+
+  /**
+   * Crear notificación de recordatorio de reserva
+   * Se llama cuando el usuario hace una reserva
+   */
+  createBookingNotification: async (booking) => {
+    try {
+      // Calcular la fecha de envío (1 hora antes de la clase)
+      const classDateTime = new Date(booking.classDateTime);
+      const scheduledFor = new Date(classDateTime.getTime() - 60 * 60 * 1000); // 1 hora antes
+
+      const notificationData = {
+        bookingId: booking.id,
+        scheduledClassId: booking.scheduledClassId,
+        type: 'BOOKING_REMINDER',
+        title: '⏰ Recordatorio de Clase',
+        message: `Tu clase de ${booking.className} comienza en 1 hora`,
+        scheduledFor: scheduledFor.toISOString(),
+      };
+
+      const response = await axiosInstance.post('/notifications', notificationData);
+      console.log('✅ Notificación creada:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating booking notification:', error);
+      throw error;
     }
   },
 
