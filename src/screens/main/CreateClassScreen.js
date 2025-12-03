@@ -120,10 +120,25 @@ const CreateClassScreen = ({ navigation }) => {
 
       console.log('📤 Enviando datos de clase:', classData);
       const response = await scheduleService.createScheduledClass(classData);
-      console.log('✅ Clase creada:', response);
-      Alert.alert('Éxito', 'Clase creada correctamente', [
-        { text: 'OK', onPress: () => navigation.goBack() },
-      ]);
+      console.log('✅ Clase creada exitosamente:', response);
+      
+      Alert.alert(
+        'Éxito', 
+        'Clase creada correctamente', 
+        [
+          { 
+            text: 'OK', 
+            onPress: () => {
+              // Navigate back to trigger a refresh
+              navigation.navigate('Home');
+              // Force a small delay to ensure the tab switches first
+              setTimeout(() => {
+                navigation.navigate('Reservations');
+              }, 100);
+            }
+          },
+        ]
+      );
     } catch (error) {
       console.error('❌ Error creating class:', error);
       console.error('Error details:', error.response?.data);

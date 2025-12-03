@@ -8,6 +8,7 @@ import {
   RefreshControl,
   Alert,
   TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import createBookingService from '../../services/bookingService';
@@ -100,134 +101,190 @@ const ReservationsScreen = ({ navigation }) => {
     />
   );
 
-  const renderProfessorClassItem = ({ item }) => (
-    <TouchableOpacity 
-      style={[styles.classCard, { backgroundColor: theme.background }]}
-      onPress={() => navigation.navigate('EditClass', { classId: item.id })}
-    >
-      <Text style={[styles.className, { color: theme.text }]}>{item.discipline}</Text>
-      <Text style={[styles.classInfo, { color: theme.textSecondary }]}>
-        {new Date(item.dateTime).toLocaleDateString('es-AR', { 
-          weekday: 'long', 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        })}
-      </Text>
-      <Text style={[styles.classInfo, { color: theme.textSecondary }]}>
-        📍 {item.location}
-      </Text>
-      <Text style={[styles.classInfo, { color: theme.textSecondary }]}>
-        👨‍� {item.professor} • {item.durationMinutes} min
-      </Text>
-      <Text style={[styles.classInfo, { color: theme.textSecondary }]}>
-        👥 {item.availableSlots} cupos disponibles
-      </Text>
-    </TouchableOpacity>
-  );
+  const renderProfessorClassItem = ({ item }) => {
+    const date = new Date(item.dateTime);
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const formattedTime = `${hours}:${minutes}`;
+    const formattedDate = date.toLocaleDateString('es-AR', { 
+      weekday: 'long', 
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+
+    return (
+      <TouchableOpacity 
+        style={[styles.classCard, { 
+          backgroundColor: theme.card,
+          borderWidth: isDarkMode ? 1 : 0,
+          borderColor: theme.border
+        }]}
+        onPress={() => navigation.navigate('EditClass', { classId: item.id })}
+      >
+        <View style={styles.cardHeader}>
+          <Text style={[styles.cardClassName, { color: theme.text }]}>
+            {item.discipline}
+          </Text>
+          <View style={[styles.timeBadge, { backgroundColor: theme.primary }]}>
+            <Text style={styles.timeText}>{formattedTime}</Text>
+          </View>
+        </View>
+        
+        <View style={styles.cardBody}>
+          <View style={styles.infoRow}>
+            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Profesor:</Text>
+            <Text style={[styles.infoValue, { color: theme.text }]}>
+              {item.professor}
+            </Text>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Sede:</Text>
+            <Text style={[styles.infoValue, { color: theme.text }]}>
+              {item.location}
+            </Text>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Fecha:</Text>
+            <Text style={[styles.infoValue, { color: theme.text }]}>
+              {formattedDate}
+            </Text>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Duración:</Text>
+            <Text style={[styles.infoValue, { color: theme.text }]}>
+              {item.durationMinutes} minutos
+            </Text>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Cupos:</Text>
+            <Text style={[styles.infoValue, { color: theme.text }]}>
+              {item.availableSlots} disponibles
+            </Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
-      {/* Header para profesores */}
-      {isProfessor && (
-        <View style={[styles.header, { backgroundColor: theme.backgroundSecondary }]}>
-          <Text style={[styles.title, { color: theme.primary }]}>Mis Clases</Text>
-          <Text style={[styles.subtitle, { color: theme.text }]}>Clases asignadas</Text>
-          <Text style={[styles.description, { color: theme.textSecondary }]}>Tus clases programadas</Text>
-        </View>
-      )}
+      <ScrollView
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header para profesores */}
+        {isProfessor && (
+          <View style={styles.header}>
+            <Text style={[styles.title, { color: theme.primary }]}>Mis Clases</Text>
+            <Text style={[styles.subtitle, { color: theme.text }]}>Clases asignadas</Text>
+            <Text style={[styles.description, { color: theme.textSecondary }]}>Tus clases programadas</Text>
+          </View>
+        )}
 
-      {/* Header para usuarios normales */}
-      {!isProfessor && (
-        <View style={[styles.header, { backgroundColor: theme.backgroundSecondary }]}>
-          <Text style={[styles.title, { color: theme.primary }]}>Mis Reservas</Text>
-          <Text style={[styles.subtitle, { color: theme.text }]}>Próximas clases</Text>
-          <Text style={[styles.description, { color: theme.textSecondary }]}>Tus reservas confirmadas</Text>
-        </View>
-      )}
-      
-      {/* Botón crear clase solo para profesores */}
-      {isProfessor && (
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.createButton, { backgroundColor: theme.primary }]}
-            onPress={() => navigation.navigate('CreateClass')}
-          >
-            <Text style={styles.createButtonText}>+ Crear Clase</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-      
-      {/* Contenedor principal - Clases del profesor */}
-      {isProfessor && (
-        <View style={[styles.contentContainer, { backgroundColor: theme.container, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
-          <FlatList
-            data={professorClasses}
-            renderItem={renderProfessorClassItem}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.listContent}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-            ListEmptyComponent={
+        {/* Header para usuarios normales */}
+        {!isProfessor && (
+          <View style={styles.header}>
+            <Text style={[styles.title, { color: theme.primary }]}>Mis Reservas</Text>
+            <Text style={[styles.subtitle, { color: theme.text }]}>Próximas clases</Text>
+            <Text style={[styles.description, { color: theme.textSecondary }]}>Tus reservas confirmadas</Text>
+          </View>
+        )}
+        
+        {/* Botón crear clase solo para profesores */}
+        {isProfessor && (
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.createButton, { backgroundColor: theme.primary }]}
+              onPress={() => navigation.navigate('CreateClass')}
+            >
+              <Text style={styles.createButtonText}>+ Crear Clase</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        
+        {/* Contenedor principal - Clases del profesor */}
+        {isProfessor && (
+          <View style={[styles.contentContainer, { 
+            backgroundColor: theme.container, 
+            borderWidth: isDarkMode ? 1 : 0, 
+            borderColor: theme.border 
+          }]}>
+            {professorClasses.length > 0 ? (
+              professorClasses.map((item) => (
+                <View key={item.id}>
+                  {renderProfessorClassItem({ item })}
+                </View>
+              ))
+            ) : (
               <View style={styles.emptyContainer}>
                 <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
                   {loading ? 'Cargando...' : 'No tenés clases asignadas'}
                 </Text>
               </View>
-            }
-          />
-        </View>
-      )}
-
-      {/* Sección de Mis Reservas para profesores */}
-      {isProfessor && (
-        <>
-          <View style={[styles.reservationsHeader, { backgroundColor: theme.backgroundSecondary }]}>
-            <Text style={[styles.reservationsTitle, { color: theme.primary }]}>Mis Reservas</Text>
-            <Text style={[styles.reservationsDescription, { color: theme.textSecondary }]}>
-              Clases en las que participás como alumno
-            </Text>
+            )}
           </View>
-          
-          <View style={[styles.reservationsContainer, { backgroundColor: theme.container, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
-            <FlatList
-              data={bookings}
-              renderItem={renderBookingItem}
-              keyExtractor={(item) => item.bookingId}
-              contentContainerStyle={styles.listContent}
-              scrollEnabled={false}
-              ListEmptyComponent={
+        )}
+
+        {/* Sección de Mis Reservas para profesores */}
+        {isProfessor && (
+          <>
+            <View style={styles.reservationsHeader}>
+              <Text style={[styles.reservationsTitle, { color: theme.primary }]}>Mis Reservas</Text>
+              <Text style={[styles.reservationsDescription, { color: theme.textSecondary }]}>
+                Clases en las que participás como alumno
+              </Text>
+            </View>
+            
+            <View style={[styles.contentContainer, { 
+              backgroundColor: theme.container, 
+              borderWidth: isDarkMode ? 1 : 0, 
+              borderColor: theme.border 
+            }]}>
+              {bookings.length > 0 ? (
+                bookings.map((item) => (
+                  <View key={item.bookingId}>
+                    {renderBookingItem({ item })}
+                  </View>
+                ))
+              ) : (
                 <View style={styles.emptyContainer}>
                   <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
                     No tenés reservas como alumno
                   </Text>
                 </View>
-              }
-            />
-          </View>
-        </>
-      )}
+              )}
+            </View>
+          </>
+        )}
 
-      {/* Contenedor para usuarios normales - Solo reservas */}
-      {!isProfessor && (
-        <View style={[styles.contentContainer, { backgroundColor: theme.container, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
-          <FlatList
-            data={bookings}
-            renderItem={renderBookingItem}
-            keyExtractor={(item) => item.bookingId}
-            contentContainerStyle={styles.listContent}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-            ListEmptyComponent={
+        {/* Contenedor para usuarios normales - Solo reservas */}
+        {!isProfessor && (
+          <View style={[styles.contentContainer, { 
+            backgroundColor: theme.container, 
+            borderWidth: isDarkMode ? 1 : 0, 
+            borderColor: theme.border 
+          }]}>
+            {bookings.length > 0 ? (
+              bookings.map((item) => (
+                <View key={item.bookingId}>
+                  {renderBookingItem({ item })}
+                </View>
+              ))
+            ) : (
               <View style={styles.emptyContainer}>
                 <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
                   {loading ? 'Cargando...' : 'No tenés reservas'}
                 </Text>
               </View>
-            }
-          />
-        </View>
-      )}
+            )}
+          </View>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -244,11 +301,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
     marginBottom: 4,
   },
   description: {
@@ -256,12 +313,11 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   contentContainer: {
-    flex: 1,
     borderRadius: 24,
     marginHorizontal: 20,
     marginTop: 8,
     marginBottom: 20,
-    paddingTop: 20,
+    padding: 20,
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -279,25 +335,8 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   reservationsDescription: {
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  reservationsContainer: {
-    borderRadius: 24,
-    marginHorizontal: 20,
-    marginTop: 8,
-    marginBottom: 20,
-    paddingTop: 20,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    maxHeight: 300,
-  },
-  listContent: {
-    padding: 20,
-    paddingBottom: 100,
+    fontSize: 13,
+    lineHeight: 18,
   },
   emptyContainer: {
     padding: 40,
@@ -311,36 +350,72 @@ const styles = StyleSheet.create({
   buttonContainer: {
     paddingHorizontal: 20,
     paddingVertical: 10,
+    marginBottom: 8,
   },
   createButton: {
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.5,
   },
   createButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
   },
+  // Estilos para las cards de clases del profesor (ahora consistentes con BookingCard)
   classCard: {
-    padding: 16,
     borderRadius: 12,
-    marginBottom: 12,
-    elevation: 2,
+    padding: 18,
+    marginBottom: 14,
+    elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowRadius: 3.5,
   },
-  className: {
-    fontSize: 18,
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  cardClassName: {
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 8,
+    flex: 1,
   },
-  classInfo: {
+  timeBadge: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 10,
+  },
+  timeText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  cardBody: {
+    gap: 10,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  infoLabel: {
     fontSize: 14,
-    marginBottom: 4,
+    fontWeight: '600',
+    width: 85,
+  },
+  infoValue: {
+    fontSize: 14,
+    flex: 1,
+    fontWeight: '500',
   },
 });
 

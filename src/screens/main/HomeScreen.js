@@ -72,11 +72,13 @@ const HomeScreen = ({ navigation }) => {
     try {
       console.log('🔄 Cargando clases desde el backend...');
       const data = await scheduleService.getWeeklySchedule();
-      console.log('✅ Clases cargadas:', data);
+      console.log('✅ Clases cargadas del backend:', JSON.stringify(data, null, 2));
+      console.log('📊 Total de clases recibidas:', data.length);
 
-      // Debug: Verificar qué valores de location vienen del backend
-      const uniqueLocations = [...new Set(data.map(item => item.location || item.site))];
-      console.log('📍 Ubicaciones únicas en los datos:', uniqueLocations);
+      // Debug: Verificar estructura de cada clase
+      if (data.length > 0) {
+        console.log('� Primera clase (ejemplo):', JSON.stringify(data[0], null, 2));
+      }
 
       setClasses(data);
 
@@ -92,6 +94,7 @@ const HomeScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.error('❌ Error loading classes:', error);
+      console.error('❌ Error details:', error.response?.data);
       Alert.alert('Error', 'No se pudieron cargar las clases. Por favor intenta nuevamente.');
       setClasses([]);
     } finally {
@@ -159,51 +162,56 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const getFilteredClasses = () => {
-    return classes.filter((item) => {
-      // Filtro por disciplina
-      const matchDiscipline =
-        selectedDiscipline === 'Todos' ||
-        item.discipline === selectedDiscipline ||
-        item.name?.includes(selectedDiscipline);
+    return classes
+      .filter((item) => {
+        // Filtro por disciplina
+        const matchDiscipline =
+          selectedDiscipline === 'Todos' ||
+          item.discipline === selectedDiscipline;
 
-      // Filtro por ubicación/sede
-      const matchLocation =
-        selectedLocation === 'Todas' ||
-        item.location === selectedLocation ||
-        item.site === selectedLocation;
+        // Filtro por ubicación/sede
+        const matchLocation =
+          selectedLocation === 'Todas' ||
+          item.location === selectedLocation;
 
-      // Filtro por fecha
-      const matchDate = (() => {
-        if (selectedDate === 'Todas') return true;
+        // Filtro por fecha
+        const matchDate = (() => {
+          if (selectedDate === 'Todas') return true;
 
-        if (!item.dateTime) return false;
+          if (!item.dateTime) return false;
 
-        const classDate = new Date(item.dateTime);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+          const classDate = new Date(item.dateTime);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
 
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
+          const tomorrow = new Date(today);
+          tomorrow.setDate(tomorrow.getDate() + 1);
 
-        const endOfWeek = new Date(today);
-        endOfWeek.setDate(endOfWeek.getDate() + 7);
+          const endOfWeek = new Date(today);
+          endOfWeek.setDate(endOfWeek.getDate() + 7);
 
-        const classDayStart = new Date(classDate);
-        classDayStart.setHours(0, 0, 0, 0);
+          const classDayStart = new Date(classDate);
+          classDayStart.setHours(0, 0, 0, 0);
 
-        if (selectedDate === 'Hoy') {
-          return classDayStart.getTime() === today.getTime();
-        } else if (selectedDate === 'Mañana') {
-          return classDayStart.getTime() === tomorrow.getTime();
-        } else if (selectedDate === 'Semana') {
-          return classDate >= today && classDate < endOfWeek;
-        }
+          if (selectedDate === 'Hoy') {
+            return classDayStart.getTime() === today.getTime();
+          } else if (selectedDate === 'Mañana') {
+            return classDayStart.getTime() === tomorrow.getTime();
+          } else if (selectedDate === 'Semana') {
+            return classDate >= today && classDate < endOfWeek;
+          }
 
-        return true;
-      })();
+          return true;
+        })();
 
-      return matchDiscipline && matchLocation && matchDate;
-    });
+        return matchDiscipline && matchLocation && matchDate;
+      })
+      .sort((a, b) => {
+        // Ordenar por fecha (más cercana primero)
+        const dateA = a.dateTime ? new Date(a.dateTime).getTime() : Infinity;
+        const dateB = b.dateTime ? new Date(b.dateTime).getTime() : Infinity;
+        return dateA - dateB;
+      });
   };
 
   const renderClassItem = ({ item }) => {
@@ -212,23 +220,29 @@ const HomeScreen = ({ navigation }) => {
     return (
       <Card onPress={() => handleClassPress(item)} style={[styles.classCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
         <View style={styles.cardHeader}>
-          <Text style={[styles.className, { color: theme.text }]}>{item.name || item.discipline}</Text>
+          <Text style={[styles.className, { color: theme.text }]}>{item.discipline}</Text>
           <View style={[styles.badge, { backgroundColor: isBooked ? theme.success : theme.primary }]}>
             <Text style={styles.badgeText}>{isBooked ? '✓ Reservada' : item.discipline}</Text>
           </View>
         </View>
 
         <View style={styles.cardContent}>
-          <Text style={[styles.infoText, { color: theme.textSecondary }]}>Instructor: {item.professor || item.teacher || 'N/A'}</Text>
-          <Text style={[styles.infoText, { color: theme.textSecondary }]}>Sede: {item.location || item.site || 'N/A'}</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary }]}>Instructor: {item.professor}</Text>
+          <Text style={[styles.infoText, { color: theme.textSecondary }]}>Sede: {item.location}</Text>
           <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-            Fecha: {item.dateTime ? new Date(item.dateTime).toLocaleDateString() : 'N/A'}
+            Fecha: {item.dateTime ? new Date(item.dateTime).toLocaleDateString('es-AR', { 
+              weekday: 'short', 
+              day: 'numeric', 
+              month: 'short',
+              hour: '2-digit',
+              minute: '2-digit'
+            }) : 'N/A'}
           </Text>
           <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-            Duración: {item.durationMinutes || 60} min
+            Duración: {item.durationMinutes} min
           </Text>
           <Text style={[styles.infoText, { color: theme.textSecondary }]}>
-            Cupos: {item.availableSlots || 0}
+            Cupos: {item.availableSlots}
           </Text>
         </View>
       </Card>
