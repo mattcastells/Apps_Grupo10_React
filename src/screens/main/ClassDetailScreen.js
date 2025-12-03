@@ -14,10 +14,12 @@ import createScheduleService from '../../services/scheduleService';
 import createBookingService from '../../services/bookingService';
 import { useAxios } from '../../hooks/useAxios';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { formatDate, formatTime } from '../../utils/helpers';
 
 const ClassDetailScreen = ({ route, navigation }) => {
   const { theme, isDarkMode } = useTheme();
+  const { user } = useAuth();
   const { classId } = route.params;
   const [classDetail, setClassDetail] = useState(null);
   const [isBooked, setIsBooked] = useState(false);
@@ -60,6 +62,12 @@ const ClassDetailScreen = ({ route, navigation }) => {
   const handleBookClass = async () => {
     // Si ya está reservada, no hacer nada
     if (isBooked) {
+      return;
+    }
+
+    // Validar que el profesor no pueda reservar su propia clase
+    if (classDetail?.professor && user?.name && classDetail.professor === user.name) {
+      Alert.alert('No permitido', 'No podés reservar una clase dictada por vos.');
       return;
     }
 
@@ -156,20 +164,32 @@ const ClassDetailScreen = ({ route, navigation }) => {
           <Text style={[styles.mapButtonText, { color: theme.primary }]}>Ver Mapa</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[
-            styles.reserveButton,
-            { backgroundColor: isBooked ? theme.success : theme.primary },
-            isBooked && styles.bookedButton
-          ]}
-          onPress={handleBookClass}
-          disabled={loading || isBooked || classDetail?.availableSlots === 0}
-          activeOpacity={isBooked ? 1 : 0.7}
-        >
-          <Text style={styles.reserveButtonText}>
-            {loading ? 'Reservando...' : isBooked ? '✓ Clase reservada' : classDetail?.availableSlots === 0 ? 'Sin cupos disponibles' : 'Reservar'}
-          </Text>
-        </TouchableOpacity>
+        {/* Determinar si es la propia clase del profesor */}
+        {(() => {
+          const isOwnClass = classDetail?.professor && user?.name && classDetail.professor === user.name;
+          const isDisabled = loading || isBooked || classDetail?.availableSlots === 0 || isOwnClass;
+          
+          return (
+            <TouchableOpacity
+              style={[
+                styles.reserveButton,
+                { backgroundColor: isBooked ? theme.success : isOwnClass ? theme.textSecondary : theme.primary },
+                (isBooked || isOwnClass) && styles.bookedButton
+              ]}
+              onPress={handleBookClass}
+              disabled={isDisabled}
+              activeOpacity={isDisabled ? 1 : 0.7}
+            >
+              <Text style={styles.reserveButtonText}>
+                {loading ? 'Reservando...' : 
+                 isBooked ? '✓ Clase reservada' : 
+                 isOwnClass ? 'Tu clase' :
+                 classDetail?.availableSlots === 0 ? 'Sin cupos disponibles' : 
+                 'Reservar'}
+              </Text>
+            </TouchableOpacity>
+          );
+        })()}
       </ScrollView>
     </SafeAreaView>
   );
