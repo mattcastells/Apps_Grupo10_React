@@ -88,6 +88,45 @@ const createScheduleService = (axiosInstance) => ({
       throw error;
     }
   },
+
+  createScheduledClass: async (classData) => {
+    try {
+      const response = await axiosInstance.post('/schedule', classData);
+      return response.data;
+    } catch (error) {
+      console.error('Create scheduled class error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  updateScheduledClass: async (classId, classData) => {
+    try {
+      const response = await axiosInstance.put(`/schedule/${classId}`, classData);
+      return response.data;
+    } catch (error) {
+      console.error('Update scheduled class error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  deleteScheduledClass: async (classId) => {
+    try {
+      await axiosInstance.delete(`/schedule/${classId}`);
+    } catch (error) {
+      console.error('Delete scheduled class error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  getClassesByProfessor: async (professorName) => {
+    try {
+      const response = await axiosInstance.get(`/schedule/professor/${professorName}`);
+      return response.data;
+    } catch (error) {
+      console.error('Get classes by professor error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
 });
 
 export default createScheduleService;

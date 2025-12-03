@@ -7,6 +7,8 @@ import { useTheme } from '../context/ThemeContext';
 import HomeScreen from '../screens/main/HomeScreen';
 import ClassDetailScreen from '../screens/main/ClassDetailScreen';
 import ReservationsScreen from '../screens/main/ReservationsScreen';
+import CreateClassScreen from '../screens/main/CreateClassScreen';
+import EditClassScreen from '../screens/main/EditClassScreen';
 import ScanQRScreen from '../screens/other/ScanQRScreen';
 import HistoryScreen from '../screens/history/HistoryScreen';
 import HistoryDetailScreen from '../screens/history/HistoryDetailScreen';
@@ -59,6 +61,16 @@ const ReservationsStack = () => {
         name="ReservationsScreen"
         component={ReservationsScreen}
         options={{ title: 'Mis Reservas' }}
+      />
+      <Stack.Screen
+        name="CreateClass"
+        component={CreateClassScreen}
+        options={{ title: 'Crear Clase' }}
+      />
+      <Stack.Screen
+        name="EditClass"
+        component={EditClassScreen}
+        options={{ title: 'Editar Clase' }}
       />
     </Stack.Navigator>
   );

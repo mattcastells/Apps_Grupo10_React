@@ -73,12 +73,12 @@ export const THEME_COLORS = {
 // API Configuration
 export const API_CONFIG = {
   // Configuración por defecto para Android emulator
-  //BASE_URL: 'http://10.0.2.2:8080/api/v1',
+  BASE_URL: 'http://10.0.2.2:8080/api/v1',
 
   // Opciones alternativas de BASE_URL:
   //
   // Para usar tu red local con un dispositivo físico o emulador en la misma red:
-  BASE_URL: 'http://192.168.0.164:8080/api/v1',
+  // BASE_URL: 'http://192.168.0.164:8080/api/v1',
   //
   // ¿Cómo obtener tu IPv4 local?
   //
@@ -130,7 +130,6 @@ export const DISCIPLINES = [
 export const DATE_FORMAT = 'DD/MM/YYYY';
 export const TIME_FORMAT = 'HH:mm';
 export const DATETIME_FORMAT = 'DD/MM/YYYY HH:mm';
-
 // History range (days)
 export const HISTORY_RANGE_DAYS = 30;
 
