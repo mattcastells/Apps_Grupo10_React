@@ -12,6 +12,7 @@ import {
 import { CameraView, Camera } from 'expo-camera';
 import { COLORS } from '../../utils/constants';
 import createHistoryService from '../../services/historyService';
+import createCheckInService from '../../services/checkInService';
 import { useAxios } from '../../hooks/useAxios';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -22,6 +23,7 @@ const ScanQRScreen = ({ navigation }) => {
   const [showCamera, setShowCamera] = useState(false);
   const [checkInData, setCheckInData] = useState(null);
   const [scanned, setScanned] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const axiosInstance = useAxios();
   const historyService = createHistoryService(axiosInstance);
 
@@ -53,63 +55,115 @@ const ScanQRScreen = ({ navigation }) => {
     setScanned(false);
   };
 
+  const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString) return 'Horario no disponible';
+    const date = new Date(dateTimeString);
+    return date.toLocaleString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
   const handleBarCodeScanned = async ({ type, data }) => {
-    if (scanned) return;
-    
+    if (scanned || processing) return;
+
     setScanned(true);
+    setProcessing(true);
     setShowCamera(false);
-    
+
     try {
-      // Parse QR code data (expecting JSON with bookingId or classId)
+      // Parse QR code data (expecting JSON with scheduledClassId)
       const qrData = JSON.parse(data);
-      
-      // TODO: Call backend check-in API
-      // const response = await bookingService.checkIn(qrData.bookingId);
-      // setCheckInData(response);
-      
-      // For now, show the scanned data
+
+      // Validate QR format
+      if (qrData.type !== 'class_checkin' || !qrData.scheduledClassId) {
+        Alert.alert('Error', 'Código QR inválido');
+        setScanned(false);
+        setProcessing(false);
+        return;
+      }
+
+      // Verify booking (without performing check-in)
+      const checkInService = createCheckInService(axiosInstance);
+      const response = await checkInService.verifyBooking(qrData.scheduledClassId);
+
+      // Show booking details for confirmation
       setCheckInData({
-        className: qrData.className || 'Clase',
-        schedule: qrData.schedule || 'Horario no disponible',
-        location: qrData.location || 'Ubicación no disponible',
+        scheduledClassId: qrData.scheduledClassId,
+        className: response.data.className,
+        schedule: formatDateTime(response.data.classDateTime),
+        location: response.data.location,
+        professor: response.data.professor,
+        status: response.data.status,
       });
     } catch (error) {
-      console.error('Error processing QR code:', error);
-      Alert.alert('Error', 'No se pudo procesar el código QR');
+
+      // Handle specific error types
+      const errorType = error.response?.data?.error;
+      let errorMessage = 'No se pudo procesar el código QR';
+
+      switch (errorType) {
+        case 'NO_BOOKING_FOUND':
+          errorMessage = 'No tenés una reserva para esta clase.';
+          break;
+        case 'ALREADY_CHECKED_IN':
+          errorMessage = 'Ya registraste tu asistencia a esta clase.';
+          break;
+        case 'CLASS_EXPIRED':
+          errorMessage = 'Error, la clase ya venció.';
+          break;
+        default:
+          errorMessage = error.response?.data?.message || errorMessage;
+      }
+
+      Alert.alert('Error', errorMessage);
       setScanned(false);
+      setProcessing(false);
+    } finally {
+      setProcessing(false);
     }
   };
 
   const handleCloseCamera = () => {
     setShowCamera(false);
     setScanned(false);
+    setProcessing(false);
   };
 
   const handleConfirmCheckIn = async () => {
+    if (!checkInData?.scheduledClassId) return;
+
     try {
+      setProcessing(true);
+      const checkInService = createCheckInService(axiosInstance);
+      await checkInService.checkIn(checkInData.scheduledClassId);
+
       Alert.alert('Check-in exitoso', 'Tu asistencia ha sido registrada correctamente', [
         {
           text: 'OK',
           onPress: () => {
             setCheckInData(null);
+            setScanned(false);
+            setProcessing(false);
             navigation.navigate('History');
           },
         },
       ]);
     } catch (error) {
-      Alert.alert('Error', 'No se pudo registrar el check-in');
+      const errorMessage = error.response?.data?.message || 'No se pudo registrar el check-in';
+      Alert.alert('Error', errorMessage);
+      setCheckInData(null);
+      setScanned(false);
+      setProcessing(false);
     }
   };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={[styles.title, { color: theme.primary }]}>Escanear QR</Text>
-
-        <Text style={[styles.subtitle, { color: theme.text }]}>
-          Usá el escáner para ingresar a tu clase registrando tu asistencia
-        </Text>
-
         {/* QR Icon Placeholder */}
         <View style={styles.qrIconContainer}>
           <View style={[styles.qrIcon, { backgroundColor: theme.card, borderColor: theme.primary }]}>
@@ -142,6 +196,12 @@ const ScanQRScreen = ({ navigation }) => {
               <Text style={styles.infoLabel}>Sede:</Text>
               <Text style={[styles.infoValue, { color: theme.text }]}>{checkInData.location}</Text>
             </View>
+            {checkInData.professor && (
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Profesor:</Text>
+                <Text style={[styles.infoValue, { color: theme.text }]}>{checkInData.professor}</Text>
+              </View>
+            )}
 
             <TouchableOpacity
               style={[styles.confirmButton, { backgroundColor: theme.primary }]}
@@ -214,22 +274,9 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingBottom: 100,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 20,
-    marginBottom: 12,
-  },
-  subtitle: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 32,
-    lineHeight: 24,
-    paddingHorizontal: 8,
-  },
   qrIconContainer: {
     alignItems: 'center',
+    marginTop: 40,
     marginBottom: 32,
   },
   qrIcon: {

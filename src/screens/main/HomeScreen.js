@@ -9,9 +9,9 @@ import {
   Alert,
   TouchableOpacity,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import Card from '../../components/Card';
 import BiometricPrompt from '../../components/BiometricPrompt';
+import FilterSelector from '../../components/FilterSelector';
 import { COLORS, DISCIPLINES } from '../../utils/constants';
 import createScheduleService from '../../services/scheduleService';
 import createBookingService from '../../services/bookingService';
@@ -56,12 +56,9 @@ const HomeScreen = ({ navigation }) => {
 
   const loadLocations = async () => {
     try {
-      console.log('📍 Cargando ubicaciones desde el backend...');
       const data = await locationService.getAllLocations();
-      console.log('✅ Ubicaciones cargadas:', data);
       setLocations(data);
     } catch (error) {
-      console.error('⚠️ Error loading locations:', error);
       // No es crítico, continuar sin ubicaciones dinámicas
       setLocations([]);
     }
@@ -70,31 +67,19 @@ const HomeScreen = ({ navigation }) => {
   const loadClasses = useCallback(async () => {
     setLoading(true);
     try {
-      console.log('🔄 Cargando clases desde el backend...');
       const data = await scheduleService.getWeeklySchedule();
-      console.log('✅ Clases cargadas del backend:', JSON.stringify(data, null, 2));
-      console.log('📊 Total de clases recibidas:', data.length);
-
-      // Debug: Verificar estructura de cada clase
-      if (data.length > 0) {
-        console.log('� Primera clase (ejemplo):', JSON.stringify(data[0], null, 2));
-      }
 
       setClasses(data);
 
       // Cargar IDs de clases ya reservadas
       try {
         const bookedIds = await bookingService.getBookedClassIds();
-        console.log('✅ IDs de clases reservadas:', bookedIds);
         setBookedClassIds(bookedIds);
       } catch (error) {
-        console.error('⚠️ Error loading booked class IDs:', error);
         // No es crítico, continuar sin marcar clases
         setBookedClassIds([]);
       }
     } catch (error) {
-      console.error('❌ Error loading classes:', error);
-      console.error('❌ Error details:', error.response?.data);
       Alert.alert('Error', 'No se pudieron cargar las clases. Por favor intenta nuevamente.');
       setClasses([]);
     } finally {
@@ -130,13 +115,11 @@ const HomeScreen = ({ navigation }) => {
   // 🔐 Callbacks para BiometricPrompt
   const handleBiometricSuccess = () => {
     // Autenticación exitosa, cargar las clases y continuar con el flujo
-    console.log('[HomeScreen] Autenticación biométrica exitosa');
     loadClasses();
   };
 
   const handleBiometricFailure = async (reason) => {
     // Autenticación fallida o sin enrolamiento, desloguear y redirigir a login
-    console.log('[HomeScreen] Autenticación biométrica fallida. Razón:', reason);
 
     Alert.alert(
       'Autenticación requerida',
@@ -155,27 +138,65 @@ const HomeScreen = ({ navigation }) => {
 
   const handleBiometricCancel = async () => {
     // Usuario canceló la autenticación, desloguear y redirigir a login
-    console.log('[HomeScreen] Autenticación biométrica cancelada');
 
     await logout();
     // La navegación al login se hace automáticamente por el AppNavigator
   };
 
+  // Opciones para los filtros
+  const dateOptions = [
+    { label: 'Todas', value: 'Todas' },
+    { label: 'Hoy', value: 'Hoy' },
+    { label: 'Mañana', value: 'Mañana' },
+    { label: 'Esta semana', value: 'Semana' },
+  ];
+
+  const disciplineOptions = DISCIPLINES.map(d => ({ label: d, value: d }));
+
+  const locationOptions = [
+    { label: 'Todas', value: 'Todas' },
+    ...locations.map((location) => ({
+      label: location?.name?.replace('Sede ', '') || location?.name || 'Sin nombre',
+      value: location.name,
+    })),
+  ];
+
+  const getLocationLabel = () => {
+    if (selectedLocation === 'Todas') return 'Todas';
+    const location = locations.find(loc => loc.name === selectedLocation);
+    return location?.name?.replace('Sede ', '') || selectedLocation;
+  };
+
   const getFilteredClasses = () => {
-    return classes
-      .filter((item) => {
-        // Filtro por disciplina
-        const matchDiscipline =
-          selectedDiscipline === 'Todos' ||
-          item.discipline === selectedDiscipline;
+    return classes.filter((item) => {
+      // Filtro por disciplina - mejorado
+      const matchDiscipline = (() => {
+        if (selectedDiscipline === 'Todos') return true;
 
-        // Filtro por ubicación/sede
-        const matchLocation =
-          selectedLocation === 'Todas' ||
-          item.location === selectedLocation;
+        const itemDiscipline = item.discipline || item.name || item.className || '';
 
-        // Filtro por fecha
-        const matchDate = (() => {
+        // Comparar case-insensitive
+        return itemDiscipline.toLowerCase().includes(selectedDiscipline.toLowerCase());
+      })();
+
+      // Filtro por ubicación/sede - mejorado para manejar diferentes formatos
+      const matchLocation = (() => {
+        if (selectedLocation === 'Todas') return true;
+
+        const itemLocation = item.location || item.site || '';
+
+        // Comparar directamente (case-insensitive)
+        if (itemLocation.toLowerCase() === selectedLocation.toLowerCase()) return true;
+
+        // Comparar sin "Sede " en ambos lados (case-insensitive)
+        const normalizedSelected = selectedLocation.replace(/Sede /i, '').toLowerCase();
+        const normalizedItem = itemLocation.replace(/Sede /i, '').toLowerCase();
+
+        return normalizedSelected === normalizedItem;
+      })();
+
+      // Filtro por fecha
+      const matchDate = (() => {
           if (selectedDate === 'Todas') return true;
 
           if (!item.dateTime) return false;
@@ -298,60 +319,24 @@ const HomeScreen = ({ navigation }) => {
             <Text style={[styles.catalogTitle, { color: theme.primary }]}>Catálogo de Clases y Turnos</Text>
 
             <View style={styles.filtersContainer}>
-              {/* Filtro de Sede */}
-              <View style={styles.filterWrapper}>
-                <Text style={[styles.filterLabel, { color: theme.textSecondary }]}>Sede</Text>
-                <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
-                  <Picker
-                    selectedValue={selectedLocation}
-                    onValueChange={setSelectedLocation}
-                    style={[styles.picker, { color: theme.text }]}
-                    itemStyle={styles.pickerItem}
-                  >
-                    <Picker.Item key="todas" label="Todas" value="Todas" />
-                    {Array.isArray(locations) && locations.map((location) => {
-                      // Mostrar solo el nombre de la ciudad (ej: "Palermo") en lugar de "Sede Palermo"
-                      const shortLabel = location?.name?.replace('Sede ', '') || location?.name || 'Sin nombre';
-                      return <Picker.Item key={location.id} label={shortLabel} value={location.name} />;
-                    })}
-                  </Picker>
-                </View>
-              </View>
-
-              {/* Filtro de Disciplina */}
-              <View style={styles.filterWrapper}>
-                <Text style={[styles.filterLabel, { color: theme.textSecondary }]}>Disciplina</Text>
-                <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
-                  <Picker
-                    selectedValue={selectedDiscipline}
-                    onValueChange={setSelectedDiscipline}
-                    style={[styles.picker, { color: theme.text }]}
-                    itemStyle={styles.pickerItem}
-                  >
-                    {DISCIPLINES.map((discipline) => (
-                      <Picker.Item key={discipline} label={discipline} value={discipline} />
-                    ))}
-                  </Picker>
-                </View>
-              </View>
-
-              {/* Filtro de Fecha */}
-              <View style={styles.filterWrapper}>
-                <Text style={[styles.filterLabel, { color: theme.textSecondary }]}>Fecha</Text>
-                <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDarkMode ? 1 : 1 }]}>
-                  <Picker
-                    selectedValue={selectedDate}
-                    onValueChange={setSelectedDate}
-                    style={[styles.picker, { color: theme.text }]}
-                    itemStyle={styles.pickerItem}
-                  >
-                    <Picker.Item label="Todas" value="Todas" />
-                    <Picker.Item label="Hoy" value="Hoy" />
-                    <Picker.Item label="Mañana" value="Mañana" />
-                    <Picker.Item label="Esta semana" value="Semana" />
-                  </Picker>
-                </View>
-              </View>
+              <FilterSelector
+                label="Fecha"
+                value={selectedDate}
+                options={dateOptions}
+                onSelect={setSelectedDate}
+              />
+              <FilterSelector
+                label="Disciplina"
+                value={selectedDiscipline}
+                options={disciplineOptions}
+                onSelect={setSelectedDiscipline}
+              />
+              <FilterSelector
+                label="Sede"
+                value={getLocationLabel()}
+                options={locationOptions}
+                onSelect={setSelectedLocation}
+              />
             </View>
 
             <Text style={[styles.classesListTitle, { color: theme.text }]}>Clases disponibles</Text>
@@ -475,38 +460,8 @@ const styles = StyleSheet.create({
   },
   filtersContainer: {
     flexDirection: 'row',
-    marginBottom: 16,
-    justifyContent: 'space-between',
-    gap: 8,
-    flexWrap: 'wrap',
-  },
-  filterWrapper: {
-    flex: 1,
-    minWidth: 100,
-    maxWidth: '32%',
-  },
-  filterLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 6,
-    marginLeft: 4,
-    textAlign: 'center',
-  },
-  filterItem: {
-    borderWidth: 1,
-    borderRadius: 8,
-    height: 50,
-    justifyContent: 'center',
-    overflow: 'hidden',
-    paddingHorizontal: 4,
-  },
-  picker: {
-    height: 50,
-    width: '100%',
-  },
-  pickerItem: {
-    fontSize: 14,
-    height: 50,
+    marginBottom: 20,
+    gap: 10,
   },
   classesListTitle: {
     fontSize: 16,

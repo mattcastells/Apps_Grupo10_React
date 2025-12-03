@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,31 +16,63 @@ import HistoryDetailScreen from '../screens/history/HistoryDetailScreen';
 import NewsScreen from '../screens/other/NewsScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import EditUserScreen from '../screens/profile/EditUserScreen';
+import NotificationBell from '../components/NotificationBell';
+import NotificationDrawer from '../components/NotificationDrawer';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 // Home Stack
 const HomeStack = () => {
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [refreshBell, setRefreshBell] = useState(0);
+
+  const handleNotificationsRead = () => {
+    // Trigger a refresh of the NotificationBell by incrementing the key
+    setRefreshBell(prev => prev + 1);
+  };
+
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerStyle: {
-          backgroundColor: '#F26A3E',
-        },
-        headerTintColor: '#FFFFFF',
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
-      }}
-    >
-      <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ title: 'Clases' }} />
-      <Stack.Screen
-        name="ClassDetail"
-        component={ClassDetailScreen}
-        options={{ title: 'Detalle de Clase' }}
+    <>
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: '#F26A3E',
+            height: 100,
+          },
+          headerTintColor: '#FFFFFF',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            fontSize: 20,
+          },
+        }}
+      >
+        <Stack.Screen
+          name="HomeScreen"
+          component={HomeScreen}
+          options={{
+            title: 'Clases',
+            headerRight: () => (
+              <NotificationBell
+                key={refreshBell}
+                onPress={() => setShowNotifications(true)}
+              />
+            ),
+          }}
+        />
+        <Stack.Screen
+          name="ClassDetail"
+          component={ClassDetailScreen}
+          options={{ title: 'Detalle de Clase' }}
+        />
+      </Stack.Navigator>
+
+      <NotificationDrawer
+        visible={showNotifications}
+        onClose={() => setShowNotifications(false)}
+        onNotificationsRead={handleNotificationsRead}
       />
-    </Stack.Navigator>
+    </>
   );
 };
 
@@ -51,10 +83,12 @@ const ReservationsStack = () => {
       screenOptions={{
         headerStyle: {
           backgroundColor: '#F26A3E',
+          height: 100,
         },
         headerTintColor: '#FFFFFF',
         headerTitleStyle: {
           fontWeight: 'bold',
+          fontSize: 20,
         },
       }}
     >
@@ -73,6 +107,11 @@ const ReservationsStack = () => {
         component={EditClassScreen}
         options={{ title: 'Editar Clase' }}
       />
+      <Stack.Screen
+        name="ClassDetail"
+        component={ClassDetailScreen}
+        options={{ title: 'Detalle de Clase' }}
+      />
     </Stack.Navigator>
   );
 };
@@ -84,10 +123,12 @@ const HistoryStack = () => {
       screenOptions={{
         headerStyle: {
           backgroundColor: '#F26A3E',
+          height: 100,
         },
         headerTintColor: '#FFFFFF',
         headerTitleStyle: {
           fontWeight: 'bold',
+          fontSize: 20,
         },
       }}
     >
@@ -112,10 +153,12 @@ const NewsStack = () => {
       screenOptions={{
         headerStyle: {
           backgroundColor: '#F26A3E',
+          height: 100,
         },
         headerTintColor: '#FFFFFF',
         headerTitleStyle: {
           fontWeight: 'bold',
+          fontSize: 20,
         },
       }}
     >
@@ -131,10 +174,12 @@ const ProfileStack = () => {
       screenOptions={{
         headerStyle: {
           backgroundColor: '#F26A3E',
+          height: 100,
         },
         headerTintColor: '#FFFFFF',
         headerTitleStyle: {
           fontWeight: 'bold',
+          fontSize: 20,
         },
       }}
     >
@@ -159,10 +204,12 @@ const ScanStack = () => {
       screenOptions={{
         headerStyle: {
           backgroundColor: '#F26A3E',
+          height: 100,
         },
         headerTintColor: '#FFFFFF',
         headerTitleStyle: {
           fontWeight: 'bold',
+          fontSize: 20,
         },
       }}
     >

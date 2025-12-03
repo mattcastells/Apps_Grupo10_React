@@ -39,7 +39,6 @@ const ClassDetailScreen = ({ route, navigation }) => {
       const data = await scheduleService.getClassDetail(classId);
       setClassDetail(data);
     } catch (error) {
-      console.error('Error loading class detail:', error);
       Alert.alert('Error', 'No se pudo cargar la información de la clase', [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
@@ -53,7 +52,6 @@ const ClassDetailScreen = ({ route, navigation }) => {
       const bookedIds = await bookingService.getBookedClassIds();
       setIsBooked(bookedIds.includes(classId));
     } catch (error) {
-      console.error('Error checking if booked:', error);
       // If there's an error, assume not booked to allow user to try
       setIsBooked(false);
     }
@@ -81,19 +79,27 @@ const ClassDetailScreen = ({ route, navigation }) => {
           onPress: async () => {
             setLoading(true);
             try {
-              await bookingService.createBooking(classId);
+              console.log('📝 Intentando reservar clase:', classId);
+              const booking = await bookingService.createBooking(classId);
+              console.log('✅ Respuesta del booking:', booking);
+
               setIsBooked(true); // Update local state
-              Alert.alert('Éxito', 'Clase reservada correctamente', [
-                { 
-                  text: 'OK', 
+
+              // El backend ya crea la notificación automáticamente cuando se hace la reserva
+              // No es necesario crearla manualmente desde el frontend
+
+              Alert.alert('Éxito', 'Clase reservada correctamente. Recibirás una notificación 1 hora antes.', [
+                {
+                  text: 'OK',
                   onPress: () => {
                     // Navigate to reservations screen to see the new booking
                     navigation.navigate('Reservations');
-                  } 
+                  }
                 },
               ]);
             } catch (error) {
-              console.error('Error booking class:', error);
+              console.error('❌ Error al reservar:', error);
+              console.error('❌ Error response:', error.response?.data);
               const errorMessage = error.response?.data?.message || 'No se pudo reservar la clase';
               Alert.alert('Error', errorMessage);
             } finally {
@@ -106,7 +112,7 @@ const ClassDetailScreen = ({ route, navigation }) => {
   };
 
   const handleViewMap = () => {
-    const locationQuery = classDetail?.location || 'RitmoFit';
+    const locationQuery = classDetail?.locationAddress || classDetail?.location || 'RitmoFit';
     const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
       locationQuery
     )}`;

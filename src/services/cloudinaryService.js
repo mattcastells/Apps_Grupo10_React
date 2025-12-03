@@ -41,7 +41,6 @@ const createCloudinaryService = (axiosInstance) => ({
 
       const cloudinaryUrl = `${CLOUDINARY_CONFIG.BASE_URL}/${CLOUDINARY_CONFIG.CLOUD_NAME}/image/upload`;
 
-      console.log('Subiendo imagen a Cloudinary con url ' + cloudinaryUrl)
 
       const response = await fetch(cloudinaryUrl, {
         method: 'POST',
@@ -54,11 +53,9 @@ const createCloudinaryService = (axiosInstance) => ({
       const data = await response.json();
       if (!response.ok) {
         // Log the detailed error from Cloudinary
-        console.error('Error response from Cloudinary:', data);
         throw new Error(data.error?.message || 'Error al subir imagen a Cloudinary');
       }
 
-      console.log('Imagen subida exitosamente a Cloudinary');
 
       return {
         success: true,
@@ -70,7 +67,6 @@ const createCloudinaryService = (axiosInstance) => ({
         cloudinaryResponse: data,
       };
     } catch (error) {
-      console.error('Error uploading to Cloudinary:', error);
       throw new Error('No se pudo subir la imagen a Cloudinary: ' + error.message);
     }
   },
@@ -83,7 +79,6 @@ const createCloudinaryService = (axiosInstance) => ({
    */
   saveImageUrlToBackend: async (userId, imageUrl) => {
     try {
-      console.log(`Guardando URL en el backend para usuario ${userId}...`);
 
       const endpoint = `/users/${userId}/photo`;
 
@@ -92,11 +87,9 @@ const createCloudinaryService = (axiosInstance) => ({
       };
 
       await axiosInstance.put(endpoint, requestBody);
-      console.log('URL guardada en el backend exitosamente');
 
       return { success: true, photoUrl: imageUrl };
     } catch (error) {
-      console.error('Error saving image URL to backend:', error.response?.data || error.message);
 
       if (error.response?.status === 400) {
         throw new Error('Solicitud inválida: ' + (error.response?.data || 'Verifica los datos enviados'));
@@ -116,7 +109,6 @@ const createCloudinaryService = (axiosInstance) => ({
    */
   uploadAndSaveProfilePhoto: async function (userId, imageData) {
     try {
-      console.log('Iniciando proceso de subida de imagen...');
       const cloudinaryResult = await this.uploadToCloudinary(imageData);
 
       if (!cloudinaryResult.success) {
@@ -132,7 +124,6 @@ const createCloudinaryService = (axiosInstance) => ({
         backendResponse: backendResult,
       };
     } catch (error) {
-      console.error('Error en proceso completo de subida:', error);
       throw error;
     }
   },
@@ -149,7 +140,6 @@ const createCloudinaryService = (axiosInstance) => ({
       });
       return response.data;
     } catch (error) {
-      console.error('Error deleting from Cloudinary:', error.response?.data || error.message);
       throw error;
     }
   },

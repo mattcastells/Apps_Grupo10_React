@@ -131,8 +131,6 @@ const EditUserScreen = ({ navigation }) => {
     }
 
     // Debug: ver qué propiedades tiene imageData
-    console.log('🔍 imageData recibido:', imageData);
-    console.log('🔍 imageData keys:', Object.keys(imageData || {}));
 
     if (!imageData || !imageData.uri) {
       Alert.alert('Error', 'No se pudo obtener la imagen seleccionada');
@@ -149,7 +147,6 @@ const EditUserScreen = ({ navigation }) => {
         fileName: imageData.fileName || `profile_${user.id}_${Date.now()}.jpg`,
       };
 
-      console.log('📦 imagePayload preparado:', imagePayload);
 
       // Subir a Cloudinary y guardar en backend
       const result = await cloudinaryService.uploadAndSaveProfilePhoto(
@@ -166,7 +163,6 @@ const EditUserScreen = ({ navigation }) => {
         await refreshUser();
       }
     } catch (error) {
-      console.error('Error al subir foto:', error);
       Alert.alert(
         'Error',
         error.message || 'No se pudo actualizar la foto de perfil'

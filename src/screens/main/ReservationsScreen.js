@@ -13,21 +13,31 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import createBookingService from '../../services/bookingService';
 import createScheduleService from '../../services/scheduleService';
+import createCheckInService from '../../services/checkInService';
+import createLocationService from '../../services/locationService';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { useAxios } from '../../hooks/useAxios';
+import { DISCIPLINES } from '../../utils/constants';
 import BookingCard from '../../components/BookingCard';
+import FilterSelector from '../../components/FilterSelector';
 
 const ReservationsScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
   const { user } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [professorClasses, setProfessorClasses] = useState([]);
+  const [locations, setLocations] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState('Todas');
+  const [selectedDiscipline, setSelectedDiscipline] = useState('Todos');
+  const [selectedDate, setSelectedDate] = useState('Todas');
   const axiosInstance = useAxios();
   const bookingService = createBookingService(axiosInstance);
   const scheduleService = createScheduleService(axiosInstance);
+  const checkInService = createCheckInService(axiosInstance);
+  const locationService = createLocationService(axiosInstance);
 
   const isProfessor = user?.role === 'PROFESSOR';
 
@@ -38,14 +48,16 @@ const ReservationsScreen = ({ navigation }) => {
         // Load professor's assigned classes AND their personal bookings
         const classes = await scheduleService.getClassesByProfessor(user.name);
         setProfessorClasses(classes);
-        
-        // Also load professor's personal bookings
+
+        // Also load professor's personal bookings (filter CONFIRMED only)
         const userBookings = await bookingService.getMyBookings();
-        setBookings(userBookings);
+        const confirmedBookings = userBookings.filter(booking => booking.status === 'CONFIRMED');
+        setBookings(confirmedBookings);
       } else {
-        // Load user's bookings
+        // Load user's bookings (filter CONFIRMED only)
         const data = await bookingService.getMyBookings();
-        setBookings(data);
+        const confirmedBookings = data.filter(booking => booking.status === 'CONFIRMED');
+        setBookings(confirmedBookings);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -59,16 +71,89 @@ const ReservationsScreen = ({ navigation }) => {
     }
   }, [isProfessor, user]);
 
+  const loadLocations = useCallback(async () => {
+    try {
+      const data = await locationService.getAllLocations();
+      setLocations(data);
+    } catch (error) {
+      console.error('Error loading locations:', error);
+      setLocations([]);
+    }
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       loadBookings();
-    }, [loadBookings])
+      loadLocations();
+    }, [loadBookings, loadLocations])
   );
 
   const onRefresh = async () => {
     setRefreshing(true);
     await loadBookings();
     setRefreshing(false);
+  };
+
+  const getFilteredBookings = () => {
+    return bookings.filter((item) => {
+      // Filtro por disciplina - mejorado
+      const matchDiscipline = (() => {
+        if (selectedDiscipline === 'Todos') return true;
+        
+        const itemDiscipline = item.className || item.discipline || item.name || '';
+        
+        // Comparar case-insensitive
+        return itemDiscipline.toLowerCase().includes(selectedDiscipline.toLowerCase());
+      })();
+
+      // Filtro por sede - mejorado para manejar diferentes formatos
+      const matchLocation = (() => {
+        if (selectedLocation === 'Todas') return true;
+        
+        const itemLocation = item.location || item.site || '';
+        
+        // Comparar directamente (case-insensitive)
+        if (itemLocation.toLowerCase() === selectedLocation.toLowerCase()) return true;
+        
+        // Comparar sin "Sede " en ambos lados (case-insensitive)
+        const normalizedSelected = selectedLocation.replace(/Sede /i, '').toLowerCase();
+        const normalizedItem = itemLocation.replace(/Sede /i, '').toLowerCase();
+        
+        return normalizedSelected === normalizedItem;
+      })();
+
+      // Filtro por fecha
+      const matchDate = (() => {
+        if (selectedDate === 'Todas') return true;
+
+        if (!item.classDateTime) return false;
+
+        const classDate = new Date(item.classDateTime);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const endOfWeek = new Date(today);
+        endOfWeek.setDate(endOfWeek.getDate() + 7);
+
+        const classDayStart = new Date(classDate);
+        classDayStart.setHours(0, 0, 0, 0);
+
+        if (selectedDate === 'Hoy') {
+          return classDayStart.getTime() === today.getTime();
+        } else if (selectedDate === 'Mañana') {
+          return classDayStart.getTime() === tomorrow.getTime();
+        } else if (selectedDate === 'Semana') {
+          return classDate >= today && classDate < endOfWeek;
+        }
+
+        return true;
+      })();
+
+      return matchDiscipline && matchLocation && matchDate;
+    });
   };
 
   const handleCancelBooking = (bookingId) => {
@@ -84,8 +169,9 @@ const ReservationsScreen = ({ navigation }) => {
             try {
               await bookingService.cancelBooking(bookingId);
               Alert.alert('Éxito', 'Reserva cancelada correctamente');
-              loadBookings();
+              loadBookings(); // Recarga la lista para eliminar la reserva cancelada
             } catch (error) {
+              console.error('Error cancelling booking:', error);
               Alert.alert('Error', 'No se pudo cancelar la reserva');
             }
           },
@@ -94,10 +180,67 @@ const ReservationsScreen = ({ navigation }) => {
     );
   };
 
+  const handleCheckIn = async (item) => {
+    Alert.alert(
+      'Confirmar Asistencia',
+      `¿Confirmar tu asistencia a ${item.className}?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Confirmar',
+          onPress: async () => {
+            try {
+              await checkInService.checkIn(item.scheduledClassId);
+              Alert.alert('¡Éxito!', 'Asistencia confirmada correctamente');
+              loadBookings();
+            } catch (error) {
+              const errorMessage = error.response?.data?.message || 'No se pudo confirmar la asistencia';
+              Alert.alert('Error', errorMessage);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleViewDetail = (item) => {
+    navigation.navigate('ClassDetail', { classId: item.scheduledClassId });
+  };
+
+  // Opciones para los filtros
+  const dateOptions = [
+    { label: 'Todas', value: 'Todas' },
+    { label: 'Hoy', value: 'Hoy' },
+    { label: 'Mañana', value: 'Mañana' },
+    { label: 'Esta semana', value: 'Semana' },
+  ];
+
+  const disciplineOptions = DISCIPLINES.map(d => ({ label: d, value: d }));
+
+  const locationOptions = [
+    { label: 'Todas', value: 'Todas' },
+    ...locations.map((location) => {
+      const shortName = location?.name?.replace('Sede ', '') || location?.name || 'Sin nombre';
+      return {
+        label: shortName,
+        value: location.name, // Guardamos el nombre completo como value
+      };
+    }),
+  ];
+
+  const getLocationLabel = () => {
+    if (selectedLocation === 'Todas') return 'Todas';
+    const location = locations.find(loc => loc.name === selectedLocation);
+    return location?.name?.replace('Sede ', '') || selectedLocation.replace('Sede ', '');
+  };
+
+
   const renderBookingItem = ({ item }) => (
-    <BookingCard 
-      item={item} 
+    <BookingCard
+      item={item}
       onCancel={handleCancelBooking}
+      onCheckIn={handleCheckIn}
+      onPress={handleViewDetail}
     />
   );
 
@@ -194,7 +337,7 @@ const ReservationsScreen = ({ navigation }) => {
             <Text style={[styles.description, { color: theme.textSecondary }]}>Tus reservas confirmadas</Text>
           </View>
         )}
-        
+
         {/* Botón crear clase solo para profesores */}
         {isProfessor && (
           <View style={styles.buttonContainer}>
@@ -206,13 +349,13 @@ const ReservationsScreen = ({ navigation }) => {
             </TouchableOpacity>
           </View>
         )}
-        
+
         {/* Contenedor principal - Clases del profesor */}
         {isProfessor && (
-          <View style={[styles.contentContainer, { 
-            backgroundColor: theme.container, 
-            borderWidth: isDarkMode ? 1 : 0, 
-            borderColor: theme.border 
+          <View style={[styles.contentContainer, {
+            backgroundColor: theme.container,
+            borderWidth: isDarkMode ? 1 : 0,
+            borderColor: theme.border
           }]}>
             {professorClasses.length > 0 ? (
               professorClasses.map((item) => (
@@ -239,11 +382,11 @@ const ReservationsScreen = ({ navigation }) => {
                 Clases en las que participás como alumno
               </Text>
             </View>
-            
-            <View style={[styles.contentContainer, { 
-              backgroundColor: theme.container, 
-              borderWidth: isDarkMode ? 1 : 0, 
-              borderColor: theme.border 
+
+            <View style={[styles.contentContainer, {
+              backgroundColor: theme.container,
+              borderWidth: isDarkMode ? 1 : 0,
+              borderColor: theme.border
             }]}>
               {bookings.length > 0 ? (
                 bookings.map((item) => (
@@ -264,10 +407,10 @@ const ReservationsScreen = ({ navigation }) => {
 
         {/* Contenedor para usuarios normales - Solo reservas */}
         {!isProfessor && (
-          <View style={[styles.contentContainer, { 
-            backgroundColor: theme.container, 
-            borderWidth: isDarkMode ? 1 : 0, 
-            borderColor: theme.border 
+          <View style={[styles.contentContainer, {
+            backgroundColor: theme.container,
+            borderWidth: isDarkMode ? 1 : 0,
+            borderColor: theme.border
           }]}>
             {bookings.length > 0 ? (
               bookings.map((item) => (
@@ -337,6 +480,11 @@ const styles = StyleSheet.create({
   reservationsDescription: {
     fontSize: 13,
     lineHeight: 18,
+  },
+  filtersContainer: {
+    flexDirection: 'row',
+    marginBottom: 20,
+    gap: 10,
   },
   emptyContainer: {
     padding: 40,
