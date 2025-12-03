@@ -29,6 +29,10 @@ const FilterSelector = ({ label, value, options, onSelect, modalTitle }) => {
     setModalVisible(false);
   };
 
+  // Buscar el label correspondiente al value seleccionado
+  const selectedOption = options.find(option => option.value === value);
+  const displayText = selectedOption ? selectedOption.label : value;
+
   return (
     <>
       <TouchableOpacity 
@@ -39,7 +43,7 @@ const FilterSelector = ({ label, value, options, onSelect, modalTitle }) => {
         <Text style={[styles.filterLabel, { color: theme.textSecondary }]}>{label}</Text>
         <View style={[styles.filterItem, { backgroundColor: theme.card, borderColor: theme.border }]}>
           <Text style={[styles.filterValue, { color: theme.text }]} numberOfLines={1}>
-            {value}
+            {displayText}
           </Text>
           <Text style={[styles.filterArrow, { color: theme.textSecondary }]}>▼</Text>
         </View>
