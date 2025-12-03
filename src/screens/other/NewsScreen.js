@@ -65,8 +65,8 @@ const NewsScreen = () => {
         )}
         <View style={[styles.cardDivider, { backgroundColor: theme.divider }]} />
         <View style={styles.newsContent}>
-          <Text style={[styles.newsDate, { color: theme.textSecondary }]}>{item.date}</Text>
           <Text style={[styles.newsTitle, { color: theme.text }]}>{item.title}</Text>
+          <Text style={[styles.newsDate, { color: theme.textSecondary }]}>{item.date}</Text>
           <Text style={[styles.newsText, { color: theme.text }]}>{item.content}</Text>
         </View>
       </View>
