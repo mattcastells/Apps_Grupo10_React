@@ -19,7 +19,7 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 /**
  * Modal/Drawer de Notificaciones que se desliza desde arriba
  */
-const NotificationDrawer = ({ visible, onClose }) => {
+const NotificationDrawer = ({ visible, onClose, onNotificationsRead }) => {
   const { theme, isDarkMode } = useTheme();
   const axiosInstance = useAxios();
   const notificationService = createNotificationService(axiosInstance);
@@ -50,7 +50,9 @@ const NotificationDrawer = ({ visible, onClose }) => {
   const loadNotifications = async () => {
     setLoading(true);
     try {
-      const data = await notificationService.getMyNotifications();
+      // Obtener SOLO las notificaciones ENVIADAS (que el scheduler ya procesó)
+      // NO mostramos las PENDIENTE (aún no llegó su scheduledFor)
+      const data = await notificationService.getSentNotifications();
       setNotifications(data);
     } catch (error) {
       console.error('Error loading notifications:', error);
@@ -72,7 +74,11 @@ const NotificationDrawer = ({ visible, onClose }) => {
       try {
         await notificationService.markAsRead(notification.id);
         // Recargar lista
-        loadNotifications();
+        await loadNotifications();
+        // Notificar al padre para actualizar el contador
+        if (onNotificationsRead) {
+          onNotificationsRead();
+        }
       } catch (error) {
         console.error('Error marking notification as read:', error);
       }

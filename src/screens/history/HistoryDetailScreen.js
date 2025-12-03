@@ -80,7 +80,7 @@ const HistoryDetailScreen = ({ route, navigation }) => {
     if (attendance.userReview) return false;
 
     // Solo puede calificar si el estado es ATTENDED (asistió a la clase)
-    if (attendance.status !== 'ATTENDED' && attendance.attendanceStatus !== 'PRESENT') {
+    if (attendance.status !== 'ATTENDED' && attendance.attendanceStatus !== 'ATTENDED') {
       return false;
     }
 
@@ -153,14 +153,20 @@ const HistoryDetailScreen = ({ route, navigation }) => {
                 styles.statusBadge,
                 {
                   backgroundColor:
-                    attendance.attendanceStatus === 'PRESENT'
+                    attendance.attendanceStatus === 'ATTENDED'
                       ? theme.success
-                      : theme.error,
+                      : attendance.attendanceStatus === 'ABSENT'
+                      ? theme.error
+                      : theme.textSecondary,
                 },
               ]}
             >
               <Text style={[styles.statusText, { color: theme.textInverted }]}>
-                {attendance.attendanceStatus === 'PRESENT' ? 'Presente' : 'Ausente'}
+                {attendance.attendanceStatus === 'ATTENDED' ? 'Presente'
+                  : attendance.attendanceStatus === 'ABSENT' ? 'Ausente'
+                  : attendance.attendanceStatus === 'CANCELLED' ? 'Cancelada'
+                  : attendance.attendanceStatus === 'CONFIRMED' ? 'Confirmada'
+                  : 'Sin estado'}
               </Text>
             </View>
           </View>
@@ -190,7 +196,7 @@ const HistoryDetailScreen = ({ route, navigation }) => {
               )}
               {!canRate() && !attendance.userReview && (
                 <Text style={[styles.expiredText, { color: theme.textLight }]}>
-                  {attendance.status !== 'ATTENDED' && attendance.attendanceStatus !== 'PRESENT'
+                  {attendance.status !== 'ATTENDED' && attendance.attendanceStatus !== 'ATTENDED'
                     ? 'Solo puedes calificar clases a las que asististe. Debes hacer check-in para poder calificar.'
                     : 'El plazo para calificar esta clase ha expirado (24 horas después del final de la clase).'}
                 </Text>

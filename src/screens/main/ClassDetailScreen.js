@@ -74,18 +74,11 @@ const ClassDetailScreen = ({ route, navigation }) => {
               console.log('📝 Intentando reservar clase:', classId);
               const booking = await bookingService.createBooking(classId);
               console.log('✅ Respuesta del booking:', booking);
-              
+
               setIsBooked(true); // Update local state
 
-              // Crear notificación en el backend
-              try {
-                const notificationService = require('../../services/notificationService').default(axiosInstance);
-                await notificationService.createBookingNotification(booking);
-                console.log('✅ Notificación programada para 1 hora antes de la clase');
-              } catch (notifError) {
-                console.log('⚠️ Error creando notificación (no crítico):', notifError);
-                // No mostrar error al usuario, la reserva se hizo correctamente
-              }
+              // El backend ya crea la notificación automáticamente cuando se hace la reserva
+              // No es necesario crearla manualmente desde el frontend
 
               Alert.alert('Éxito', 'Clase reservada correctamente. Recibirás una notificación 1 hora antes.', [
                 {

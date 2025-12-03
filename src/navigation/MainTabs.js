@@ -22,6 +22,12 @@ const Stack = createNativeStackNavigator();
 // Home Stack
 const HomeStack = () => {
   const [showNotifications, setShowNotifications] = useState(false);
+  const [refreshBell, setRefreshBell] = useState(0);
+
+  const handleNotificationsRead = () => {
+    // Trigger a refresh of the NotificationBell by incrementing the key
+    setRefreshBell(prev => prev + 1);
+  };
 
   return (
     <>
@@ -44,7 +50,10 @@ const HomeStack = () => {
           options={{
             title: 'Clases',
             headerRight: () => (
-              <NotificationBell onPress={() => setShowNotifications(true)} />
+              <NotificationBell
+                key={refreshBell}
+                onPress={() => setShowNotifications(true)}
+              />
             ),
           }}
         />
@@ -58,6 +67,7 @@ const HomeStack = () => {
       <NotificationDrawer
         visible={showNotifications}
         onClose={() => setShowNotifications(false)}
+        onNotificationsRead={handleNotificationsRead}
       />
     </>
   );
