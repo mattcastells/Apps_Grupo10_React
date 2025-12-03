@@ -96,6 +96,24 @@ const HistoryDetailScreen = ({ route, navigation }) => {
     return now >= classEndTime && now <= ratingDeadline;
   };
 
+  const getRatingMessage = () => {
+    if (!attendance) return null;
+
+    // Si ya tiene reseña, no hay mensaje
+    if (attendance.userReview) return null;
+
+    // Si puede calificar, no mostrar mensaje aquí (se mostrará el botón)
+    if (canRate()) return null;
+
+    // Si no asistió, mostrar mensaje de asistencia
+    if (attendance.status !== 'ATTENDED' && attendance.attendanceStatus !== 'ATTENDED') {
+      return 'Solo puedes calificar clases a las que asististe. Debes hacer check-in para poder calificar.';
+    }
+
+    // Si asistió pero expiró el plazo
+    return 'El plazo para calificar esta clase ha expirado (24 horas después del final de la clase).';
+  };
+
   const handleSubmitRating = async (rating, comment) => {
     setSubmittingRating(true);
     try {
@@ -183,22 +201,21 @@ const HistoryDetailScreen = ({ route, navigation }) => {
             </>
           ) : (
             <>
-              <Text style={[styles.noReviewText, { color: theme.textLight }]}>Aún no has dejado una reseña para esta clase.</Text>
-              {canRate() && (
-                <TouchableOpacity
-                  style={[styles.rateButton, { backgroundColor: theme.primary }]}
-                  onPress={() => setRatingModalVisible(true)}
-                >
-                  <Text style={[styles.rateButtonText, { color: theme.textInverted }]}>
-                    Calificar Clase
-                  </Text>
-                </TouchableOpacity>
-              )}
-              {!canRate() && !attendance.userReview && (
+              {canRate() ? (
+                <>
+                  <Text style={[styles.noReviewText, { color: theme.textLight }]}>Aún no has dejado una reseña para esta clase.</Text>
+                  <TouchableOpacity
+                    style={[styles.rateButton, { backgroundColor: theme.primary }]}
+                    onPress={() => setRatingModalVisible(true)}
+                  >
+                    <Text style={[styles.rateButtonText, { color: theme.textInverted }]}>
+                      Calificar Clase
+                    </Text>
+                  </TouchableOpacity>
+                </>
+              ) : (
                 <Text style={[styles.expiredText, { color: theme.textLight }]}>
-                  {attendance.status !== 'ATTENDED' && attendance.attendanceStatus !== 'ATTENDED'
-                    ? 'Solo puedes calificar clases a las que asististe. Debes hacer check-in para poder calificar.'
-                    : 'El plazo para calificar esta clase ha expirado (24 horas después del final de la clase).'}
+                  {getRatingMessage()}
                 </Text>
               )}
             </>
