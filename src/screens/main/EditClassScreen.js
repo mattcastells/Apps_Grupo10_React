@@ -33,6 +33,7 @@ const EditClassScreen = ({ route, navigation }) => {
   const [discipline, setDiscipline] = useState('');
   const [durationMinutes, setDurationMinutes] = useState('');
   const [capacity, setCapacity] = useState('');
+  const [description, setDescription] = useState('');
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [locations, setLocations] = useState([]);
   const [dateTime, setDateTime] = useState(new Date());
@@ -60,6 +61,7 @@ const EditClassScreen = ({ route, navigation }) => {
         setDurationMinutes(classData.durationMinutes.toString());
         setCapacity(classData.capacity.toString());
         setDateTime(new Date(classData.dateTime));
+        setDescription(classData.description || '');
         
         // Find and set the location
         const location = locationsData.find(loc => loc.name === classData.location);
@@ -145,6 +147,7 @@ const EditClassScreen = ({ route, navigation }) => {
         capacity: parseInt(capacity),
         locationId: selectedLocation.id,
         dateTime: formattedDateTime,
+        description: description.trim() || null, // Enviar null si está vacío
       };
 
       await scheduleService.updateScheduledClass(classId, classData);
@@ -231,6 +234,16 @@ const EditClassScreen = ({ route, navigation }) => {
             value={capacity}
             onChangeText={setCapacity}
             keyboardType="numeric"
+          />
+
+          <Text style={[styles.label, { color: theme.text }]}>Descripción (opcional)</Text>
+          <Input
+            placeholder="Describe la clase (ej: Clase de yoga enfocada en respiración...)"
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            numberOfLines={4}
+            style={styles.descriptionInput}
           />
 
           <Text style={[styles.label, { color: theme.text }]}>Sede</Text>
@@ -411,6 +424,10 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
+  },
+  descriptionInput: {
+    height: 100,
+    textAlignVertical: 'top',
   },
 });
 

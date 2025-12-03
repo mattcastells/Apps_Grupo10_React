@@ -31,6 +31,7 @@ const CreateClassScreen = ({ navigation }) => {
   const [discipline, setDiscipline] = useState('');
   const [durationMinutes, setDurationMinutes] = useState('');
   const [capacity, setCapacity] = useState('');
+  const [description, setDescription] = useState('');
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [locations, setLocations] = useState([]);
   const [dateTime, setDateTime] = useState(new Date());
@@ -116,6 +117,7 @@ const CreateClassScreen = ({ navigation }) => {
         capacity: parseInt(capacity),
         locationId: selectedLocation.id,
         dateTime: formattedDateTime,
+        description: description.trim() || null, // Enviar null si está vacío
       };
 
       console.log('📤 Enviando datos de clase:', classData);
@@ -181,6 +183,16 @@ const CreateClassScreen = ({ navigation }) => {
             value={capacity}
             onChangeText={setCapacity}
             keyboardType="numeric"
+          />
+
+          <Text style={[styles.label, { color: theme.text }]}>Descripción (opcional)</Text>
+          <Input
+            placeholder="Describe la clase (ej: Clase de yoga enfocada en respiración...)"
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            numberOfLines={4}
+            style={styles.descriptionInput}
           />
 
           <Text style={[styles.label, { color: theme.text }]}>Sede</Text>
@@ -344,6 +356,10 @@ const styles = StyleSheet.create({
   },
   buttonSpacing: {
     marginTop: 12,
+  },
+  descriptionInput: {
+    height: 100,
+    textAlignVertical: 'top',
   },
 });
 
