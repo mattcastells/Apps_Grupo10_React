@@ -131,12 +131,10 @@ const CreateClassScreen = ({ navigation }) => {
           { 
             text: 'OK', 
             onPress: () => {
-              // Navigate back to trigger a refresh
-              navigation.navigate('Home');
-              // Force a small delay to ensure the tab switches first
-              setTimeout(() => {
-                navigation.navigate('Reservations');
-              }, 100);
+              // Navegar a la pantalla de Reservas (Mis Clases para profesores)
+              navigation.navigate('MainTabs', { 
+                screen: 'Reservations'
+              });
             }
           },
         ]
