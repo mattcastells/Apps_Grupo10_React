@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 import HomeScreen from '../screens/main/HomeScreen';
 import ClassDetailScreen from '../screens/main/ClassDetailScreen';
@@ -176,6 +177,8 @@ const ScanStack = () => {
 
 const MainTabs = () => {
   const { theme } = useTheme();
+  const { user } = useAuth();
+  const isProfessor = user?.role === 'PROFESSOR';
   
   return (
     <Tab.Navigator
@@ -210,7 +213,11 @@ const MainTabs = () => {
     >
       <Tab.Screen name="Home" component={HomeStack} options={{ title: 'Clases' }} />
       <Tab.Screen name="Scan" component={ScanStack} options={{ title: 'Escanear' }} />
-      <Tab.Screen name="Reservations" component={ReservationsStack} options={{ title: 'Reservas' }} />
+      <Tab.Screen 
+        name="Reservations" 
+        component={ReservationsStack} 
+        options={{ title: isProfessor ? 'Mis Clases' : 'Reservas' }} 
+      />
       <Tab.Screen name="History" component={HistoryStack} options={{ title: 'Historial' }} />
       <Tab.Screen name="News" component={NewsStack} options={{ title: 'Noticias' }} />
       <Tab.Screen name="Profile" component={ProfileStack} options={{ title: 'Perfil' }} />

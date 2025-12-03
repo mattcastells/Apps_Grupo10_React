@@ -34,9 +34,13 @@ const ReservationsScreen = ({ navigation }) => {
     setLoading(true);
     try {
       if (isProfessor) {
-        // Load professor's assigned classes
+        // Load professor's assigned classes AND their personal bookings
         const classes = await scheduleService.getClassesByProfessor(user.name);
         setProfessorClasses(classes);
+        
+        // Also load professor's personal bookings
+        const userBookings = await bookingService.getMyBookings();
+        setBookings(userBookings);
       } else {
         // Load user's bookings
         const data = await bookingService.getMyBookings();
@@ -47,9 +51,8 @@ const ReservationsScreen = ({ navigation }) => {
       Alert.alert('Error', isProfessor ? 'No se pudieron cargar las clases.' : 'No se pudieron cargar las reservas.');
       if (isProfessor) {
         setProfessorClasses([]);
-      } else {
-        setBookings([]);
       }
+      setBookings([]);
     } finally {
       setLoading(false);
     }
@@ -127,18 +130,25 @@ const ReservationsScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
-      <View style={[styles.header, { backgroundColor: theme.backgroundSecondary }]}>
-        <Text style={[styles.title, { color: theme.primary }]}>
-          {isProfessor ? 'Mis Clases' : 'Mis Reservas'}
-        </Text>
-        <Text style={[styles.subtitle, { color: theme.text }]}>
-          {isProfessor ? 'Clases asignadas' : 'Próximas clases'}
-        </Text>
-        <Text style={[styles.description, { color: theme.textSecondary }]}>
-          {isProfessor ? 'Tus clases programadas' : 'Tus reservas confirmadas'}
-        </Text>
-      </View>
+      {/* Header para profesores */}
+      {isProfessor && (
+        <View style={[styles.header, { backgroundColor: theme.backgroundSecondary }]}>
+          <Text style={[styles.title, { color: theme.primary }]}>Mis Clases</Text>
+          <Text style={[styles.subtitle, { color: theme.text }]}>Clases asignadas</Text>
+          <Text style={[styles.description, { color: theme.textSecondary }]}>Tus clases programadas</Text>
+        </View>
+      )}
+
+      {/* Header para usuarios normales */}
+      {!isProfessor && (
+        <View style={[styles.header, { backgroundColor: theme.backgroundSecondary }]}>
+          <Text style={[styles.title, { color: theme.primary }]}>Mis Reservas</Text>
+          <Text style={[styles.subtitle, { color: theme.text }]}>Próximas clases</Text>
+          <Text style={[styles.description, { color: theme.textSecondary }]}>Tus reservas confirmadas</Text>
+        </View>
+      )}
       
+      {/* Botón crear clase solo para profesores */}
       {isProfessor && (
         <View style={styles.buttonContainer}>
           <TouchableOpacity
@@ -150,22 +160,74 @@ const ReservationsScreen = ({ navigation }) => {
         </View>
       )}
       
-      <View style={[styles.contentContainer, { backgroundColor: theme.container, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
-        <FlatList
-          data={isProfessor ? professorClasses : bookings}
-          renderItem={isProfessor ? renderProfessorClassItem : renderBookingItem}
-          keyExtractor={(item) => isProfessor ? item.id : item.bookingId}
-          contentContainerStyle={styles.listContent}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
-                {loading ? 'Cargando...' : (isProfessor ? 'No tenés clases asignadas' : 'No tenés reservas')}
-              </Text>
-            </View>
-          }
-        />
-      </View>
+      {/* Contenedor principal - Clases del profesor */}
+      {isProfessor && (
+        <View style={[styles.contentContainer, { backgroundColor: theme.container, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
+          <FlatList
+            data={professorClasses}
+            renderItem={renderProfessorClassItem}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.listContent}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
+                  {loading ? 'Cargando...' : 'No tenés clases asignadas'}
+                </Text>
+              </View>
+            }
+          />
+        </View>
+      )}
+
+      {/* Sección de Mis Reservas para profesores */}
+      {isProfessor && (
+        <>
+          <View style={[styles.reservationsHeader, { backgroundColor: theme.backgroundSecondary }]}>
+            <Text style={[styles.reservationsTitle, { color: theme.primary }]}>Mis Reservas</Text>
+            <Text style={[styles.reservationsDescription, { color: theme.textSecondary }]}>
+              Clases en las que participás como alumno
+            </Text>
+          </View>
+          
+          <View style={[styles.reservationsContainer, { backgroundColor: theme.container, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
+            <FlatList
+              data={bookings}
+              renderItem={renderBookingItem}
+              keyExtractor={(item) => item.bookingId}
+              contentContainerStyle={styles.listContent}
+              scrollEnabled={false}
+              ListEmptyComponent={
+                <View style={styles.emptyContainer}>
+                  <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
+                    No tenés reservas como alumno
+                  </Text>
+                </View>
+              }
+            />
+          </View>
+        </>
+      )}
+
+      {/* Contenedor para usuarios normales - Solo reservas */}
+      {!isProfessor && (
+        <View style={[styles.contentContainer, { backgroundColor: theme.container, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
+          <FlatList
+            data={bookings}
+            renderItem={renderBookingItem}
+            keyExtractor={(item) => item.bookingId}
+            contentContainerStyle={styles.listContent}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
+                  {loading ? 'Cargando...' : 'No tenés reservas'}
+                </Text>
+              </View>
+            }
+          />
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -205,6 +267,33 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
+  },
+  reservationsHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 8,
+  },
+  reservationsTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  reservationsDescription: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  reservationsContainer: {
+    borderRadius: 24,
+    marginHorizontal: 20,
+    marginTop: 8,
+    marginBottom: 20,
+    paddingTop: 20,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    maxHeight: 300,
   },
   listContent: {
     padding: 20,
