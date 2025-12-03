@@ -83,12 +83,20 @@ const CreateClassScreen = ({ navigation }) => {
       Alert.alert('Error', 'Por favor ingresá una duración válida (mayor a 0)');
       return false;
     }
+    if (parseInt(durationMinutes) > 120) {
+      Alert.alert('Error', 'La duración no puede ser mayor a 120 minutos');
+      return false;
+    }
     if (!capacity || capacity.trim() === '') {
       Alert.alert('Error', 'La capacidad máxima es obligatoria');
       return false;
     }
     if (isNaN(capacity) || parseInt(capacity) <= 0) {
       Alert.alert('Error', 'Por favor ingresá una capacidad válida (mayor a 0)');
+      return false;
+    }
+    if (parseInt(capacity) > 30) {
+      Alert.alert('Error', 'La clase no puede tener más de 30 cupos');
       return false;
     }
     if (!selectedLocation) {
@@ -131,10 +139,8 @@ const CreateClassScreen = ({ navigation }) => {
           { 
             text: 'OK', 
             onPress: () => {
-              // Navegar a la pantalla de Reservas (Mis Clases para profesores)
-              navigation.navigate('MainTabs', { 
-                screen: 'Reservations'
-              });
+              // Navegar hacia atrás para que se recarguen las clases
+              navigation.goBack();
             }
           },
         ]

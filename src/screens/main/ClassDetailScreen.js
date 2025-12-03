@@ -136,7 +136,7 @@ const ClassDetailScreen = ({ route, navigation }) => {
           <Text style={[styles.classTitle, { color: theme.primary }]}>{classDetail.name}</Text>
 
           <View style={styles.infoContainer}>
-            <Text style={[styles.infoText, { color: theme.text }]}>👨‍🏫   Profesor: {classDetail.professor}</Text>
+            <Text style={[styles.infoText, { color: theme.text }]}>👨‍🏫   Instructor: {classDetail.professor}</Text>
             <Text style={[styles.infoText, { color: theme.text }]}>📅   Fecha: {formattedDate}</Text>
             <Text style={[styles.infoText, { color: theme.text }]}>🕐   Horario: {formattedTime}</Text>
             <Text style={[styles.infoText, { color: theme.text }]}>⏱️   Duración: {classDetail.durationMinutes} min</Text>

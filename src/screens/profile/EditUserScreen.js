@@ -269,6 +269,12 @@ const EditUserScreen = ({ navigation }) => {
             )}
           </View>
 
+          {user?.role === 'PROFESSOR' && (
+            <View style={styles.professorTag}>
+              <Text style={styles.professorTagText}>Instructor</Text>
+            </View>
+          )}
+
           {/* Change Photo Button */}
           <TouchableOpacity
             style={styles.photoButton}
@@ -416,6 +422,19 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: 'bold',
     color: COLORS.WHITE,
+  },
+  professorTag: {
+    backgroundColor: '#FFD700',
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginBottom: 12,
+    alignSelf: 'center',
+  },
+  professorTagText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
   },
   photoButton: {
     backgroundColor: COLORS.ORANGE,

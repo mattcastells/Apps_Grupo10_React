@@ -217,12 +217,13 @@ const ProfileScreen = ({ navigation }) => {
                 </Text>
               </View>
             )}
-            {user?.role === 'PROFESSOR' && (
-              <View style={styles.professorBadge}>
-                <Text style={styles.professorStar}>⭐</Text>
-              </View>
-            )}
           </View>
+
+          {user?.role === 'PROFESSOR' && (
+            <View style={styles.professorTag}>
+              <Text style={styles.professorTagText}>Instructor</Text>
+            </View>
+          )}
 
           <Text style={[styles.userName, { color: theme.text }]}>{user?.name || 'Usuario'}</Text>
           <Text style={[styles.userEmail, { color: theme.textSecondary }]}>{user?.email || 'email@ejemplo.com'}</Text>
@@ -372,26 +373,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
-  professorBadge: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
+  professorTag: {
     backgroundColor: '#FFD700',
-    borderRadius: 15,
-    width: 30,
-    height: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3,
-    elevation: 5,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginBottom: 12,
+    alignSelf: 'center',
   },
-  professorStar: {
-    fontSize: 16,
+  professorTagText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
   },
   userName: {
     fontSize: 24,
