@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -21,6 +21,7 @@ import { useAxios } from '../../hooks/useAxios';
 import { DISCIPLINES } from '../../utils/constants';
 import BookingCard from '../../components/BookingCard';
 import FilterSelector from '../../components/FilterSelector';
+import NotificationBell from '../../components/NotificationBell';
 
 const ReservationsScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
@@ -313,6 +314,12 @@ const ReservationsScreen = ({ navigation }) => {
       </TouchableOpacity>
     );
   };
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <NotificationBell />,
+    });
+  }, [navigation]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
