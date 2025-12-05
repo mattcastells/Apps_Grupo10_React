@@ -58,12 +58,10 @@ const ClassDetailScreen = ({ route, navigation }) => {
   };
 
   const handleBookClass = async () => {
-    // Si ya está reservada, no hacer nada
     if (isBooked) {
       return;
     }
 
-    // Validar que el profesor no pueda reservar su propia clase
     if (classDetail?.professor && user?.name && classDetail.professor === user.name) {
       Alert.alert('No permitido', 'No podés reservar una clase dictada por vos.');
       return;
@@ -79,27 +77,18 @@ const ClassDetailScreen = ({ route, navigation }) => {
           onPress: async () => {
             setLoading(true);
             try {
-              console.log('📝 Intentando reservar clase:', classId);
               const booking = await bookingService.createBooking(classId);
-              console.log('✅ Respuesta del booking:', booking);
-
-              setIsBooked(true); // Update local state
-
-              // El backend ya crea la notificación automáticamente cuando se hace la reserva
-              // No es necesario crearla manualmente desde el frontend
+              setIsBooked(true);
 
               Alert.alert('Éxito', 'Clase reservada correctamente. Recibirás una notificación 1 hora antes.', [
                 {
                   text: 'OK',
                   onPress: () => {
-                    // Navigate to reservations screen to see the new booking
                     navigation.navigate('Reservations');
                   }
                 },
               ]);
             } catch (error) {
-              console.error('❌ Error al reservar:', error);
-              console.error('❌ Error response:', error.response?.data);
               const errorMessage = error.response?.data?.message || 'No se pudo reservar la clase';
               Alert.alert('Error', errorMessage);
             } finally {

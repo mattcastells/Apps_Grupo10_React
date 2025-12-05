@@ -120,12 +120,10 @@ const HistoryDetailScreen = ({ route, navigation }) => {
       await ratingService.createRating(attendanceId, rating, comment);
       setRatingModalVisible(false);
       
-      // Recargar los datos para mostrar la nueva calificación
       await loadAttendanceDetail();
       
       Alert.alert('¡Gracias!', 'Tu calificación ha sido guardada exitosamente.');
     } catch (error) {
-      console.error('Error submitting rating:', error);
       const errorMessage = error.response?.data?.message || error.message || 'No se pudo guardar la calificación';
       Alert.alert('Error', errorMessage);
     } finally {

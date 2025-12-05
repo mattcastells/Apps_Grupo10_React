@@ -185,3 +185,11 @@ Para configurar Android Studio:
 
 ### Configuración de la API
 Para dispositivos físicos, actualiza el `BASE_URL` en `src/utils/constants.js` para usar la dirección IP de tu computadora en lugar de `10.0.2.2`.
+
+
+
+$env:MONGO_PASSWORD="ritmofit"
+$env:GMAIL_USERNAME="tucorreo@gmail.com"
+$env:GMAIL_APP_PASSWORD="gvpgvjeauxiipccz"
+$env:JWT_SECRET_KEY="bWF0dWNhc3RlbGxzLXJpdG1vZml0LWFwaS1zZWNyZXQta2V5LWdlbmVyYXRlZC1mb3ItZGVtby1wdXJwb3Nlcy1mb3ItdWFkZS1jb3Vyc2U="
+$env:JWT_EXPIRATION_MS="1000000000"

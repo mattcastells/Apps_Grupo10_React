@@ -13,6 +13,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useAxios } from '../../hooks/useAxios';
 import createNewsService from '../../services/newsService';
 import NotificationBell from '../../components/NotificationBell';
+import NotificationDrawer from '../../components/NotificationDrawer';
 import { useNavigation } from '@react-navigation/native';
 
 const NewsScreen = () => {
@@ -20,15 +21,24 @@ const NewsScreen = () => {
   const [news, setNews] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showNotificationDrawer, setShowNotificationDrawer] = useState(false);
   const axiosInstance = useAxios();
   const newsService = createNewsService(axiosInstance);
-  const navigation = useNavigation(); // Importar desde @react-navigation/native
+  const navigation = useNavigation();
 
   useEffect(() => {
     loadNews();
   }, []);
 
-
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <NotificationBell 
+          onPress={() => setShowNotificationDrawer(true)} 
+        />
+      ),
+    });
+  }, [navigation]);
 
   const loadNews = async () => {
     setLoading(true);
@@ -49,7 +59,6 @@ const NewsScreen = () => {
   };
 
   const renderNewsItem = ({ item }) => {
-
     return (
       <View style={[styles.newsCard, { backgroundColor: theme.card, borderWidth: 1, borderColor: theme.border }]}>
         {item.image ? (
@@ -58,10 +67,6 @@ const NewsScreen = () => {
             source={{ uri: item.image }}
             style={styles.newsImage}
             resizeMode="cover"
-            onError={(error) => {}}
-            onLoad={() => {}}
-            onLoadStart={() => {}}
-            onLoadEnd={() => {}}
           />
         ) : (
           <View style={[styles.newsImage, { backgroundColor: '#E0E0E0', justifyContent: 'center', alignItems: 'center' }]}>
@@ -94,6 +99,12 @@ const NewsScreen = () => {
           }
         />
       </View>
+
+      {/* Notification Drawer */}
+      <NotificationDrawer
+        visible={showNotificationDrawer}
+        onClose={() => setShowNotificationDrawer(false)}
+      />
     </SafeAreaView>
   );
 };

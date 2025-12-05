@@ -48,11 +48,9 @@ const EditClassScreen = ({ route, navigation }) => {
 
   const loadInitialData = async () => {
     try {
-      // Load locations
       const locationsData = await locationService.getAllLocations();
       setLocations(locationsData);
 
-      // Load professor's classes to find this specific class
       const classes = await scheduleService.getClassesByProfessor(user.name);
       const classData = classes.find(c => c.id === classId);
 
@@ -63,7 +61,6 @@ const EditClassScreen = ({ route, navigation }) => {
         setDateTime(new Date(classData.dateTime));
         setDescription(classData.description || '');
         
-        // Find and set the location
         const location = locationsData.find(loc => loc.name === classData.location);
         if (location) {
           setSelectedLocation(location);
@@ -74,7 +71,6 @@ const EditClassScreen = ({ route, navigation }) => {
         ]);
       }
     } catch (error) {
-      console.error('Error loading class data:', error);
       Alert.alert('Error', 'No se pudieron cargar los datos de la clase', [
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);
@@ -145,8 +141,6 @@ const EditClassScreen = ({ route, navigation }) => {
 
     setLoading(true);
     try {
-      // Format datetime maintaining local timezone (Argentina)
-      // Instead of toISOString(), format manually to preserve local time
       const year = dateTime.getFullYear();
       const month = String(dateTime.getMonth() + 1).padStart(2, '0');
       const day = String(dateTime.getDate()).padStart(2, '0');
@@ -171,7 +165,6 @@ const EditClassScreen = ({ route, navigation }) => {
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
     } catch (error) {
-      console.error('Error updating class:', error);
       Alert.alert('Error', 'No se pudo actualizar la clase. Por favor intentá nuevamente.');
     } finally {
       setLoading(false);
@@ -195,7 +188,6 @@ const EditClassScreen = ({ route, navigation }) => {
                 { text: 'OK', onPress: () => navigation.goBack() },
               ]);
             } catch (error) {
-              console.error('Error deleting class:', error);
               Alert.alert('Error', 'No se pudo eliminar la clase. Por favor intentá nuevamente.');
             } finally {
               setLoading(false);

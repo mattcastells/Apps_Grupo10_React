@@ -22,6 +22,7 @@ import { DISCIPLINES } from '../../utils/constants';
 import BookingCard from '../../components/BookingCard';
 import FilterSelector from '../../components/FilterSelector';
 import NotificationBell from '../../components/NotificationBell';
+import NotificationDrawer from '../../components/NotificationDrawer';
 
 const ReservationsScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
@@ -34,6 +35,7 @@ const ReservationsScreen = ({ navigation }) => {
   const [selectedLocation, setSelectedLocation] = useState('Todas');
   const [selectedDiscipline, setSelectedDiscipline] = useState('Todos');
   const [selectedDate, setSelectedDate] = useState('Todas');
+  const [showNotificationDrawer, setShowNotificationDrawer] = useState(false);
   const axiosInstance = useAxios();
   const bookingService = createBookingService(axiosInstance);
   const scheduleService = createScheduleService(axiosInstance);
@@ -46,22 +48,18 @@ const ReservationsScreen = ({ navigation }) => {
     setLoading(true);
     try {
       if (isProfessor) {
-        // Load professor's assigned classes AND their personal bookings
         const classes = await scheduleService.getClassesByProfessor(user.name);
         setProfessorClasses(classes);
 
-        // Also load professor's personal bookings (filter CONFIRMED only)
         const userBookings = await bookingService.getMyBookings();
         const confirmedBookings = userBookings.filter(booking => booking.status === 'CONFIRMED');
         setBookings(confirmedBookings);
       } else {
-        // Load user's bookings (filter CONFIRMED only)
         const data = await bookingService.getMyBookings();
         const confirmedBookings = data.filter(booking => booking.status === 'CONFIRMED');
         setBookings(confirmedBookings);
       }
     } catch (error) {
-      console.error('Error loading data:', error);
       Alert.alert('Error', isProfessor ? 'No se pudieron cargar las clases.' : 'No se pudieron cargar las reservas.');
       if (isProfessor) {
         setProfessorClasses([]);
@@ -77,7 +75,6 @@ const ReservationsScreen = ({ navigation }) => {
       const data = await locationService.getAllLocations();
       setLocations(data);
     } catch (error) {
-      console.error('Error loading locations:', error);
       setLocations([]);
     }
   }, []);
@@ -170,9 +167,8 @@ const ReservationsScreen = ({ navigation }) => {
             try {
               await bookingService.cancelBooking(bookingId);
               Alert.alert('Éxito', 'Reserva cancelada correctamente');
-              loadBookings(); // Recarga la lista para eliminar la reserva cancelada
+              loadBookings();
             } catch (error) {
-              console.error('Error cancelling booking:', error);
               Alert.alert('Error', 'No se pudo cancelar la reserva');
             }
           },
@@ -317,7 +313,11 @@ const ReservationsScreen = ({ navigation }) => {
 
   useEffect(() => {
     navigation.setOptions({
-      headerRight: () => <NotificationBell />,
+      headerRight: () => (
+        <NotificationBell 
+          onPress={() => setShowNotificationDrawer(true)} 
+        />
+      ),
     });
   }, [navigation]);
 
@@ -435,6 +435,12 @@ const ReservationsScreen = ({ navigation }) => {
           </View>
         )}
       </ScrollView>
+
+      {/* Notification Drawer */}
+      <NotificationDrawer
+        visible={showNotificationDrawer}
+        onClose={() => setShowNotificationDrawer(false)}
+      />
     </SafeAreaView>
   );
 };

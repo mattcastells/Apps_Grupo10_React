@@ -16,6 +16,7 @@ import createCheckInService from '../../services/checkInService';
 import { useAxios } from '../../hooks/useAxios';
 import { useTheme } from '../../context/ThemeContext';
 import NotificationBell from '../../components/NotificationBell';
+import NotificationDrawer from '../../components/NotificationDrawer';
 
 const ScanQRScreen = ({ navigation }) => {
   const { theme } = useTheme();
@@ -25,6 +26,7 @@ const ScanQRScreen = ({ navigation }) => {
   const [checkInData, setCheckInData] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [showNotificationDrawer, setShowNotificationDrawer] = useState(false);
   const axiosInstance = useAxios();
   const historyService = createHistoryService(axiosInstance);
 
@@ -32,6 +34,15 @@ const ScanQRScreen = ({ navigation }) => {
     requestCameraPermission();
   }, []);
 
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <NotificationBell 
+          onPress={() => setShowNotificationDrawer(true)} 
+        />
+      ),
+    });
+  }, [navigation]);
 
   const requestCameraPermission = async () => {
     const { status } = await Camera.requestCameraPermissionsAsync();
@@ -77,10 +88,8 @@ const ScanQRScreen = ({ navigation }) => {
     setShowCamera(false);
 
     try {
-      // Parse QR code data (expecting JSON with scheduledClassId)
       const qrData = JSON.parse(data);
 
-      // Validate QR format
       if (qrData.type !== 'class_checkin' || !qrData.scheduledClassId) {
         Alert.alert('Error', 'Código QR inválido');
         setScanned(false);
@@ -88,11 +97,9 @@ const ScanQRScreen = ({ navigation }) => {
         return;
       }
 
-      // Verify booking (without performing check-in)
       const checkInService = createCheckInService(axiosInstance);
       const response = await checkInService.verifyBooking(qrData.scheduledClassId);
 
-      // Show booking details for confirmation
       setCheckInData({
         scheduledClassId: qrData.scheduledClassId,
         className: response.data.className,
@@ -102,8 +109,6 @@ const ScanQRScreen = ({ navigation }) => {
         status: response.data.status,
       });
     } catch (error) {
-
-      // Handle specific error types
       const errorType = error.response?.data?.error;
       let errorMessage = 'No se pudo procesar el código QR';
 
@@ -264,6 +269,12 @@ const ScanQRScreen = ({ navigation }) => {
           </CameraView>
         </View>
       </Modal>
+
+      {/* Notification Drawer */}
+      <NotificationDrawer
+        visible={showNotificationDrawer}
+        onClose={() => setShowNotificationDrawer(false)}
+      />
     </SafeAreaView>
   );
 };

@@ -18,12 +18,14 @@ import { useFocusEffect } from '@react-navigation/native';
 import createCloudinaryService from '../../services/cloudinaryService';
 import { useAxios } from '../../hooks/useAxios';
 import NotificationBell from '../../components/NotificationBell';
+import NotificationDrawer from '../../components/NotificationDrawer';
 
 const ProfileScreen = ({ navigation }) => {
   const { user, logout, refreshUser, updateUser } = useAuth();
   const { isDarkMode, toggleTheme, theme } = useTheme();
   const [loading, setLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [showNotificationDrawer, setShowNotificationDrawer] = useState(false);
   const axiosInstance = useAxios();
   const cloudinaryService = createCloudinaryService(axiosInstance);
 
@@ -45,6 +47,15 @@ const ProfileScreen = ({ navigation }) => {
     }, [refreshUser])
   );
 
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <NotificationBell 
+          onPress={() => setShowNotificationDrawer(true)} 
+        />
+      ),
+    });
+  }, [navigation]);
 
   const handleEditProfile = () => {
     navigation.navigate('EditUser');
@@ -125,8 +136,6 @@ const ProfileScreen = ({ navigation }) => {
       return;
     }
 
-    // Debug: ver qué propiedades tiene imageData
-
     if (!imageData || !imageData.uri) {
       Alert.alert('Error', 'No se pudo obtener la imagen seleccionada');
       return;
@@ -135,26 +144,20 @@ const ProfileScreen = ({ navigation }) => {
     setUploadingPhoto(true);
 
     try {
-      // Preparar datos de la imagen (Expo format)
       const imagePayload = {
         uri: imageData.uri,
         type: imageData.mimeType || imageData.type || 'image/jpeg',
         fileName: imageData.fileName || `profile_${user.id}_${Date.now()}.jpg`,
       };
 
-
-      // Subir a Cloudinary y guardar en backend (IMPORTANTE: userId como primer parámetro)
       const result = await cloudinaryService.uploadAndSaveProfilePhoto(
         user.id,
         imagePayload
       );
 
       if (result.success) {
-        // Actualizar foto en UI inmediatamente (optimistic update)
         updateUser({ ...user, photoUrl: result.photoUrl });
-
         Alert.alert('Éxito', 'Foto de perfil actualizada correctamente');
-        // Refrescar datos del usuario para ver la nueva foto
         await refreshUser();
       }
     } catch (error) {
@@ -313,6 +316,12 @@ const ProfileScreen = ({ navigation }) => {
           textStyle={styles.logoutButtonText}
         />
       </ScrollView>
+
+      {/* Notification Drawer */}
+      <NotificationDrawer
+        visible={showNotificationDrawer}
+        onClose={() => setShowNotificationDrawer(false)}
+      />
     </SafeAreaView>
   );
 };

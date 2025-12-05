@@ -30,16 +30,12 @@ const NotificationBell = ({ onPress }) => {
       const count = await notificationService.getUnreadCount();
       setUnreadCount(count);
     } catch (error) {
-      console.error('Error loading unread count:', error);
+      // Silently fail
     }
   };
 
   return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
+    <TouchableOpacity onPress={onPress} style={styles.container} activeOpacity={0.7}>
       {/* Icono de campanita blanca */}
       <Ionicons name="notifications-outline" size={26} color="#FFFFFF" />
 
@@ -57,12 +53,12 @@ const NotificationBell = ({ onPress }) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginRight: 16,
     position: 'relative',
     width: 44,
     height: 44,
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 16,
   },
   badge: {
     position: 'absolute',

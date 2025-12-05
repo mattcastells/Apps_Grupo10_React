@@ -130,8 +130,6 @@ const EditUserScreen = ({ navigation }) => {
       return;
     }
 
-    // Debug: ver qué propiedades tiene imageData
-
     if (!imageData || !imageData.uri) {
       Alert.alert('Error', 'No se pudo obtener la imagen seleccionada');
       return;
@@ -140,26 +138,20 @@ const EditUserScreen = ({ navigation }) => {
     setUploadingPhoto(true);
 
     try {
-      // Preparar datos de la imagen (Expo format)
       const imagePayload = {
         uri: imageData.uri,
         type: imageData.mimeType || imageData.type || 'image/jpeg',
         fileName: imageData.fileName || `profile_${user.id}_${Date.now()}.jpg`,
       };
 
-
-      // Subir a Cloudinary y guardar en backend
       const result = await cloudinaryService.uploadAndSaveProfilePhoto(
         user.id,
         imagePayload
       );
 
       if (result.success) {
-        // Actualizar foto en UI inmediatamente (optimistic update)
         updateUser({ ...user, photoUrl: result.photoUrl });
-
         Alert.alert('Éxito', 'Foto de perfil actualizada correctamente');
-        // Refrescar datos del usuario desde el backend para ver la nueva foto
         await refreshUser();
       }
     } catch (error) {

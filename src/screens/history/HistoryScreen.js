@@ -16,6 +16,7 @@ import { DISCIPLINES } from '../../utils/constants';
 import BookingCard from '../../components/BookingCard';
 import FilterSelector from '../../components/FilterSelector';
 import NotificationBell from '../../components/NotificationBell';
+import NotificationDrawer from '../../components/NotificationDrawer';
 
 const HistoryScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
@@ -24,6 +25,7 @@ const HistoryScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedDiscipline, setSelectedDiscipline] = useState('Todos');
   const [selectedDate, setSelectedDate] = useState('Todas');
+  const [showNotificationDrawer, setShowNotificationDrawer] = useState(false);
   const axiosInstance = useAxios();
   const historyService = createHistoryService(axiosInstance);
 
@@ -120,6 +122,15 @@ const HistoryScreen = ({ navigation }) => {
 
   const filteredHistory = getFilteredHistory();
 
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <NotificationBell 
+          onPress={() => setShowNotificationDrawer(true)} 
+        />
+      ),
+    });
+  }, [navigation]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
@@ -155,6 +166,12 @@ const HistoryScreen = ({ navigation }) => {
           }
         />
       </View>
+
+      {/* Notification Drawer */}
+      <NotificationDrawer
+        visible={showNotificationDrawer}
+        onClose={() => setShowNotificationDrawer(false)}
+      />
     </SafeAreaView>
   );
 };

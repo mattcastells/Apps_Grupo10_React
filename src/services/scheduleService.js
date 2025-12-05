@@ -87,7 +87,6 @@ const createScheduleService = (axiosInstance) => ({
       const response = await axiosInstance.post('/schedule', classData);
       return response.data;
     } catch (error) {
-      console.error('Create scheduled class error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -97,7 +96,6 @@ const createScheduleService = (axiosInstance) => ({
       const response = await axiosInstance.put(`/schedule/${classId}`, classData);
       return response.data;
     } catch (error) {
-      console.error('Update scheduled class error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -106,7 +104,6 @@ const createScheduleService = (axiosInstance) => ({
     try {
       await axiosInstance.delete(`/schedule/${classId}`);
     } catch (error) {
-      console.error('Delete scheduled class error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -116,7 +113,6 @@ const createScheduleService = (axiosInstance) => ({
       const response = await axiosInstance.get(`/schedule/professor/${professorName}`);
       return response.data;
     } catch (error) {
-      console.error('Get classes by professor error:', error.response?.data || error.message);
       throw error;
     }
   },

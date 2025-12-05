@@ -18,6 +18,8 @@ import createLocationService from '../../services/locationService';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import NotificationBell from '../../components/NotificationBell';
+import NotificationDrawer from '../../components/NotificationDrawer';
 
 const DISCIPLINES = ['Yoga', 'Funcional', 'Spinning', 'Boxeo', 'Pilates', 'Zumba', 'CrossFit'];
 
@@ -38,6 +40,17 @@ const CreateClassScreen = ({ navigation }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showNotificationDrawer, setShowNotificationDrawer] = useState(false);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <NotificationBell 
+          onPress={() => setShowNotificationDrawer(true)} 
+        />
+      ),
+    });
+  }, [navigation]);
 
   useEffect(() => {
     loadLocations();
@@ -115,8 +128,6 @@ const CreateClassScreen = ({ navigation }) => {
 
     setLoading(true);
     try {
-      // Format datetime maintaining local timezone (Argentina)
-      // Instead of toISOString(), format manually to preserve local time
       const year = dateTime.getFullYear();
       const month = String(dateTime.getMonth() + 1).padStart(2, '0');
       const day = String(dateTime.getDate()).padStart(2, '0');
@@ -136,9 +147,7 @@ const CreateClassScreen = ({ navigation }) => {
         description: description.trim() || null,
       };
 
-      console.log('📤 Enviando datos de clase:', classData);
-      const response = await scheduleService.createScheduledClass(classData);
-      console.log('✅ Clase creada exitosamente:', response);
+      await scheduleService.createScheduledClass(classData);
       
       Alert.alert(
         'Éxito', 
@@ -153,8 +162,6 @@ const CreateClassScreen = ({ navigation }) => {
         ]
       );
     } catch (error) {
-      console.error('❌ Error creating class:', error);
-      console.error('Error details:', error.response?.data);
       Alert.alert('Error', error.response?.data?.message || 'No se pudo crear la clase. Por favor intentá nuevamente.');
     } finally {
       setLoading(false);
@@ -299,6 +306,12 @@ const CreateClassScreen = ({ navigation }) => {
           />
         </View>
       </ScrollView>
+
+      {/* Notification Drawer */}
+      <NotificationDrawer
+        visible={showNotificationDrawer}
+        onClose={() => setShowNotificationDrawer(false)}
+      />
     </SafeAreaView>
   );
 };

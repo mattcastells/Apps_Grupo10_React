@@ -20,6 +20,8 @@ import { useAxios } from '../../hooks/useAxios';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import NotificationBell from '../../components/NotificationBell';
+import NotificationDrawer from '../../components/NotificationDrawer';
 
 const HomeScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
@@ -39,6 +41,7 @@ const HomeScreen = ({ navigation }) => {
 
   // 🔐 Estado para controlar si debe mostrar el prompt biométrico
   const [showBiometricPrompt, setShowBiometricPrompt] = useState(false);
+  const [showNotificationDrawer, setShowNotificationDrawer] = useState(false);
 
   useEffect(() => {
     // Cargar ubicaciones al montar el componente
@@ -52,8 +55,18 @@ const HomeScreen = ({ navigation }) => {
       // Ya se autenticó en esta sesión, cargar clases normalmente
       loadClasses();
     }
-
   }, []);
+
+  // Separar el useEffect para configurar el header de notificaciones
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <NotificationBell 
+          onPress={() => setShowNotificationDrawer(true)} 
+        />
+      ),
+    });
+  }, [navigation]);
 
   const loadLocations = async () => {
     try {
@@ -350,6 +363,15 @@ const HomeScreen = ({ navigation }) => {
             </Text>
           </View>
         }
+      />
+
+      {/* Notification Drawer */}
+      <NotificationDrawer
+        visible={showNotificationDrawer}
+        onClose={() => setShowNotificationDrawer(false)}
+        onNotificationsRead={() => {
+          // Opcional: recargar algo si es necesario
+        }}
       />
     </SafeAreaView>
   );
