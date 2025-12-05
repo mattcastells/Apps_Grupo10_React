@@ -45,11 +45,6 @@ const ProfileScreen = ({ navigation }) => {
     }, [refreshUser])
   );
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => <NotificationBell />,
-    });
-  }, [navigation]);
 
   const handleEditProfile = () => {
     navigation.navigate('EditUser');

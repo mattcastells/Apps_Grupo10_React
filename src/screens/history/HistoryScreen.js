@@ -120,11 +120,6 @@ const HistoryScreen = ({ navigation }) => {
 
   const filteredHistory = getFilteredHistory();
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => <NotificationBell />,
-    });
-  }, [navigation]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>

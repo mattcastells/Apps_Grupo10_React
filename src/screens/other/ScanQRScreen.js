@@ -32,11 +32,6 @@ const ScanQRScreen = ({ navigation }) => {
     requestCameraPermission();
   }, []);
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => <NotificationBell />,
-    });
-  }, [navigation]);
 
   const requestCameraPermission = async () => {
     const { status } = await Camera.requestCameraPermissionsAsync();

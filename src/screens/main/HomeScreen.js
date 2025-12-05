@@ -20,7 +20,6 @@ import { useAxios } from '../../hooks/useAxios';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import NotificationBell from '../../components/NotificationBell';
 
 const HomeScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
@@ -54,10 +53,6 @@ const HomeScreen = ({ navigation }) => {
       loadClasses();
     }
 
-    // Agregar useEffect para configurar el header
-    navigation.setOptions({
-      headerRight: () => <NotificationBell />,
-    });
   }, []);
 
   const loadLocations = async () => {

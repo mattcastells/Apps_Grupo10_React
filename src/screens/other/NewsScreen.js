@@ -28,11 +28,7 @@ const NewsScreen = () => {
     loadNews();
   }, []);
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => <NotificationBell />,
-    });
-  }, [navigation]);
+
 
   const loadNews = async () => {
     setLoading(true);

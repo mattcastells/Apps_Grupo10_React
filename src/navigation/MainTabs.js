@@ -24,61 +24,45 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 // Home Stack
-const HomeStack = () => {
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [refreshBell, setRefreshBell] = useState(0);
-
-  const handleNotificationsRead = () => {
-    // Trigger a refresh of the NotificationBell by incrementing the key
-    setRefreshBell(prev => prev + 1);
-  };
-
+const HomeStack = ({ setShowNotifications, refreshBell }) => {
   return (
-    <>
-      <Stack.Navigator
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: '#F26A3E',
-            height: 100,
-          },
-          headerTintColor: '#FFFFFF',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-            fontSize: 20,
-          },
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: '#F26A3E',
+          height: 100,
+        },
+        headerTintColor: '#FFFFFF',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+          fontSize: 20,
+        },
+      }}
+    >
+      <Stack.Screen
+        name="HomeScreen"
+        component={HomeScreen}
+        options={{
+          title: 'Clases',
+          headerRight: () => (
+            <NotificationBell
+              key={refreshBell}
+              onPress={() => setShowNotifications(true)}
+            />
+          ),
         }}
-      >
-        <Stack.Screen
-          name="HomeScreen"
-          component={HomeScreen}
-          options={{
-            title: 'Clases',
-            headerRight: () => (
-              <NotificationBell
-                key={refreshBell}
-                onPress={() => setShowNotifications(true)}
-              />
-            ),
-          }}
-        />
-        <Stack.Screen
-          name="ClassDetail"
-          component={ClassDetailScreen}
-          options={{ title: 'Detalle de Clase' }}
-        />
-        <Stack.Screen
-          name="ClassChangeConfirmation"
-          component={ClassChangeConfirmationScreen}
-          options={{ title: 'Confirmar Cambio de Clase' }}
-        />
-      </Stack.Navigator>
-
-      <NotificationDrawer
-        visible={showNotifications}
-        onClose={() => setShowNotifications(false)}
-        onNotificationsRead={handleNotificationsRead}
       />
-    </>
+      <Stack.Screen
+        name="ClassDetail"
+        component={ClassDetailScreen}
+        options={{ title: 'Detalle de Clase' }}
+      />
+      <Stack.Screen
+        name="ClassChangeConfirmation"
+        component={ClassChangeConfirmationScreen}
+        options={{ title: 'Confirmar Cambio de Clase' }}
+      />
+    </Stack.Navigator>
   );
 };
 
@@ -232,49 +216,66 @@ const MainTabs = () => {
   const { theme } = useTheme();
   const { user } = useAuth();
   const isProfessor = user?.role === 'PROFESSOR';
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [refreshBell, setRefreshBell] = useState(0);
+
+  const handleNotificationsRead = () => {
+    // Trigger a refresh of the NotificationBell by incrementing the key
+    setRefreshBell(prev => prev + 1);
+  };
   
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
+    <>
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName;
 
-          if (route.name === 'Home') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Scan') {
-            iconName = focused ? 'qr-code' : 'qr-code-outline';
-          } else if (route.name === 'Reservations') {
-            iconName = focused ? 'calendar' : 'calendar-outline';
-          } else if (route.name === 'History') {
-            iconName = focused ? 'time' : 'time-outline';
-          } else if (route.name === 'News') {
-            iconName = focused ? 'newspaper' : 'newspaper-outline';
-          } else if (route.name === 'Profile') {
-            iconName = focused ? 'person' : 'person-outline';
-          }
+            if (route.name === 'Home') {
+              iconName = focused ? 'home' : 'home-outline';
+            } else if (route.name === 'Scan') {
+              iconName = focused ? 'qr-code' : 'qr-code-outline';
+            } else if (route.name === 'Reservations') {
+              iconName = focused ? 'calendar' : 'calendar-outline';
+            } else if (route.name === 'History') {
+              iconName = focused ? 'time' : 'time-outline';
+            } else if (route.name === 'News') {
+              iconName = focused ? 'newspaper' : 'newspaper-outline';
+            } else if (route.name === 'Profile') {
+              iconName = focused ? 'person' : 'person-outline';
+            }
 
-          return <Ionicons name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: theme.tabActive,
-        tabBarInactiveTintColor: theme.tabInactive,
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: theme.card,
-          borderTopColor: theme.border,
-        },
-      })}
-    >
-      <Tab.Screen name="Home" component={HomeStack} options={{ title: 'Clases' }} />
-      <Tab.Screen name="Scan" component={ScanStack} options={{ title: 'Escanear' }} />
-      <Tab.Screen 
-        name="Reservations" 
-        component={ReservationsStack} 
-        options={{ title: isProfessor ? 'Mis Clases' : 'Reservas' }} 
+            return <Ionicons name={iconName} size={size} color={color} />;
+          },
+          tabBarActiveTintColor: theme.tabActive,
+          tabBarInactiveTintColor: theme.tabInactive,
+          headerShown: false,
+          tabBarStyle: {
+            backgroundColor: theme.card,
+            borderTopColor: theme.border,
+          },
+        })}
+      >
+        <Tab.Screen name="Home" options={{ title: 'Clases' }}>
+          {() => <HomeStack setShowNotifications={setShowNotifications} refreshBell={refreshBell} />}
+        </Tab.Screen>
+        <Tab.Screen name="Scan" component={ScanStack} options={{ title: 'Escanear' }} />
+        <Tab.Screen 
+          name="Reservations" 
+          component={ReservationsStack} 
+          options={{ title: isProfessor ? 'Mis Clases' : 'Reservas' }} 
+        />
+        <Tab.Screen name="History" component={HistoryStack} options={{ title: 'Historial' }} />
+        <Tab.Screen name="News" component={NewsStack} options={{ title: 'Noticias' }} />
+        <Tab.Screen name="Profile" component={ProfileStack} options={{ title: 'Perfil' }} />
+      </Tab.Navigator>
+
+      <NotificationDrawer
+        visible={showNotifications}
+        onClose={() => setShowNotifications(false)}
+        onNotificationsRead={handleNotificationsRead}
       />
-      <Tab.Screen name="History" component={HistoryStack} options={{ title: 'Historial' }} />
-      <Tab.Screen name="News" component={NewsStack} options={{ title: 'Noticias' }} />
-      <Tab.Screen name="Profile" component={ProfileStack} options={{ title: 'Perfil' }} />
-    </Tab.Navigator>
+    </>
   );
 };
 
