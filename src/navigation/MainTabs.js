@@ -18,6 +18,7 @@ import ProfileScreen from '../screens/profile/ProfileScreen';
 import EditUserScreen from '../screens/profile/EditUserScreen';
 import NotificationBell from '../components/NotificationBell';
 import NotificationDrawer from '../components/NotificationDrawer';
+import ClassChangeConfirmationScreen from '../screens/other/ClassChangeConfirmationScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -64,6 +65,11 @@ const HomeStack = () => {
           name="ClassDetail"
           component={ClassDetailScreen}
           options={{ title: 'Detalle de Clase' }}
+        />
+        <Stack.Screen
+          name="ClassChangeConfirmation"
+          component={ClassChangeConfirmationScreen}
+          options={{ title: 'Confirmar Cambio de Clase' }}
         />
       </Stack.Navigator>
 
