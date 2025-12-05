@@ -40,7 +40,6 @@ const ClassChangeConfirmationScreen = () => {
       if (notification.bookingId) {
         await bookingService.cancelBooking(notification.bookingId);
       }
-      await notificationService.markAsRead(notification.id);
       Alert.alert('Cambio Rechazado', 'Has rechazado el cambio y la reserva ha sido cancelada.');
       navigation.goBack();
     } catch (error) {
