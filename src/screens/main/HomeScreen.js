@@ -85,7 +85,6 @@ const HomeScreen = ({ navigation }) => {
       // Cargar la próxima clase confirmada
       try {
         const bookings = await bookingService.getMyBookings();
-        console.log('📋 Total bookings:', bookings.length);
 
         const now = new Date();
         const confirmedBookings = bookings.filter((booking) => {
@@ -93,14 +92,11 @@ const HomeScreen = ({ navigation }) => {
           return booking.status === 'CONFIRMED' && classDate > now;
         });
 
-        console.log('✅ Confirmed future bookings:', confirmedBookings.length);
-
         if (confirmedBookings.length > 0) {
           // Ordenar por fecha y tomar la más cercana
           confirmedBookings.sort((a, b) =>
             new Date(a.classDateTime) - new Date(b.classDateTime)
           );
-          console.log('🎯 Next class:', confirmedBookings[0]);
 
           // Mapear la estructura del backend a lo que espera el componente
           setNextClass({
@@ -111,11 +107,9 @@ const HomeScreen = ({ navigation }) => {
             durationMinutes: confirmedBookings[0].durationMinutes,
           });
         } else {
-          console.log('❌ No confirmed future bookings found');
           setNextClass(null);
         }
       } catch (error) {
-        console.error('❌ Error loading next class:', error);
         // No es crítico, continuar sin próxima clase
         setNextClass(null);
       }

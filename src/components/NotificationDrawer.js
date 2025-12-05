@@ -55,18 +55,15 @@ const NotificationDrawer = ({ visible, onClose, onNotificationsRead }) => {
       const data = await notificationService.getSentNotifications();
       setNotifications(data);
     } catch (error) {
-      console.error('Error loading notifications:', error);
+      // Error loading notifications
     } finally {
       setLoading(false);
     }
   };
 
   const handleNotificationPress = async (notification) => {
-    console.log('🔔 Notification pressed from drawer:', notification);
-
     // Si la notificación es un recordatorio, navegar al detalle de la clase
     if (notification.type === 'BOOKING_REMINDER' && notification.scheduledClassId) {
-      console.log('✅ BOOKING_REMINDER detected, navigating to ClassDetail:', notification.scheduledClassId);
       navigation.navigate('Home', {
         screen: 'ClassDetail',
         params: { classId: notification.scheduledClassId },
@@ -81,7 +78,7 @@ const NotificationDrawer = ({ visible, onClose, onNotificationsRead }) => {
             onNotificationsRead();
           }
         } catch (error) {
-          console.error('Error marking notification as read:', error);
+          // Error marking notification as read
         }
       }
       return;
@@ -107,7 +104,7 @@ const NotificationDrawer = ({ visible, onClose, onNotificationsRead }) => {
           onNotificationsRead();
         }
       } catch (error) {
-        console.error('Error marking notification as read:', error);
+        // Error marking notification as read
       }
     }
   };

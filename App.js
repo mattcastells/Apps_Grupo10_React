@@ -44,7 +44,6 @@ export default function App() {
         // Request notification permissions
         const { status } = await Notifications.requestPermissionsAsync();
         if (status !== 'granted') {
-          console.log('Notification permissions not granted');
           return;
         }
 
@@ -68,12 +67,9 @@ export default function App() {
           await BackgroundTask.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK, {
             intervalMinutes: 15, // Minimum interval is 15 minutes
           });
-          console.log('✅ Background task registered successfully');
-        } else {
-          console.log('ℹ️ Background task already registered');
         }
       } catch (error) {
-        console.error('Error setting up notifications/background task:', error);
+        // Error setting up notifications/background task
       }
     };
 
@@ -82,46 +78,22 @@ export default function App() {
     // Handle notification tap when app is running or in background
     const notificationResponseListener = Notifications.addNotificationResponseReceivedListener(
       (response) => {
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.log('📱 NOTIFICATION TAPPED - Full response:', JSON.stringify(response, null, 2));
-
         const data = response.notification.request.content.data;
-        console.log('📦 Notification data:', JSON.stringify(data, null, 2));
-        console.log('🔍 Data type:', data?.type);
-        console.log('🔍 scheduledClassId:', data?.scheduledClassId);
-        console.log('🔍 bookingId:', data?.bookingId);
 
         // Handle BOOKING_REMINDER notifications
         if (data.type === 'BOOKING_REMINDER' && data.scheduledClassId) {
-          console.log('✅ Condition met: BOOKING_REMINDER with scheduledClassId');
-          console.log('🧭 navigationRef.current:', navigationRef.current);
-          console.log('🧭 navigationRef.current.isReady():', navigationRef.current?.isReady());
-
           // Navigate to ClassDetail screen
           if (navigationRef.current?.isReady()) {
-            console.log('🚀 Attempting navigation to ClassDetail with classId:', data.scheduledClassId);
             try {
               navigationRef.current.navigate('Home', {
                 screen: 'ClassDetail',
                 params: { classId: data.scheduledClassId },
               });
-              console.log('✅ Navigation command executed');
             } catch (error) {
-              console.error('❌ Navigation error:', error);
+              // Navigation error
             }
-          } else {
-            console.warn('⚠️ Navigation not ready!');
-          }
-        } else {
-          console.log('❌ Condition NOT met');
-          if (data.type !== 'BOOKING_REMINDER') {
-            console.log('  → Wrong type:', data.type);
-          }
-          if (!data.scheduledClassId) {
-            console.log('  → Missing scheduledClassId');
           }
         }
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       }
     );
 

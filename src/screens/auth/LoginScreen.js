@@ -100,7 +100,6 @@ const LoginScreen = ({ navigation }) => {
       Alert.alert('Código enviado', 'Se ha enviado un código de verificación a tu email.');
     } catch (error) {
       // Si falla, mostrar error específico
-      console.error('Error al enviar OTP desde verificar cuenta:', error);
       Alert.alert(
         'Error',
         error.response?.data?.message || 'No se pudo enviar el código. Verifica que el email esté registrado.'

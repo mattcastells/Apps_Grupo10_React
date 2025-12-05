@@ -7,7 +7,6 @@ const createRatingService = (axiosInstance) => ({
       });
       return response.data;
     } catch (error) {
-      console.error('Create rating error:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -20,7 +19,6 @@ const createRatingService = (axiosInstance) => ({
       if (error.response?.status === 404) {
         return null; // No rating found
       }
-      console.error('Get rating error:', error.response?.data || error.message);
       throw error;
     }
   },

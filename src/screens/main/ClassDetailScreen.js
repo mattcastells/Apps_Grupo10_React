@@ -42,7 +42,6 @@ const ClassDetailScreen = ({ route, navigation }) => {
     setLoading(true);
     try {
       const data = await scheduleService.getClassDetail(classId);
-      console.log('📋 ClassDetail data:', JSON.stringify(data, null, 2));
       setClassDetail(data);
     } catch (error) {
       Alert.alert('Error', 'No se pudo cargar la información de la clase', [

@@ -15,7 +15,6 @@ const createNotificationService = (axiosInstance) => ({
       const response = await axiosInstance.get('/notifications');
       return response.data;
     } catch (error) {
-      console.error('Error fetching notifications:', error);
       throw error;
     }
   },
@@ -28,7 +27,6 @@ const createNotificationService = (axiosInstance) => ({
       const response = await axiosInstance.get('/notifications/sent');
       return response.data;
     } catch (error) {
-      console.error('Error fetching sent notifications:', error);
       throw error;
     }
   },
@@ -41,7 +39,6 @@ const createNotificationService = (axiosInstance) => ({
       const response = await axiosInstance.get('/notifications/unread-count');
       return response.data.count;
     } catch (error) {
-      console.error('Error fetching unread count:', error);
       return 0;
     }
   },
@@ -54,7 +51,6 @@ const createNotificationService = (axiosInstance) => ({
       const response = await axiosInstance.put(`/notifications/${notificationId}/read`);
       return response.data;
     } catch (error) {
-      console.error('Error marking notification as read:', error);
       throw error;
     }
   },
@@ -73,7 +69,6 @@ const createNotificationService = (axiosInstance) => ({
       }
 
       if (finalStatus !== 'granted') {
-        console.log('Notification permissions not granted');
         return false;
       }
 
@@ -90,7 +85,6 @@ const createNotificationService = (axiosInstance) => ({
 
       return true;
     } catch (error) {
-      console.error('Error requesting notification permissions:', error);
       return false;
     }
   },
@@ -115,7 +109,7 @@ const createNotificationService = (axiosInstance) => ({
         trigger: null, // Show immediately
       });
     } catch (error) {
-      console.error('Error showing local notification:', error);
+      // Error showing local notification
     }
   },
 
@@ -133,8 +127,6 @@ const createNotificationService = (axiosInstance) => ({
       const response = await axiosInstance.get('/notifications/sent');
       const sentNotifications = response.data;
 
-      console.log(`📬 Found ${sentNotifications.length} notifications to display`);
-
       // Mostrar cada notificación localmente
       for (const notification of sentNotifications) {
         await createNotificationService(axiosInstance).showLocalNotification(notification);
@@ -142,7 +134,6 @@ const createNotificationService = (axiosInstance) => ({
 
       return sentNotifications.length;
     } catch (error) {
-      console.error('Error processing pending notifications:', error);
       return 0;
     }
   },

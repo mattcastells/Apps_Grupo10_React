@@ -61,7 +61,6 @@ const CreateClassScreen = ({ navigation }) => {
       const data = await locationService.getAllLocations();
       setLocations(data);
     } catch (error) {
-      console.error('Error loading locations:', error);
       Alert.alert('Error', 'No se pudieron cargar las sedes.');
     }
   };

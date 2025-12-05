@@ -26,7 +26,6 @@ const ClassChangeConfirmationScreen = () => {
       Alert.alert('Cambio Aceptado', 'Has aceptado el cambio de la clase.');
       navigation.goBack();
     } catch (error) {
-      console.error('Error al aceptar el cambio:', error);
       Alert.alert('Error', 'No se pudo procesar tu solicitud.');
     } finally {
       setLoading(false);
@@ -43,7 +42,6 @@ const ClassChangeConfirmationScreen = () => {
       Alert.alert('Cambio Rechazado', 'Has rechazado el cambio y la reserva ha sido cancelada.');
       navigation.goBack();
     } catch (error) {
-      console.error('Error al rechazar el cambio:', error);
       Alert.alert('Error', 'No se pudo procesar tu solicitud.');
     } finally {
       setLoading(false);
