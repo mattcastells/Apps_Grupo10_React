@@ -12,6 +12,8 @@ import {
 import { useTheme } from '../../context/ThemeContext';
 import { useAxios } from '../../hooks/useAxios';
 import createNewsService from '../../services/newsService';
+import NotificationBell from '../../components/NotificationBell';
+import { useNavigation } from '@react-navigation/native';
 
 const NewsScreen = () => {
   const { theme } = useTheme();
@@ -20,10 +22,17 @@ const NewsScreen = () => {
   const [loading, setLoading] = useState(false);
   const axiosInstance = useAxios();
   const newsService = createNewsService(axiosInstance);
+  const navigation = useNavigation(); // Importar desde @react-navigation/native
 
   useEffect(() => {
     loadNews();
   }, []);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <NotificationBell />,
+    });
+  }, [navigation]);
 
   const loadNews = async () => {
     setLoading(true);

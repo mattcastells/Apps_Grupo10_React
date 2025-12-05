@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -17,6 +17,7 @@ import Button from '../../components/Button';
 import { useFocusEffect } from '@react-navigation/native';
 import createCloudinaryService from '../../services/cloudinaryService';
 import { useAxios } from '../../hooks/useAxios';
+import NotificationBell from '../../components/NotificationBell';
 
 const ProfileScreen = ({ navigation }) => {
   const { user, logout, refreshUser, updateUser } = useAuth();
@@ -43,6 +44,12 @@ const ProfileScreen = ({ navigation }) => {
       loadData();
     }, [refreshUser])
   );
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <NotificationBell />,
+    });
+  }, [navigation]);
 
   const handleEditProfile = () => {
     navigation.navigate('EditUser');

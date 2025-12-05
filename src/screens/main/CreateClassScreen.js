@@ -115,8 +115,16 @@ const CreateClassScreen = ({ navigation }) => {
 
     setLoading(true);
     try {
-      // Format datetime to ISO string without milliseconds
-      const formattedDateTime = dateTime.toISOString().split('.')[0];
+      // Format datetime maintaining local timezone (Argentina)
+      // Instead of toISOString(), format manually to preserve local time
+      const year = dateTime.getFullYear();
+      const month = String(dateTime.getMonth() + 1).padStart(2, '0');
+      const day = String(dateTime.getDate()).padStart(2, '0');
+      const hours = String(dateTime.getHours()).padStart(2, '0');
+      const minutes = String(dateTime.getMinutes()).padStart(2, '0');
+      const seconds = '00';
+      
+      const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 
       const classData = {
         discipline: discipline,
@@ -125,7 +133,7 @@ const CreateClassScreen = ({ navigation }) => {
         capacity: parseInt(capacity),
         locationId: selectedLocation.id,
         dateTime: formattedDateTime,
-        description: description.trim() || null, // Enviar null si está vacío
+        description: description.trim() || null,
       };
 
       console.log('📤 Enviando datos de clase:', classData);
@@ -139,7 +147,6 @@ const CreateClassScreen = ({ navigation }) => {
           { 
             text: 'OK', 
             onPress: () => {
-              // Navegar hacia atrás para que se recarguen las clases
               navigation.goBack();
             }
           },

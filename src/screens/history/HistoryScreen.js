@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useContext } from 'react';
+import React, { useState, useCallback, useContext, useEffect } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { DISCIPLINES } from '../../utils/constants';
 import BookingCard from '../../components/BookingCard';
 import FilterSelector from '../../components/FilterSelector';
+import NotificationBell from '../../components/NotificationBell';
 
 const HistoryScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
@@ -118,6 +119,12 @@ const HistoryScreen = ({ navigation }) => {
   );
 
   const filteredHistory = getFilteredHistory();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <NotificationBell />,
+    });
+  }, [navigation]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>

@@ -15,6 +15,7 @@ import createHistoryService from '../../services/historyService';
 import createCheckInService from '../../services/checkInService';
 import { useAxios } from '../../hooks/useAxios';
 import { useTheme } from '../../context/ThemeContext';
+import NotificationBell from '../../components/NotificationBell';
 
 const ScanQRScreen = ({ navigation }) => {
   const { theme } = useTheme();
@@ -30,6 +31,12 @@ const ScanQRScreen = ({ navigation }) => {
   useEffect(() => {
     requestCameraPermission();
   }, []);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <NotificationBell />,
+    });
+  }, [navigation]);
 
   const requestCameraPermission = async () => {
     const { status } = await Camera.requestCameraPermissionsAsync();

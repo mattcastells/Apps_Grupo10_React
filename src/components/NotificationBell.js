@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import { useAxios } from '../hooks/useAxios';
 import createNotificationService from '../services/notificationService';
@@ -8,7 +9,8 @@ import createNotificationService from '../services/notificationService';
 /**
  * Componente de campanita de notificaciones con badge contador
  */
-const NotificationBell = ({ onPress }) => {
+const NotificationBell = () => {
+  const navigation = useNavigation();
   const { theme } = useTheme();
   const axiosInstance = useAxios();
   const notificationService = createNotificationService(axiosInstance);
@@ -34,8 +36,16 @@ const NotificationBell = ({ onPress }) => {
     }
   };
 
+  const handlePress = () => {
+    navigation.navigate('Notifications');
+  };
+
   return (
-    <TouchableOpacity onPress={onPress} style={styles.container}>
+    <TouchableOpacity
+      style={styles.container}
+      onPress={handlePress}
+      activeOpacity={0.7}
+    >
       {/* Icono de campanita blanca */}
       <Ionicons name="notifications-outline" size={26} color="#FFFFFF" />
 
@@ -53,12 +63,12 @@ const NotificationBell = ({ onPress }) => {
 
 const styles = StyleSheet.create({
   container: {
+    marginRight: 16,
     position: 'relative',
     width: 44,
     height: 44,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 4,
   },
   badge: {
     position: 'absolute',
