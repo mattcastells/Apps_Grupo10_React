@@ -60,6 +60,7 @@ TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async () => {
             data: {
               notificationId: notification.id,
               bookingId: notification.bookingId,
+              scheduledClassId: notification.scheduledClassId,
               type: notification.type,
             },
             sound: 'default',
