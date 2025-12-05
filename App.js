@@ -82,21 +82,46 @@ export default function App() {
     // Handle notification tap when app is running or in background
     const notificationResponseListener = Notifications.addNotificationResponseReceivedListener(
       (response) => {
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('📱 NOTIFICATION TAPPED - Full response:', JSON.stringify(response, null, 2));
+
         const data = response.notification.request.content.data;
-        console.log('📱 Notification tapped:', data);
+        console.log('📦 Notification data:', JSON.stringify(data, null, 2));
+        console.log('🔍 Data type:', data?.type);
+        console.log('🔍 scheduledClassId:', data?.scheduledClassId);
+        console.log('🔍 bookingId:', data?.bookingId);
 
         // Handle BOOKING_REMINDER notifications
         if (data.type === 'BOOKING_REMINDER' && data.scheduledClassId) {
-          console.log('🔔 Navigating to class detail:', data.scheduledClassId);
+          console.log('✅ Condition met: BOOKING_REMINDER with scheduledClassId');
+          console.log('🧭 navigationRef.current:', navigationRef.current);
+          console.log('🧭 navigationRef.current.isReady():', navigationRef.current?.isReady());
 
           // Navigate to ClassDetail screen
           if (navigationRef.current?.isReady()) {
-            navigationRef.current.navigate('Home', {
-              screen: 'ClassDetail',
-              params: { classId: data.scheduledClassId },
-            });
+            console.log('🚀 Attempting navigation to ClassDetail with classId:', data.scheduledClassId);
+            try {
+              navigationRef.current.navigate('Home', {
+                screen: 'ClassDetail',
+                params: { classId: data.scheduledClassId },
+              });
+              console.log('✅ Navigation command executed');
+            } catch (error) {
+              console.error('❌ Navigation error:', error);
+            }
+          } else {
+            console.warn('⚠️ Navigation not ready!');
+          }
+        } else {
+          console.log('❌ Condition NOT met');
+          if (data.type !== 'BOOKING_REMINDER') {
+            console.log('  → Wrong type:', data.type);
+          }
+          if (!data.scheduledClassId) {
+            console.log('  → Missing scheduledClassId');
           }
         }
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       }
     );
 
