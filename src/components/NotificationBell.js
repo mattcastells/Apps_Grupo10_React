@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import { useAxios } from '../hooks/useAxios';
 import createNotificationService from '../services/notificationService';
@@ -9,8 +8,7 @@ import createNotificationService from '../services/notificationService';
 /**
  * Componente de campanita de notificaciones con badge contador
  */
-const NotificationBell = () => {
-  const navigation = useNavigation();
+const NotificationBell = ({ onPress }) => {
   const { theme } = useTheme();
   const axiosInstance = useAxios();
   const notificationService = createNotificationService(axiosInstance);
@@ -36,14 +34,10 @@ const NotificationBell = () => {
     }
   };
 
-  const handlePress = () => {
-    navigation.navigate('Notifications');
-  };
-
   return (
     <TouchableOpacity
       style={styles.container}
-      onPress={handlePress}
+      onPress={onPress}
       activeOpacity={0.7}
     >
       {/* Icono de campanita blanca */}
