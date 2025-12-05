@@ -13,6 +13,7 @@ import {
 import { useTheme } from '../context/ThemeContext';
 import { useAxios } from '../hooks/useAxios';
 import createNotificationService from '../services/notificationService';
+import { useNavigation } from '@react-navigation/native';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -22,6 +23,7 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const NotificationDrawer = ({ visible, onClose, onNotificationsRead }) => {
   const { theme, isDarkMode } = useTheme();
   const axiosInstance = useAxios();
+  const navigation = useNavigation();
   const notificationService = createNotificationService(axiosInstance);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -50,32 +52,32 @@ const NotificationDrawer = ({ visible, onClose, onNotificationsRead }) => {
   const loadNotifications = async () => {
     setLoading(true);
     try {
-      // Obtener SOLO las notificaciones ENVIADAS (que el scheduler ya procesó)
-      // NO mostramos las PENDIENTE (aún no llegó su scheduledFor)
       const data = await notificationService.getSentNotifications();
       setNotifications(data);
     } catch (error) {
       console.error('Error loading notifications:', error);
-      console.error('Error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        url: error.config?.url,
-        baseURL: error.config?.baseURL,
-      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleNotificationPress = async (notification) => {
-    // Marcar como leída si está en estado ENVIADA
+    // Si la notificación es un cambio de clase, navegar a la pantalla de confirmación
+    if (notification.type === 'CLASS_CHANGED') {
+      // Navegación anidada: Ir a la PESTAÑA 'Home', y DENTRO de ella, a la PANTALLA 'ClassChangeConfirmation'
+      navigation.navigate('Home', {
+        screen: 'ClassChangeConfirmation',
+        params: { notification },
+      });
+      onClose(); // Cerrar el drawer de notificaciones
+      return;
+    }
+
+    // Comportamiento por defecto: marcar como leída
     if (notification.status === 'ENVIADA') {
       try {
         await notificationService.markAsRead(notification.id);
-        // Recargar lista
         await loadNotifications();
-        // Notificar al padre para actualizar el contador
         if (onNotificationsRead) {
           onNotificationsRead();
         }
