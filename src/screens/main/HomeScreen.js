@@ -34,6 +34,7 @@ const HomeScreen = ({ navigation }) => {
   const [selectedDiscipline, setSelectedDiscipline] = useState('Todos');
   const [selectedLocation, setSelectedLocation] = useState('Todas');
   const [selectedDate, setSelectedDate] = useState('Todas');
+  const [nextClass, setNextClass] = useState(null);
   const axiosInstance = useAxios();
   const scheduleService = createScheduleService(axiosInstance);
   const bookingService = createBookingService(axiosInstance);
@@ -92,6 +93,44 @@ const HomeScreen = ({ navigation }) => {
       } catch (error) {
         // No es crítico, continuar sin marcar clases
         setBookedClassIds([]);
+      }
+
+      // Cargar la próxima clase confirmada
+      try {
+        const bookings = await bookingService.getMyBookings();
+        console.log('📋 Total bookings:', bookings.length);
+
+        const now = new Date();
+        const confirmedBookings = bookings.filter((booking) => {
+          const classDate = new Date(booking.classDateTime);
+          return booking.status === 'CONFIRMED' && classDate > now;
+        });
+
+        console.log('✅ Confirmed future bookings:', confirmedBookings.length);
+
+        if (confirmedBookings.length > 0) {
+          // Ordenar por fecha y tomar la más cercana
+          confirmedBookings.sort((a, b) =>
+            new Date(a.classDateTime) - new Date(b.classDateTime)
+          );
+          console.log('🎯 Next class:', confirmedBookings[0]);
+
+          // Mapear la estructura del backend a lo que espera el componente
+          setNextClass({
+            discipline: confirmedBookings[0].className,
+            dateTime: confirmedBookings[0].classDateTime,
+            location: confirmedBookings[0].location,
+            professor: confirmedBookings[0].professor,
+            durationMinutes: confirmedBookings[0].durationMinutes,
+          });
+        } else {
+          console.log('❌ No confirmed future bookings found');
+          setNextClass(null);
+        }
+      } catch (error) {
+        console.error('❌ Error loading next class:', error);
+        // No es crítico, continuar sin próxima clase
+        setNextClass(null);
       }
     } catch (error) {
       Alert.alert('Error', 'No se pudieron cargar las clases. Por favor intenta nuevamente.');
@@ -318,17 +357,60 @@ const HomeScreen = ({ navigation }) => {
               Tu espacio para entrenar, reservar clases y mantenerte informado.
             </Text>
 
-            <Card style={[styles.featuredCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
-              <View style={styles.featuredCardContent}>
-                <View style={styles.featuredIcon}>
-                  <Text style={styles.featuredIconText}>📅</Text>
-                </View>
-                <View style={styles.featuredTextContainer}>
-                  <Text style={[styles.featuredTitle, { color: theme.primary }]}>Próxima clase: Yoga - 10:00</Text>
-                  <Text style={[styles.featuredSubtitle, { color: theme.textSecondary }]}>¡No olvides tu clase!</Text>
-                </View>
-              </View>
-            </Card>
+            {nextClass && (() => {
+              const now = new Date();
+              const classDate = new Date(nextClass.dateTime);
+
+              // Comparar solo las fechas (sin hora) para evitar problemas de UTC
+              const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+              const classDay = new Date(classDate.getFullYear(), classDate.getMonth(), classDate.getDate());
+
+              const diffTime = classDay - today;
+              const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+              let headerText = '';
+              if (diffDays === 0) {
+                headerText = '¡Hoy tienes clase!';
+              } else if (diffDays === 1) {
+                headerText = '¡Mañana tienes clase!';
+              } else {
+                headerText = `Próxima clase en ${diffDays} días`;
+              }
+
+              return (
+                <Card style={[styles.featuredCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
+                  <View style={[styles.featuredCardHeader, { backgroundColor: theme.primary }]}>
+                    <Text style={styles.featuredCardBadge}>{headerText}</Text>
+                  </View>
+                  <View style={styles.featuredCardBody}>
+                    <Text style={[styles.featuredClassName, { color: theme.primary }]}>{nextClass.discipline}</Text>
+                    <View style={[styles.featuredInfoRow, { backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(242, 106, 62, 0.08)' }]}>
+                      <Text style={styles.featuredInfoIcon}>🕒</Text>
+                      <Text style={[styles.featuredInfoText, { color: theme.text }]}>
+                        {new Date(nextClass.dateTime).toLocaleDateString('es-AR', {
+                          weekday: 'short',
+                          day: 'numeric',
+                          month: 'short'
+                        }).replace(/^\w/, (c) => c.toUpperCase())} • {
+                          new Date(nextClass.dateTime).toLocaleTimeString('es-AR', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })
+                        }
+                      </Text>
+                    </View>
+                    <View style={[styles.featuredInfoRow, { backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(242, 106, 62, 0.08)' }]}>
+                      <Text style={styles.featuredInfoIcon}>📍</Text>
+                      <Text style={[styles.featuredInfoText, { color: theme.text }]}>{nextClass.location}</Text>
+                    </View>
+                    <View style={[styles.featuredInfoRow, { backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(242, 106, 62, 0.08)' }]}>
+                      <Text style={styles.featuredInfoIcon}>👤</Text>
+                      <Text style={[styles.featuredInfoText, { color: theme.text }]}>{nextClass.professor}</Text>
+                    </View>
+                  </View>
+                </Card>
+              );
+            })()}
 
             <Text style={[styles.catalogTitle, { color: theme.primary }]}>Catálogo de Clases y Turnos</Text>
 
@@ -443,36 +525,48 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    padding: 20,
+    padding: 0,
     marginTop: 20,
     marginBottom: 20,
-    minHeight: 80,
+    overflow: 'hidden',
   },
-  featuredCardContent: {
+  featuredCardHeader: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  featuredCardBadge: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  featuredCardBody: {
+    padding: 20,
+  },
+  featuredClassName: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  featuredInfoRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 8,
   },
-  featuredIcon: {
-    width: 40,
-    height: 40,
-    marginRight: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
+  featuredInfoIcon: {
+    fontSize: 18,
+    marginRight: 12,
   },
-  featuredIconText: {
-    fontSize: 32,
-  },
-  featuredTextContainer: {
+  featuredInfoText: {
+    fontSize: 15,
+    fontWeight: '600',
     flex: 1,
-  },
-  featuredTitle: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    marginBottom: 6,
-    lineHeight: 22,
-  },
-  featuredSubtitle: {
-    fontSize: 14,
   },
   catalogTitle: {
     fontSize: 22,
