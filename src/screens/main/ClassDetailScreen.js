@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,9 @@ import {
   TouchableOpacity,
   Alert,
   Linking,
+  Animated,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { COLORS } from '../../utils/constants';
 import createScheduleService from '../../services/scheduleService';
 import createBookingService from '../../services/bookingService';
@@ -27,6 +29,9 @@ const ClassDetailScreen = ({ route, navigation }) => {
   const axiosInstance = useAxios();
   const scheduleService = createScheduleService(axiosInstance);
   const bookingService = createBookingService(axiosInstance);
+
+  // Animated value for button scale
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     loadClassDetail();
@@ -109,6 +114,26 @@ const ClassDetailScreen = ({ route, navigation }) => {
     Linking.openURL(url);
   };
 
+  // Funciones de animación para el botón
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.95,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      friction: 3,
+      tension: 40,
+      useNativeDriver: true,
+    }).start();
+
+    // Vibración háptica
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  };
+
   if (!classDetail) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
@@ -176,26 +201,30 @@ const ClassDetailScreen = ({ route, navigation }) => {
         {(() => {
           const isOwnClass = classDetail?.professor && user?.name && classDetail.professor === user.name;
           const isDisabled = loading || isBooked || classDetail?.availableSlots === 0 || isOwnClass;
-          
+
           return (
-            <TouchableOpacity
-              style={[
-                styles.reserveButton,
-                { backgroundColor: isBooked ? theme.success : isOwnClass ? theme.textSecondary : theme.primary },
-                (isBooked || isOwnClass) && styles.bookedButton
-              ]}
-              onPress={handleBookClass}
-              disabled={isDisabled}
-              activeOpacity={isDisabled ? 1 : 0.7}
-            >
-              <Text style={styles.reserveButtonText}>
-                {loading ? 'Reservando...' : 
-                 isBooked ? '✓ Clase reservada' : 
-                 isOwnClass ? 'Tu clase' :
-                 classDetail?.availableSlots === 0 ? 'Sin cupos disponibles' : 
-                 'Reservar'}
-              </Text>
-            </TouchableOpacity>
+            <Animated.View style={{ transform: [{ scale: isDisabled ? 1 : scaleAnim }] }}>
+              <TouchableOpacity
+                style={[
+                  styles.reserveButton,
+                  { backgroundColor: isBooked ? theme.success : isOwnClass ? theme.textSecondary : theme.primary },
+                  (isBooked || isOwnClass) && styles.bookedButton
+                ]}
+                onPress={handleBookClass}
+                onPressIn={isDisabled ? undefined : handlePressIn}
+                onPressOut={isDisabled ? undefined : handlePressOut}
+                disabled={isDisabled}
+                activeOpacity={isDisabled ? 1 : 0.7}
+              >
+                <Text style={styles.reserveButtonText}>
+                  {loading ? 'Reservando...' :
+                   isBooked ? '✓ Clase reservada' :
+                   isOwnClass ? 'Tu clase' :
+                   classDetail?.availableSlots === 0 ? 'Sin cupos disponibles' :
+                   'Reservar'}
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
           );
         })()}
       </ScrollView>
