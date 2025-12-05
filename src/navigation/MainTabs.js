@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -70,6 +70,9 @@ const HomeStack = ({ setShowNotifications, refreshBell }) => {
           fontSize: 20,
         },
         headerRight: () => <ProfileButton />,
+        animation: Platform.OS === 'ios' ? 'default' : 'slide_from_right',
+        gestureEnabled: true,
+        gestureDirection: 'horizontal',
       }}
     >
       <Stack.Screen
@@ -122,6 +125,9 @@ const ReservationsStack = ({ setShowNotifications, refreshBell }) => {
               style={{ marginLeft: 10 }}
             />
           ),
+        animation: Platform.OS === 'ios' ? 'default' : 'slide_from_right',
+        gestureEnabled: true,
+        gestureDirection: 'horizontal',
       }}
     >
       <Stack.Screen
@@ -170,6 +176,9 @@ const HistoryStack = ({ setShowNotifications, refreshBell }) => {
               style={{ marginLeft: 10 }}
             />
           ),
+        animation: Platform.OS === 'ios' ? 'default' : 'slide_from_right',
+        gestureEnabled: true,
+        gestureDirection: 'horizontal',
       }}
     >
       <Stack.Screen
@@ -208,6 +217,9 @@ const NewsStack = ({ setShowNotifications, refreshBell }) => {
               style={{ marginLeft: 10 }}
             />
           ),
+        animation: Platform.OS === 'ios' ? 'default' : 'slide_from_right',
+        gestureEnabled: true,
+        gestureDirection: 'horizontal',
       }}
     >
       <Stack.Screen name="NewsScreen" component={NewsScreen} options={{ title: 'Noticias' }} />
@@ -229,6 +241,9 @@ const ProfileStack = () => {
           fontWeight: 'bold',
           fontSize: 20,
         },
+        animation: Platform.OS === 'ios' ? 'default' : 'slide_from_right',
+        gestureEnabled: true,
+        gestureDirection: 'horizontal',
       }}
     >
       <Stack.Screen
@@ -267,6 +282,9 @@ const ScanStack = ({ setShowNotifications, refreshBell }) => {
               style={{ marginLeft: 10 }}
             />
           ),
+        animation: Platform.OS === 'ios' ? 'default' : 'slide_from_right',
+        gestureEnabled: true,
+        gestureDirection: 'horizontal',
       }}
     >
       <Stack.Screen
@@ -362,7 +380,12 @@ const MainTabs = () => {
 
   return (
     <>
-      <MainStack.Navigator screenOptions={{ headerShown: false }}>
+      <MainStack.Navigator screenOptions={{
+        headerShown: false,
+        animation: Platform.OS === 'ios' ? 'default' : 'slide_from_right',
+        gestureEnabled: true,
+        gestureDirection: 'horizontal',
+      }}>
         <MainStack.Screen name="MainTabs">
           {() => <BottomTabs setShowNotifications={setShowNotifications} refreshBell={refreshBell} />}
         </MainStack.Screen>

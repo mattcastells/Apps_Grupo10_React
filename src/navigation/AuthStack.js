@@ -1,5 +1,6 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Platform } from 'react-native';
 import LoginScreen from '../screens/auth/LoginScreen';
 import CreateUserScreen from '../screens/auth/CreateUserScreen';
 import OtpScreen from '../screens/auth/OtpScreen';
@@ -20,6 +21,9 @@ const AuthStack = () => {
         headerTitleStyle: {
           fontWeight: 'bold',
         },
+        animation: Platform.OS === 'ios' ? 'default' : 'slide_from_right',
+        gestureEnabled: true,
+        gestureDirection: 'horizontal',
       }}
     >
       <Stack.Screen

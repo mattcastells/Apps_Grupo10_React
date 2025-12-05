@@ -565,6 +565,11 @@ const styles = StyleSheet.create({
   },
   classCard: {
     marginBottom: 12,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   cardHeader: {
     flexDirection: 'row',
