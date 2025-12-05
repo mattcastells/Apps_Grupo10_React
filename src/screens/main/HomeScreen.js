@@ -434,8 +434,6 @@ const HomeScreen = ({ navigation }) => {
                 onSelect={setSelectedLocation}
               />
             </View>
-
-            <Text style={[styles.classesListTitle, { color: theme.text }]}>Clases disponibles</Text>
           </>
         }
         ListEmptyComponent={
@@ -469,12 +467,11 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    marginTop: 24,
     marginBottom: 24,
   },
   logoPlaceholder: {
-    width: 180,
-    height: 180,
+    width: 130,
+    height: 130,
     borderRadius: 90,
     justifyContent: 'center',
     alignItems: 'center',
@@ -569,10 +566,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   catalogTitle: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
     marginTop: 16,
-    marginBottom: 16,
+    marginBottom: 30,
     lineHeight: 28,
   },
   filtersContainer: {
@@ -581,7 +578,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   classesListTitle: {
-    fontSize: 16,
+    fontSize: 22,
     fontWeight: '600',
     marginTop: 16,
     marginBottom: 12,

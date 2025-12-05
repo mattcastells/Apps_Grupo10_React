@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   filterLabel: {
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: '600',
     marginBottom: 6,
     textAlign: 'center',
