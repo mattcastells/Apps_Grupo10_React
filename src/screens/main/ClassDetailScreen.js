@@ -37,6 +37,7 @@ const ClassDetailScreen = ({ route, navigation }) => {
     setLoading(true);
     try {
       const data = await scheduleService.getClassDetail(classId);
+      console.log('📋 ClassDetail data:', JSON.stringify(data, null, 2));
       setClassDetail(data);
     } catch (error) {
       Alert.alert('Error', 'No se pudo cargar la información de la clase', [
@@ -128,7 +129,9 @@ const ClassDetailScreen = ({ route, navigation }) => {
     <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={[styles.mainCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
-          <Text style={[styles.classTitle, { color: theme.primary }]}>{classDetail.name}</Text>
+          <Text style={[styles.classTitle, { color: theme.primary }]}>
+            {classDetail.discipline}
+          </Text>
 
           <View style={styles.infoContainer}>
             <Text style={[styles.infoText, { color: theme.text }]}>👨‍🏫   Instructor: {classDetail.professor}</Text>
@@ -153,6 +156,13 @@ const ClassDetailScreen = ({ route, navigation }) => {
           <Text style={[styles.bulletText, { color: theme.text }]}>• Traé tu botella de agua y toalla</Text>
           <Text style={[styles.bulletText, { color: theme.text }]}>• Usá ropa cómoda para entrenar</Text>
           <Text style={[styles.bulletText, { color: theme.text }]}>• Si cancelás, hacelo con 2 horas de anticipación</Text>
+        </View>
+
+        <View style={[styles.reminderCard, { backgroundColor: theme.container, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
+          <Text style={[styles.reminderTitle, { color: theme.primary }]}>¡Recordatorio!</Text>
+          <Text style={[styles.reminderText, { color: theme.text }]}>💧 Mantente hidratado.</Text>
+          <Text style={[styles.reminderText, { color: theme.text }]}>🧘 Lleva tu toalla.</Text>
+          <Text style={[styles.reminderText, { color: theme.text }]}>👍 ¡Disfruta tu clase!</Text>
         </View>
 
         <TouchableOpacity style={[styles.mapButton, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]} onPress={handleViewMap}>
@@ -262,6 +272,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
     marginBottom: 4,
+  },
+  reminderCard: {
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 24,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  reminderTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  reminderText: {
+    fontSize: 16,
+    lineHeight: 24,
   },
   mapButton: {
     height: 56,

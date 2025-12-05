@@ -143,15 +143,6 @@ const HistoryDetailScreen = ({ route, navigation }) => {
           </View>
         </View>
 
-        {isToday(date) && (
-          <View style={[styles.todayCard, { backgroundColor: theme.container, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
-            <Text style={[styles.todayTitle, { color: theme.primary }]}>¡Recordatorio!</Text>
-            <Text style={[styles.todayText, { color: theme.text }]}>💧 Mantente hidratado.</Text>
-            <Text style={[styles.todayText, { color: theme.text }]}>🧘 Lleva tu toalla.</Text>
-            <Text style={[styles.todayText, { color: theme.text }]}>👍 ¡Disfruta tu clase!</Text>
-          </View>
-        )}
-
         <View style={[styles.detailsCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
           <Text style={[styles.cardTitle, { color: theme.text, borderBottomColor: theme.divider }]}>Detalles de la Asistencia</Text>
           <View style={styles.infoRow}>
@@ -259,7 +250,7 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
   },
   disciplineTitle: {
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
   },
