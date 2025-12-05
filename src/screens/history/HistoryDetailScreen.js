@@ -264,9 +264,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   headerInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: 'column',
+    alignItems: 'center',
     width: '100%',
+    gap: 8,
   },
   headerText: {
     fontSize: 16,
