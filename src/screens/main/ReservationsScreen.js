@@ -94,33 +94,33 @@ const ReservationsScreen = ({ navigation }) => {
 
   const getFilteredBookings = () => {
     return bookings.filter((item) => {
-      // Filtro por disciplina - mejorado
+      // Filter by discipline - improved
       const matchDiscipline = (() => {
         if (selectedDiscipline === 'Todos') return true;
         
         const itemDiscipline = item.className || item.discipline || item.name || '';
         
-        // Comparar case-insensitive
+        // Case-insensitive comparison
         return itemDiscipline.toLowerCase().includes(selectedDiscipline.toLowerCase());
       })();
 
-      // Filtro por sede - mejorado para manejar diferentes formatos
+      // Filter by site - improved to handle different formats
       const matchLocation = (() => {
         if (selectedLocation === 'Todas') return true;
         
         const itemLocation = item.location || item.site || '';
         
-        // Comparar directamente (case-insensitive)
+        // Direct comparison (case-insensitive)
         if (itemLocation.toLowerCase() === selectedLocation.toLowerCase()) return true;
         
-        // Comparar sin "Sede " en ambos lados (case-insensitive)
+        // Compare without "Sede " on both sides (case-insensitive)
         const normalizedSelected = selectedLocation.replace(/Sede /i, '').toLowerCase();
         const normalizedItem = itemLocation.replace(/Sede /i, '').toLowerCase();
         
         return normalizedSelected === normalizedItem;
       })();
 
-      // Filtro por fecha
+      // Filter by date
       const matchDate = (() => {
         if (selectedDate === 'Todas') return true;
 
@@ -204,7 +204,7 @@ const ReservationsScreen = ({ navigation }) => {
     navigation.navigate('ClassDetail', { classId: item.scheduledClassId });
   };
 
-  // Opciones para los filtros
+  // Options for filters
   const dateOptions = [
     { label: 'Todas', value: 'Todas' },
     { label: 'Hoy', value: 'Hoy' },

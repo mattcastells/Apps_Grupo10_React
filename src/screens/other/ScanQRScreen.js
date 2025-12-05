@@ -179,7 +179,6 @@ const ScanQRScreen = ({ navigation }) => {
         {/* QR Icon Placeholder */}
         <View style={styles.qrIconContainer}>
           <View style={[styles.qrIcon, { backgroundColor: theme.card, borderColor: theme.primary }]}>
-            <Text style={styles.qrIconText}>📱</Text>
           </View>
         </View>
 
@@ -195,7 +194,7 @@ const ScanQRScreen = ({ navigation }) => {
 
         {checkInData && (
           <View style={[styles.checkInCard, { backgroundColor: theme.card }]}>
-            <Text style={[styles.checkInTitle, { color: theme.primary }]}>✅ Datos del turno</Text>
+            <Text style={[styles.checkInTitle, { color: theme.primary }]}>Datos del turno</Text>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Clase:</Text>
               <Text style={[styles.infoValue, { color: theme.text }]}>{checkInData.className}</Text>

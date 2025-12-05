@@ -70,47 +70,47 @@ const HistoryDetailScreen = ({ route, navigation }) => {
   ).padStart(2, '0')}`;
 
   const renderStars = (rating) => {
-    return Array.from({ length: 5 }, (_, i) => (i < rating ? '⭐' : '☆')).join(' ');
+    return Array.from({ length: 5 }, (_, i) => (i < rating ? '★' : '☆')).join(' ');
   };
 
   const canRate = () => {
     if (!attendance) return false;
 
-    // Si ya tiene calificación, no puede calificar de nuevo
+    // If already has rating, cannot rate again
     if (attendance.userReview) return false;
 
-    // Solo puede calificar si el estado es ATTENDED (asistió a la clase)
+    // Can only rate if status is ATTENDED (attended the class)
     if (attendance.status !== 'ATTENDED' && attendance.attendanceStatus !== 'ATTENDED') {
       return false;
     }
 
-    // Calcular el tiempo de finalización de la clase
+    // Calculate class end time
     const classStartTime = new Date(attendance.startDateTime);
     const classEndTime = new Date(classStartTime.getTime() + attendance.durationMinutes * 60000);
 
-    // Calcular el límite de 24 horas después del final de la clase
+    // Calculate 24-hour deadline after class end
     const ratingDeadline = new Date(classEndTime.getTime() + 24 * 60 * 60 * 1000);
     const now = new Date();
 
-    // Solo puede calificar si la clase ya terminó y no pasaron más de 24 horas
+    // Can only rate if class has ended and less than 24 hours have passed
     return now >= classEndTime && now <= ratingDeadline;
   };
 
   const getRatingMessage = () => {
     if (!attendance) return null;
 
-    // Si ya tiene reseña, no hay mensaje
+    // If already has review, no message
     if (attendance.userReview) return null;
 
-    // Si puede calificar, no mostrar mensaje aquí (se mostrará el botón)
+    // If can rate, don't show message here (button will be shown)
     if (canRate()) return null;
 
-    // Si no asistió, mostrar mensaje de asistencia
+    // If didn't attend, show attendance message
     if (attendance.status !== 'ATTENDED' && attendance.attendanceStatus !== 'ATTENDED') {
       return 'Solo puedes calificar clases a las que asististe. Debes hacer check-in para poder calificar.';
     }
 
-    // Si asistió pero expiró el plazo
+    // If attended but deadline expired
     return 'El plazo para calificar esta clase ha expirado (24 horas después del final de la clase).';
   };
 
@@ -138,9 +138,9 @@ const HistoryDetailScreen = ({ route, navigation }) => {
           <Text style={[styles.disciplineTitle, { color: theme.textInverted }]}>{attendance.discipline}</Text>
           <Text style={[styles.disciplineSubtitle, { color: theme.textInverted }]}>{attendance.className}</Text>
           <View style={styles.headerInfo}>
-            <Text style={[styles.headerText, { color: theme.textInverted }]}>📍 {attendance.site}</Text>
-            <Text style={[styles.headerText, { color: theme.textInverted }]}>📅 {formattedDate}</Text>
-            <Text style={[styles.headerText, { color: theme.textInverted }]}>🕒 {formattedTime}</Text>
+            <Text style={[styles.headerText, { color: theme.textInverted }]}>{attendance.site}</Text>
+            <Text style={[styles.headerText, { color: theme.textInverted }]}>{formattedDate}</Text>
+            <Text style={[styles.headerText, { color: theme.textInverted }]}>{formattedTime}</Text>
           </View>
         </View>
 

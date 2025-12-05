@@ -131,7 +131,6 @@ const CreateUserScreen = ({ navigation }) => {
             {/* Avatar placeholder - 120x120 */}
             <View style={styles.avatarContainer}>
               <View style={styles.avatarPlaceholder}>
-                <Text style={styles.avatarText}>👤</Text>
               </View>
             </View>
 

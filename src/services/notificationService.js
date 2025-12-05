@@ -113,21 +113,21 @@ const createNotificationService = (axiosInstance) => ({
     }
   },
 
-  // ELIMINADO: createBookingNotification
-  // El backend ahora crea automáticamente las notificaciones cuando se hace una reserva
-  // No es necesario que el frontend las cree manualmente
+  // REMOVED: createBookingNotification
+  // The backend now automatically creates notifications when a booking is made
+  // No need for the frontend to create them manually
 
   /**
-   * Procesar notificaciones pendientes desde el backend
-   * Este método se llama periódicamente (cada 15 min o al abrir la app)
+   * Process pending notifications from the backend
+   * This method is called periodically (every 15 min or when opening the app)
    */
   processPendingNotifications: async (axiosInstance) => {
     try {
-      // Obtener notificaciones enviadas desde el backend
+      // Get notifications sent from the backend
       const response = await axiosInstance.get('/notifications/sent');
       const sentNotifications = response.data;
 
-      // Mostrar cada notificación localmente
+      // Show each notification locally
       for (const notification of sentNotifications) {
         await createNotificationService(axiosInstance).showLocalNotification(notification);
       }

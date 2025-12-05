@@ -39,8 +39,8 @@ export const useAxios = () => {
     const responseInterceptor = instance.interceptors.response.use(
       (res) => res,
       async (err) => {
-        // Solo desloguear en errores 401 (no autorizado)
-        // Los 403 pueden ser errores de validación de negocio (ej: clase llena, ya reservada)
+        // Only logout on 401 errors (unauthorized)
+        // 403 errors can be business validation errors (e.g. class full, already booked)
         if (err.response?.status === 401) {
           await logout();
           // The AppNavigator will handle the redirection automatically

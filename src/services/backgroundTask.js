@@ -35,7 +35,7 @@ TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async () => {
     }
 
     // Fetch PENDING notifications that are ready to be sent from backend
-    // El backend debe devolver solo las que tienen:
+    // The backend should only return those that have:
     // - status: "PENDING"
     // - scheduledFor <= now
     const response = await fetchWithFallback('/notifications/pending', token);
@@ -45,7 +45,7 @@ TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async () => {
     // Show each notification locally and mark as RECEIVED
     for (const notification of notifications) {
       try {
-        // Mostrar notificación local
+        // Show local notification
         await Notifications.scheduleNotificationAsync({
           content: {
             title: notification.title,

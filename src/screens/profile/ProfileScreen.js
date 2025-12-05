@@ -271,7 +271,6 @@ const ProfileScreen = ({ navigation }) => {
         <View style={styles.infoSection}>
           <View style={[styles.fieldCard, { backgroundColor: theme.card, borderWidth: isDarkMode ? 1 : 0, borderColor: theme.border }]}>
             <View style={styles.fieldHeader}>
-              <Text style={styles.fieldIcon}>👤</Text>
               <View style={styles.fieldTextContainer}>
                 <Text style={[styles.fieldLabel, { color: theme.textSecondary }]}>Nombre completo</Text>
                 <Text style={[styles.fieldValue, { color: theme.text }]}>{user?.name || 'N/A'}</Text>

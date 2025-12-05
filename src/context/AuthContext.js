@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }) => {
         setHasBiometricAuthenticated(true);
         return response;
       } catch (error) {
-        // IMPORTANTE: Asegurarse de que el estado de autenticación NO se setee en caso de error
+        // IMPORTANT: Make sure authentication state is NOT set in case of error
         setIsAuthenticated(false);
         setUser(null);
         setHasBiometricAuthenticated(false);

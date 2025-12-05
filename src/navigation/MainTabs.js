@@ -40,10 +40,9 @@ const FloatingQRButton = ({ children, onPress }) => {
     >
       <View
         style={{
-          top: 10,
           width: 70,
           height: 70,
-          borderRadius: 90,
+          borderRadius: 35,
           backgroundColor: '#F26A3E',
           justifyContent: 'center',
           alignItems: 'center',
@@ -348,11 +347,10 @@ const BottomTabs = ({ setShowNotifications, refreshBell }) => {
         name="Scan" 
         options={{ 
           title: '',
-          tabBarIcon: ({ focused }) => (
-            <Ionicons name="qr-code-outline" size={30} color="#FFFFFF" />
-          ),
           tabBarButton: (props) => (
-            <FloatingQRButton {...props} />
+            <FloatingQRButton {...props}>
+              <Ionicons name="qr-code-outline" size={30} color="#FFFFFF" />
+            </FloatingQRButton>
           )
         }} 
       >

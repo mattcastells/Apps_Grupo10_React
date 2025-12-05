@@ -113,7 +113,7 @@ const ClassDetailScreen = ({ route, navigation }) => {
     Linking.openURL(url);
   };
 
-  // Funciones de animación para el botón
+  // Button animation functions
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
       toValue: 0.95,
@@ -129,7 +129,7 @@ const ClassDetailScreen = ({ route, navigation }) => {
       useNativeDriver: true,
     }).start();
 
-    // Vibración háptica
+    // Haptic vibration
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   };
 
@@ -161,12 +161,12 @@ const ClassDetailScreen = ({ route, navigation }) => {
           </Text>
 
           <View style={styles.infoContainer}>
-            <Text style={[styles.infoText, { color: theme.text }]}>👨‍🏫   Instructor: {classDetail.professor}</Text>
-            <Text style={[styles.infoText, { color: theme.text }]}>📅   Fecha: {formattedDate}</Text>
-            <Text style={[styles.infoText, { color: theme.text }]}>🕐   Horario: {formattedTime}</Text>
-            <Text style={[styles.infoText, { color: theme.text }]}>⏱️   Duración: {classDetail.durationMinutes} min</Text>
-            <Text style={[styles.infoText, { color: theme.text }]}>📍   Ubicación: {classDetail.location}</Text>
-            <Text style={[styles.infoText, { color: theme.text }]}>👥   Cupos disponibles: {classDetail.availableSlots}</Text>
+            <Text style={[styles.infoText, { color: theme.text }]}>Instructor: {classDetail.professor}</Text>
+            <Text style={[styles.infoText, { color: theme.text }]}>Fecha: {formattedDate}</Text>
+            <Text style={[styles.infoText, { color: theme.text }]}>Horario: {formattedTime}</Text>
+            <Text style={[styles.infoText, { color: theme.text }]}>Duración: {classDetail.durationMinutes} min</Text>
+            <Text style={[styles.infoText, { color: theme.text }]}>Ubicación: {classDetail.location}</Text>
+            <Text style={[styles.infoText, { color: theme.text }]}>Cupos disponibles: {classDetail.availableSlots}</Text>
           </View>
         </View>
 

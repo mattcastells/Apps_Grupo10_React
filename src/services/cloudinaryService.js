@@ -1,15 +1,15 @@
 /**
  * Cloudinary Configuration
- * IMPORTANTE: Estos son los valores correctos de tu cuenta de Cloudinary
+ * IMPORTANT: These are the correct values for your Cloudinary account
  */
 const CLOUDINARY_CONFIG = {
-  // Cloud name de tu cuenta Cloudinary
+  // Cloud name from your Cloudinary account
   CLOUD_NAME: 'do7lo4pkj',
 
-  // Upload preset (debe ser "unsigned" para uploads desde el cliente)
+  // Upload preset (must be "unsigned" for client uploads)
   UPLOAD_PRESET: 'ritmofit_unisgned',
 
-  // URL base de Cloudinary (no modificar)
+  // Cloudinary base URL (do not modify)
   BASE_URL: 'https://api.cloudinary.com/v1_1',
 };
 

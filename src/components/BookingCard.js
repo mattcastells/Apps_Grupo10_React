@@ -28,7 +28,7 @@ const BookingCard = ({ item, onPress, onCancel, onCheckIn }) => {
 
   const showCancelButton = item.bookingId && item.status === 'CONFIRMED' && onCancel;
 
-  // Determinar si el check-in está disponible (1h antes hasta fin de clase)
+  // Determine if check-in is available (1h before until end of class)
   const now = new Date();
   const classStart = new Date(item.classDateTime);
   const classEnd = new Date(classStart.getTime() + (item.durationMinutes || 60) * 60000);
@@ -39,7 +39,7 @@ const BookingCard = ({ item, onPress, onCancel, onCheckIn }) => {
                      now <= classEnd &&
                      onCheckIn;
 
-  // Determinar el badge a mostrar según el estado
+  // Determine the badge to show according to status
   const getStatusBadge = () => {
     if (!item.status) return null;
     

@@ -32,7 +32,7 @@ const NotificationDrawer = ({ visible, onClose, onNotificationsRead }) => {
   useEffect(() => {
     if (visible) {
       loadNotifications();
-      // Animación de deslizamiento hacia abajo
+      // Slide down animation
       Animated.spring(slideAnim, {
         toValue: 0,
         useNativeDriver: true,
@@ -40,7 +40,7 @@ const NotificationDrawer = ({ visible, onClose, onNotificationsRead }) => {
         friction: 8,
       }).start();
     } else {
-      // Animación de deslizamiento hacia arriba
+      // Slide up animation
       Animated.timing(slideAnim, {
         toValue: -SCREEN_HEIGHT,
         duration: 300,
@@ -62,7 +62,7 @@ const NotificationDrawer = ({ visible, onClose, onNotificationsRead }) => {
   };
 
   const handleNotificationPress = async (notification) => {
-    // Si la notificación es un recordatorio, navegar al detalle de la clase
+    // If notification is a reminder, navigate to class detail
     if (notification.type === 'BOOKING_REMINDER' && notification.scheduledClassId) {
       navigation.navigate('Home', {
         screen: 'ClassDetail',
@@ -70,7 +70,7 @@ const NotificationDrawer = ({ visible, onClose, onNotificationsRead }) => {
       });
       onClose(); // Cerrar el drawer de notificaciones
 
-      // Marcar como leída
+      // Mark as read
       if (notification.status === 'ENVIADA') {
         try {
           await notificationService.markAsRead(notification.id);
@@ -84,9 +84,9 @@ const NotificationDrawer = ({ visible, onClose, onNotificationsRead }) => {
       return;
     }
 
-    // Si la notificación es un cambio de clase, navegar a la pantalla de confirmación
+    // If notification is a class change, navigate to confirmation screen
     if (notification.type === 'CLASS_CHANGED') {
-      // Navegación anidada: Ir a la PESTAÑA 'Home', y DENTRO de ella, a la PANTALLA 'ClassChangeConfirmation'
+      // Nested navigation: Go to 'Home' TAB, and INSIDE it, to 'ClassChangeConfirmation' SCREEN
       navigation.navigate('Home', {
         screen: 'ClassChangeConfirmation',
         params: { notification },
@@ -95,7 +95,7 @@ const NotificationDrawer = ({ visible, onClose, onNotificationsRead }) => {
       return;
     }
 
-    // Comportamiento por defecto: marcar como leída
+    // Default behavior: mark as read
     if (notification.status === 'ENVIADA') {
       try {
         await notificationService.markAsRead(notification.id);

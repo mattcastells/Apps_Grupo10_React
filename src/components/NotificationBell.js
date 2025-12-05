@@ -14,7 +14,7 @@ const NotificationBell = ({ onPress }) => {
   const notificationService = createNotificationService(axiosInstance);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // Cargar contador al montar y cada 30 segundos
+  // Load counter on mount and every 30 seconds
   useEffect(() => {
     loadUnreadCount();
 

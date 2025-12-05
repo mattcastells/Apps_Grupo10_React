@@ -292,7 +292,7 @@ const EditClassScreen = ({ route, navigation }) => {
             onPress={() => setShowDatePicker(true)}
           >
             <Text style={[styles.dateButtonText, { color: theme.text }]}>
-              📅 {dateTime.toLocaleDateString('es-AR', { 
+              {dateTime.toLocaleDateString('es-AR', { 
                 weekday: 'long', 
                 year: 'numeric', 
                 month: 'long', 
@@ -306,7 +306,7 @@ const EditClassScreen = ({ route, navigation }) => {
             onPress={() => setShowTimePicker(true)}
           >
             <Text style={[styles.dateButtonText, { color: theme.text }]}>
-              🕐 {dateTime.toLocaleTimeString('es-AR', { 
+              {dateTime.toLocaleTimeString('es-AR', { 
                 hour: '2-digit', 
                 minute: '2-digit' 
               })}

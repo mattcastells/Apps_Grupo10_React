@@ -58,7 +58,7 @@ const HistoryScreen = ({ navigation }) => {
     navigation.navigate('HistoryDetail', { attendanceId: item.id });
   };
 
-  // Opciones para los filtros
+  // Options for filters
   const dateOptions = [
     { label: 'Todas', value: 'Todas' },
     { label: 'Última semana', value: 'Semana' },
@@ -70,17 +70,17 @@ const HistoryScreen = ({ navigation }) => {
 
   const getFilteredHistory = () => {
     return history.filter((item) => {
-      // Filtro por disciplina - mejorado
+      // Filter by discipline - improved
       const matchDiscipline = (() => {
         if (selectedDiscipline === 'Todos') return true;
         
         const itemDiscipline = item.className || item.discipline || item.name || '';
         
-        // Comparar case-insensitive
+        // Case-insensitive comparison
         return itemDiscipline.toLowerCase().includes(selectedDiscipline.toLowerCase());
       })();
 
-      // Filtro por fecha
+      // Filter by date
       const matchDate = (() => {
         if (selectedDate === 'Todas') return true;
 

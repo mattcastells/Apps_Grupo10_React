@@ -132,10 +132,10 @@ const OtpScreen = ({ navigation, route }) => {
       setVerified(true);
       setErrorMessage('');
       
-      // Mostrar mensaje de éxito y redirigir al login
+      // Show success message and redirect to login
       Alert.alert(
-        '✅ Verificación exitosa',
-        'Tu cuenta ha sido verificada correctamente. Ahora puedes iniciar sesión con tu email y contraseña.',
+        'Successful Verification',
+        'Your account has been verified correctly. You can now log in with your email and password.',
         [
           {
             text: 'Ir a Login',

@@ -40,18 +40,18 @@ const HomeScreen = ({ navigation }) => {
   const bookingService = createBookingService(axiosInstance);
   const locationService = createLocationService(axiosInstance);
 
-  // 🔐 Estado para controlar si debe mostrar el prompt biométrico
+  // State to control whether to show the biometric prompt
   const [showBiometricPrompt, setShowBiometricPrompt] = useState(false);
   useEffect(() => {
-    // Cargar ubicaciones al montar el componente
+    // Load locations when component mounts
     loadLocations();
 
-    // 🔐 Verificar si necesita autenticación biométrica al entrar al Home
+    // Check if biometric authentication is needed when entering Home
     if (needsBiometricAuth()) {
-      // Necesita autenticarse, mostrar el prompt
+      // Needs authentication, show the prompt
       setShowBiometricPrompt(true);
     } else {
-      // Ya se autenticó en esta sesión, cargar clases normalmente
+      // Already authenticated in this session, load classes normally
       loadClasses();
     }
   }, []);
@@ -61,7 +61,7 @@ const HomeScreen = ({ navigation }) => {
       const data = await locationService.getAllLocations();
       setLocations(data);
     } catch (error) {
-      // No es crítico, continuar sin ubicaciones dinámicas
+      // Not critical, continue without dynamic locations
       setLocations([]);
     }
   };
@@ -73,16 +73,16 @@ const HomeScreen = ({ navigation }) => {
 
       setClasses(data);
 
-      // Cargar IDs de clases ya reservadas
+      // Load IDs of already booked classes
       try {
         const bookedIds = await bookingService.getBookedClassIds();
         setBookedClassIds(bookedIds);
       } catch (error) {
-        // No es crítico, continuar sin marcar clases
+        // Not critical, continue without marking classes
         setBookedClassIds([]);
       }
 
-      // Cargar la próxima clase confirmada
+      // Load the next confirmed class
       try {
         const bookings = await bookingService.getMyBookings();
 
@@ -93,12 +93,12 @@ const HomeScreen = ({ navigation }) => {
         });
 
         if (confirmedBookings.length > 0) {
-          // Ordenar por fecha y tomar la más cercana
+          // Sort by date and take the closest one
           confirmedBookings.sort((a, b) =>
             new Date(a.classDateTime) - new Date(b.classDateTime)
           );
 
-          // Mapear la estructura del backend a lo que espera el componente
+          // Map backend structure to what the component expects
           setNextClass({
             discipline: confirmedBookings[0].className,
             dateTime: confirmedBookings[0].classDateTime,
@@ -110,7 +110,7 @@ const HomeScreen = ({ navigation }) => {
           setNextClass(null);
         }
       } catch (error) {
-        // No es crítico, continuar sin próxima clase
+        // Not critical, continue without next class
         setNextClass(null);
       }
     } catch (error) {
@@ -138,7 +138,7 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleReserveClass = () => {
-    // Navegar al tab de Reservas
+    // Navigate to Reservations tab
     navigation.navigate('Reservations');
   };
 
@@ -146,14 +146,14 @@ const HomeScreen = ({ navigation }) => {
     navigation.navigate('Profile');
   };
 
-  // 🔐 Callbacks para BiometricPrompt
+  // Callbacks for BiometricPrompt
   const handleBiometricSuccess = () => {
-    // Autenticación exitosa, cargar las clases y continuar con el flujo
+    // Successful authentication, load classes and continue with flow
     loadClasses();
   };
 
   const handleBiometricFailure = async (reason) => {
-    // Autenticación fallida o sin enrolamiento, desloguear y redirigir a login
+    // Authentication failed or no enrollment, logout and redirect to login
 
     Alert.alert(
       'Autenticación requerida',
@@ -163,7 +163,7 @@ const HomeScreen = ({ navigation }) => {
           text: 'OK',
           onPress: async () => {
             await logout();
-            // La navegación al login se hace automáticamente por el AppNavigator
+            // Navigation to login happens automatically via AppNavigator
           },
         },
       ]
@@ -171,13 +171,13 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleBiometricCancel = async () => {
-    // Usuario canceló la autenticación, desloguear y redirigir a login
+    // User cancelled authentication, logout and redirect to login
 
     await logout();
-    // La navegación al login se hace automáticamente por el AppNavigator
+    // Navigation to login happens automatically via AppNavigator
   };
 
-  // Opciones para los filtros
+  // Options for filters
   const dateOptions = [
     { label: 'Todas', value: 'Todas' },
     { label: 'Hoy', value: 'Hoy' },
@@ -203,33 +203,33 @@ const HomeScreen = ({ navigation }) => {
 
   const getFilteredClasses = () => {
     return classes.filter((item) => {
-      // Filtro por disciplina - mejorado
+      // Filter by discipline - improved
       const matchDiscipline = (() => {
         if (selectedDiscipline === 'Todos') return true;
 
         const itemDiscipline = item.discipline || item.name || item.className || '';
 
-        // Comparar case-insensitive
+        // Case-insensitive comparison
         return itemDiscipline.toLowerCase().includes(selectedDiscipline.toLowerCase());
       })();
 
-      // Filtro por ubicación/sede - mejorado para manejar diferentes formatos
+      // Filter by location/site - improved to handle different formats
       const matchLocation = (() => {
         if (selectedLocation === 'Todas') return true;
 
         const itemLocation = item.location || item.site || '';
 
-        // Comparar directamente (case-insensitive)
+        // Direct comparison (case-insensitive)
         if (itemLocation.toLowerCase() === selectedLocation.toLowerCase()) return true;
 
-        // Comparar sin "Sede " en ambos lados (case-insensitive)
+        // Compare without "Sede " on both sides (case-insensitive)
         const normalizedSelected = selectedLocation.replace(/Sede /i, '').toLowerCase();
         const normalizedItem = itemLocation.replace(/Sede /i, '').toLowerCase();
 
         return normalizedSelected === normalizedItem;
       })();
 
-      // Filtro por fecha
+      // Filter by date
       const matchDate = (() => {
           if (selectedDate === 'Todas') return true;
 
@@ -262,7 +262,7 @@ const HomeScreen = ({ navigation }) => {
         return matchDiscipline && matchLocation && matchDate;
       })
       .sort((a, b) => {
-        // Ordenar por fecha (más cercana primero)
+        // Sort by date (closest first)
         const dateA = a.dateTime ? new Date(a.dateTime).getTime() : Infinity;
         const dateB = b.dateTime ? new Date(b.dateTime).getTime() : Infinity;
         return dateA - dateB;
@@ -308,7 +308,7 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
-      {/* 🔐 BiometricPrompt - Se muestra solo si showBiometricPrompt es true */}
+      {/* BiometricPrompt - Shows only if showBiometricPrompt is true */}
       {showBiometricPrompt && (
         <BiometricPrompt
           onSuccess={handleBiometricSuccess}
@@ -342,7 +342,7 @@ const HomeScreen = ({ navigation }) => {
               const now = new Date();
               const classDate = new Date(nextClass.dateTime);
 
-              // Comparar solo las fechas (sin hora) para evitar problemas de UTC
+              // Compare only dates (without time) to avoid UTC issues
               const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
               const classDay = new Date(classDate.getFullYear(), classDate.getMonth(), classDate.getDate());
 
@@ -366,7 +366,6 @@ const HomeScreen = ({ navigation }) => {
                   <View style={styles.featuredCardBody}>
                     <Text style={[styles.featuredClassName, { color: theme.primary }]}>{nextClass.discipline}</Text>
                     <View style={[styles.featuredInfoRow, { backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(242, 106, 62, 0.08)' }]}>
-                      <Text style={styles.featuredInfoIcon}>🕒</Text>
                       <Text style={[styles.featuredInfoText, { color: theme.text }]}>
                         {new Date(nextClass.dateTime).toLocaleDateString('es-AR', {
                           weekday: 'short',
@@ -381,11 +380,9 @@ const HomeScreen = ({ navigation }) => {
                       </Text>
                     </View>
                     <View style={[styles.featuredInfoRow, { backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(242, 106, 62, 0.08)' }]}>
-                      <Text style={styles.featuredInfoIcon}>📍</Text>
                       <Text style={[styles.featuredInfoText, { color: theme.text }]}>{nextClass.location}</Text>
                     </View>
                     <View style={[styles.featuredInfoRow, { backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(242, 106, 62, 0.08)' }]}>
-                      <Text style={styles.featuredInfoIcon}>👤</Text>
                       <Text style={[styles.featuredInfoText, { color: theme.text }]}>{nextClass.professor}</Text>
                     </View>
                   </View>
