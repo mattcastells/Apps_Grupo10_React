@@ -88,8 +88,8 @@ const EditUserScreen = ({ navigation }) => {
 
     if (status !== 'granted') {
       Alert.alert(
-        'Permission denied',
-        'We need permission to access your photo library'
+        'Permisos denegados',
+        'Necesitamos permiso para acceder a tu galería de fotos'
       );
       return;
     }
@@ -112,8 +112,8 @@ const EditUserScreen = ({ navigation }) => {
 
     if (status !== 'granted') {
       Alert.alert(
-        'Permission denied',
-        'We need permission to use your camera'
+        'Permisos denegados',
+        'Necesitamos permiso para usar tu cámara'
       );
       return;
     }

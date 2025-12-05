@@ -136,6 +136,7 @@ class BiometricManager {
       if (Platform.OS === 'ios') {
         await Linking.openURL('app-settings:');
       } else if (Platform.OS === 'android') {
+        //await Linking.sendIntent('android.settings.SECURITY_SETTINGS');
         await Linking.openURL('app-settings:');
       }
       return true;
