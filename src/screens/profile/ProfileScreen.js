@@ -9,7 +9,9 @@ import {
   Alert,
   Switch,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -49,6 +51,14 @@ const ProfileScreen = ({ navigation }) => {
 
   useEffect(() => {
     navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity 
+          onPress={() => navigation.goBack()}
+          style={{ marginLeft: 10, padding: 5 }}
+        >
+          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+      ),
       headerRight: () => (
         <NotificationBell 
           onPress={() => setShowNotificationDrawer(true)} 

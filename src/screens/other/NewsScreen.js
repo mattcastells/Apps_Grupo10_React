@@ -15,6 +15,7 @@ import createNewsService from '../../services/newsService';
 import NotificationBell from '../../components/NotificationBell';
 import NotificationDrawer from '../../components/NotificationDrawer';
 import { useNavigation } from '@react-navigation/native';
+import ProfileButton from '../../components/ProfileButton';
 
 const NewsScreen = () => {
   const { theme } = useTheme();
@@ -22,6 +23,7 @@ const NewsScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showNotificationDrawer, setShowNotificationDrawer] = useState(false);
+
   const axiosInstance = useAxios();
   const newsService = createNewsService(axiosInstance);
   const navigation = useNavigation();
@@ -32,13 +34,17 @@ const NewsScreen = () => {
 
   useEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
+      headerRight: () => <ProfileButton />,
+      headerLeft: () => (
         <NotificationBell 
           onPress={() => setShowNotificationDrawer(true)} 
+          style={{ marginLeft: 10 }}
         />
       ),
     });
   }, [navigation]);
+
+
 
   const loadNews = async () => {
     setLoading(true);
@@ -100,11 +106,7 @@ const NewsScreen = () => {
         />
       </View>
 
-      {/* Notification Drawer */}
-      <NotificationDrawer
-        visible={showNotificationDrawer}
-        onClose={() => setShowNotificationDrawer(false)}
-      />
+
     </SafeAreaView>
   );
 };

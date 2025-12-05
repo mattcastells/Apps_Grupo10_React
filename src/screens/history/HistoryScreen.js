@@ -17,6 +17,7 @@ import BookingCard from '../../components/BookingCard';
 import FilterSelector from '../../components/FilterSelector';
 import NotificationBell from '../../components/NotificationBell';
 import NotificationDrawer from '../../components/NotificationDrawer';
+import ProfileButton from '../../components/ProfileButton';
 
 const HistoryScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
@@ -124,13 +125,17 @@ const HistoryScreen = ({ navigation }) => {
 
   useEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
+      headerRight: () => <ProfileButton />,
+      headerLeft: () => (
         <NotificationBell 
           onPress={() => setShowNotificationDrawer(true)} 
+          style={{ marginLeft: 10 }}
         />
       ),
     });
   }, [navigation]);
+
+
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]}>
@@ -167,11 +172,7 @@ const HistoryScreen = ({ navigation }) => {
         />
       </View>
 
-      {/* Notification Drawer */}
-      <NotificationDrawer
-        visible={showNotificationDrawer}
-        onClose={() => setShowNotificationDrawer(false)}
-      />
+
     </SafeAreaView>
   );
 };

@@ -39,6 +39,12 @@ const EditUserScreen = ({ navigation }) => {
   const cloudinaryService = createCloudinaryService(axiosInstance);
 
   useEffect(() => {
+    navigation.setOptions({
+      headerRight: null,
+    });
+  }, [navigation]);
+
+  useEffect(() => {
     if (user) {
       setFormData({
         name: user.name || '',

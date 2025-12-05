@@ -17,6 +17,7 @@ import { useAxios } from '../../hooks/useAxios';
 import { useTheme } from '../../context/ThemeContext';
 import NotificationBell from '../../components/NotificationBell';
 import NotificationDrawer from '../../components/NotificationDrawer';
+import ProfileButton from '../../components/ProfileButton';
 
 const ScanQRScreen = ({ navigation }) => {
   const { theme } = useTheme();
@@ -36,13 +37,17 @@ const ScanQRScreen = ({ navigation }) => {
 
   useEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
+      headerRight: () => <ProfileButton />,
+      headerLeft: () => (
         <NotificationBell 
           onPress={() => setShowNotificationDrawer(true)} 
+          style={{ marginLeft: 10 }}
         />
       ),
     });
   }, [navigation]);
+
+
 
   const requestCameraPermission = async () => {
     const { status } = await Camera.requestCameraPermissionsAsync();
@@ -270,11 +275,7 @@ const ScanQRScreen = ({ navigation }) => {
         </View>
       </Modal>
 
-      {/* Notification Drawer */}
-      <NotificationDrawer
-        visible={showNotificationDrawer}
-        onClose={() => setShowNotificationDrawer(false)}
-      />
+
     </SafeAreaView>
   );
 };

@@ -42,8 +42,6 @@ const HomeScreen = ({ navigation }) => {
 
   // 🔐 Estado para controlar si debe mostrar el prompt biométrico
   const [showBiometricPrompt, setShowBiometricPrompt] = useState(false);
-  const [showNotificationDrawer, setShowNotificationDrawer] = useState(false);
-
   useEffect(() => {
     // Cargar ubicaciones al montar el componente
     loadLocations();
@@ -57,17 +55,6 @@ const HomeScreen = ({ navigation }) => {
       loadClasses();
     }
   }, []);
-
-  // Separar el useEffect para configurar el header de notificaciones
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <NotificationBell 
-          onPress={() => setShowNotificationDrawer(true)} 
-        />
-      ),
-    });
-  }, [navigation]);
 
   const loadLocations = async () => {
     try {
@@ -445,14 +432,7 @@ const HomeScreen = ({ navigation }) => {
         }
       />
 
-      {/* Notification Drawer */}
-      <NotificationDrawer
-        visible={showNotificationDrawer}
-        onClose={() => setShowNotificationDrawer(false)}
-        onNotificationsRead={() => {
-          // Opcional: recargar algo si es necesario
-        }}
-      />
+      {/* Notification Drawer - Handled in MainTabs */}
     </SafeAreaView>
   );
 };
