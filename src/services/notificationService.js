@@ -107,6 +107,7 @@ const createNotificationService = (axiosInstance) => ({
           data: {
             notificationId: notification.id,
             bookingId: notification.bookingId,
+            scheduledClassId: notification.scheduledClassId,
             type: notification.type,
           },
           sound: 'default',

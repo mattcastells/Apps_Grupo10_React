@@ -62,6 +62,31 @@ const NotificationDrawer = ({ visible, onClose, onNotificationsRead }) => {
   };
 
   const handleNotificationPress = async (notification) => {
+    console.log('🔔 Notification pressed from drawer:', notification);
+
+    // Si la notificación es un recordatorio, navegar al detalle de la clase
+    if (notification.type === 'BOOKING_REMINDER' && notification.scheduledClassId) {
+      console.log('✅ BOOKING_REMINDER detected, navigating to ClassDetail:', notification.scheduledClassId);
+      navigation.navigate('Home', {
+        screen: 'ClassDetail',
+        params: { classId: notification.scheduledClassId },
+      });
+      onClose(); // Cerrar el drawer de notificaciones
+
+      // Marcar como leída
+      if (notification.status === 'ENVIADA') {
+        try {
+          await notificationService.markAsRead(notification.id);
+          if (onNotificationsRead) {
+            onNotificationsRead();
+          }
+        } catch (error) {
+          console.error('Error marking notification as read:', error);
+        }
+      }
+      return;
+    }
+
     // Si la notificación es un cambio de clase, navegar a la pantalla de confirmación
     if (notification.type === 'CLASS_CHANGED') {
       // Navegación anidada: Ir a la PESTAÑA 'Home', y DENTRO de ella, a la PANTALLA 'ClassChangeConfirmation'

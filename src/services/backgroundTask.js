@@ -52,6 +52,15 @@ TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async () => {
     // Show each notification locally and mark as RECEIVED
     for (const notification of notifications) {
       try {
+        console.log('[BACKGROUND TASK] 📬 Processing notification:', notification.id);
+        console.log('[BACKGROUND TASK] 📋 Notification details:', JSON.stringify({
+          id: notification.id,
+          type: notification.type,
+          bookingId: notification.bookingId,
+          scheduledClassId: notification.scheduledClassId,
+          title: notification.title,
+        }, null, 2));
+
         // Mostrar notificación local
         await Notifications.scheduleNotificationAsync({
           content: {
@@ -60,12 +69,20 @@ TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async () => {
             data: {
               notificationId: notification.id,
               bookingId: notification.bookingId,
+              scheduledClassId: notification.scheduledClassId,
               type: notification.type,
             },
             sound: 'default',
           },
           trigger: null, // Show immediately
         });
+
+        console.log('[BACKGROUND TASK] ✅ Notification shown with data:', JSON.stringify({
+          notificationId: notification.id,
+          bookingId: notification.bookingId,
+          scheduledClassId: notification.scheduledClassId,
+          type: notification.type,
+        }, null, 2));
 
         // Marcar como RECEIVED en el backend
         await axios.put(
