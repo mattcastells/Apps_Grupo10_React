@@ -132,6 +132,9 @@ const ClassDetailScreen = ({ route, navigation }) => {
           <Text style={[styles.classTitle, { color: theme.primary }]}>
             {classDetail.discipline}
           </Text>
+          <Text style={[styles.classSubtitle, { color: theme.text }]}>
+            {classDetail.name}
+          </Text>
 
           <View style={styles.infoContainer}>
             <Text style={[styles.infoText, { color: theme.text }]}>👨‍🏫   Instructor: {classDetail.professor}</Text>
@@ -229,6 +232,12 @@ const styles = StyleSheet.create({
   classTitle: {
     fontSize: 32,
     fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  classSubtitle: {
+    fontSize: 20,
+    fontWeight: '600',
     textAlign: 'center',
     marginBottom: 20,
   },

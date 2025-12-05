@@ -136,6 +136,7 @@ const HistoryDetailScreen = ({ route, navigation }) => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={[styles.headerCard, { backgroundColor: theme.primary }]}>
           <Text style={[styles.disciplineTitle, { color: theme.textInverted }]}>{attendance.discipline}</Text>
+          <Text style={[styles.disciplineSubtitle, { color: theme.textInverted }]}>{attendance.className}</Text>
           <View style={styles.headerInfo}>
             <Text style={[styles.headerText, { color: theme.textInverted }]}>📍 {attendance.site}</Text>
             <Text style={[styles.headerText, { color: theme.textInverted }]}>📅 {formattedDate}</Text>
@@ -252,6 +253,11 @@ const styles = StyleSheet.create({
   disciplineTitle: {
     fontSize: 24,
     fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  disciplineSubtitle: {
+    fontSize: 18,
+    fontWeight: '600',
     marginBottom: 16,
   },
   headerInfo: {
