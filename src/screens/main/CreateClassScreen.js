@@ -20,6 +20,7 @@ import Button from '../../components/Button';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import NotificationBell from '../../components/NotificationBell';
 import NotificationDrawer from '../../components/NotificationDrawer';
+import ProfileButton from '../../components/ProfileButton';
 
 const DISCIPLINES = ['Yoga', 'Funcional', 'Spinning', 'Boxeo', 'Pilates', 'Zumba', 'CrossFit'];
 
@@ -44,9 +45,11 @@ const CreateClassScreen = ({ navigation }) => {
 
   useEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
+      headerRight: () => <ProfileButton />,
+      headerLeft: () => (
         <NotificationBell 
           onPress={() => setShowNotificationDrawer(true)} 
+          style={{ marginLeft: 10 }}
         />
       ),
     });

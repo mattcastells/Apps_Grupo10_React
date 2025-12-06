@@ -71,7 +71,7 @@ TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async () => {
           }
         );
       } catch (notifError) {
-        // Error processing notification
+        // Error processing notification1
       }
     }
 

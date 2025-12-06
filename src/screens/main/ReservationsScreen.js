@@ -23,6 +23,7 @@ import BookingCard from '../../components/BookingCard';
 import FilterSelector from '../../components/FilterSelector';
 import NotificationBell from '../../components/NotificationBell';
 import NotificationDrawer from '../../components/NotificationDrawer';
+import ProfileButton from '../../components/ProfileButton';
 
 const ReservationsScreen = ({ navigation }) => {
   const { theme, isDarkMode } = useTheme();
@@ -313,9 +314,11 @@ const ReservationsScreen = ({ navigation }) => {
 
   useEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
+      headerRight: () => <ProfileButton />,
+      headerLeft: () => (
         <NotificationBell 
           onPress={() => setShowNotificationDrawer(true)} 
+          style={{ marginLeft: 10 }}
         />
       ),
     });
@@ -327,24 +330,6 @@ const ReservationsScreen = ({ navigation }) => {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header para profesores */}
-        {isProfessor && (
-          <View style={styles.header}>
-            <Text style={[styles.title, { color: theme.primary }]}>Mis Clases</Text>
-            <Text style={[styles.subtitle, { color: theme.text }]}>Clases asignadas</Text>
-            <Text style={[styles.description, { color: theme.textSecondary }]}>Tus clases programadas</Text>
-          </View>
-        )}
-
-        {/* Header para usuarios normales */}
-        {!isProfessor && (
-          <View style={styles.header}>
-            <Text style={[styles.title, { color: theme.primary }]}>Mis Reservas</Text>
-            <Text style={[styles.subtitle, { color: theme.text }]}>Próximas clases</Text>
-            <Text style={[styles.description, { color: theme.textSecondary }]}>Tus reservas confirmadas</Text>
-          </View>
-        )}
-
         {/* Botón crear clase solo para profesores */}
         {isProfessor && (
           <View style={styles.buttonContainer}>
