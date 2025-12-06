@@ -52,9 +52,16 @@ const ProfileScreen = ({ navigation }) => {
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
+        <TouchableOpacity 
+          onPress={() => navigation.goBack()}
+          style={{ marginLeft: 10, padding: 5 }}
+        >
+          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+      ),
+      headerRight: () => (
         <NotificationBell 
           onPress={() => setShowNotificationDrawer(true)} 
-          style={{ marginLeft: 10 }}
         />
       ),
     });
